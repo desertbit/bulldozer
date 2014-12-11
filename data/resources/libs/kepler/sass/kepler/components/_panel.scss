@@ -1,0 +1,275 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$panel-color: #909090 !default;
+$panel-info-color: #3880d8 !default;
+$panel-success-color: #58b553 !default;
+$panel-alert-color: #cf280e !default;
+$panel-warning-color: #ff7f00 !default;
+$panel-question-color: #00b1ff !default;
+
+$panel-padding: 10px !default;
+$panel-margin: 15px 0 !default;
+$panel-left-border: 8px !default;
+$panel-border-radius: 5px !default;
+
+$topbar-panel-color: #ff7f00 !default;
+$topbar-panel-radius: 5px !default;
+$topbar-panel-height: 60px !default;
+$topbar-panel-padding-top: 16px !default;
+$topbar-panel-padding-bottom: 16px !default;
+$topbar-panel-padding-left: 7px !default;
+$topbar-panel-padding-right: 7px !default;
+
+
+
+/*
+ *  Mixins
+ */
+
+@mixin panel-style($base-color, $name, $icon){
+    &.#{$name}{
+        border: none;
+        background-color: lighten($base-color, 40%);
+        border-left: $panel-left-border solid lighten($base-color, 10%);
+        color: lighten($base-color, 15%);
+
+        .headline{
+            color:lighten($base-color, 11%);
+        }
+
+        &.icon {
+            border-left: none;
+            padding-left: 80px;
+            box-shadow: inset 70px 0 0 0 lighten($base-color, 10%);
+
+            &::before {
+                color: #FFF;
+                background-color: lighten($base-color, 10%);
+                content: $icon;
+            }
+        }
+
+        @content
+    }
+}
+
+@mixin panel-body($bg-color: lighten($panel-color, 37.5%), $border: 1px solid lighten($panel-color, 32.5%), $margin: $panel-margin) {
+        display: block;
+        position: relative;
+        margin: $margin;
+        padding: $panel-padding;
+        color:lighten($panel-color, 10%);
+        background-color: $bg-color;
+        border: $border;
+
+        &.radius {
+            @include border-radius($panel-border-radius);
+        }
+
+        &.nopad {
+            padding: 0;
+        }
+
+        &.light {
+            background-color: transparent;
+            border: 1px solid #d9d9d9;
+        }
+
+        .headline{
+            color: lighten($panel-color, 5%);
+        }
+
+        &.icon {
+            min-height: 55px;
+
+            &::before {
+                position: absolute;
+                left: 0;
+                top: 50%;
+                margin: -23px 0;
+                width: 70px;
+                font-family: FontAwesome;
+                font-weight: normal;
+                font-style: normal;
+                font-size: 46px;
+                line-height: 46px;
+                text-decoration: inherit;
+                vertical-align: middle;
+                text-align: center;
+            }
+        }
+}
+
+@mixin panel {
+    @include panel-body;
+
+    @include panel-style($panel-info-color, info, "\f129");
+    @include panel-style($panel-warning-color, warning, "\f071");
+    @include panel-style($panel-success-color, success, "\f00c");
+    @include panel-style($panel-alert-color, alert, "\f00d");
+}
+
+@mixin topbar-panel-bar-style($bg-color: $topbar-panel-color, $color: lighten($bg-color, 20%)) {
+    color: $color;
+    background-color: $bg-color;
+    border: 1px solid $bg-color;
+
+    h1, h2, h3, h4, h5 {
+        color: $color;
+    }
+
+    .icon::before {
+        color: $color;
+    }
+}
+
+@mixin topbar-panel-bar($padding-top:$topbar-panel-padding-top,
+                        $padding-right:$topbar-panel-padding-right,
+                        $padding-bottom:$topbar-panel-padding-bottom,
+                        $padding-left:$topbar-panel-padding-left)
+{
+    padding: $padding-top $padding-right $padding-bottom $padding-left;
+
+    &.radius {
+        @include border-radius($topbar-panel-radius+1 $topbar-panel-radius+1 $topbar-panel-radius $topbar-panel-radius);
+    }
+
+    .topbar {
+        position: relative;
+        display: block;
+        height: $topbar-panel-height;
+        padding: 0 $topbar-panel-height;
+        margin: (-$padding-top) (-$padding-left) 10px (-$padding-right);
+        border-bottom: none;
+
+        @include topbar-panel-bar-style;
+        @include border-radius($topbar-panel-radius $topbar-panel-radius 0 0);
+        @include clearfix;
+
+        h1, h2, h3, h4, h5 {
+            display: inline;
+            line-height: $topbar-panel-height;
+            vertical-align: middle;
+            font-weight: bold;
+            margin: 0 10px;
+            cursor: default;
+
+            @include user-select(none);
+        }
+
+        .title {
+            display: block;
+            width: 100%;
+            text-align: center;
+            overflow: hidden;
+
+            h1, h2, h3, h4, h5 {
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .icon {
+            position: absolute;
+            display: block;
+            top: 0;
+            right: 0;
+            left: 5px;
+
+            &::before {
+                display: block;
+                width: $topbar-panel-height;
+                height: $topbar-panel-height;
+                font-family: FontAwesome;
+                font-weight: normal;
+                font-style: normal;
+                font-size: 40px;
+                line-height: $topbar-panel-height;
+                text-decoration: inherit;
+                vertical-align: middle;
+                text-align: center;
+            }
+        }
+
+        // Icon Styles
+
+        .icon.lock::before {
+            content: "\f023";
+        }
+        .icon.info::before,
+        &.info [class="icon"]::before {
+            content: "\f129";
+        }
+        .icon.warning::before,
+        &.warning [class="icon"]::before {
+            content: "\f071";
+        }
+        .icon.success::before,
+        &.success [class="icon"]::before {
+            content: "\f00c";
+        }
+        .icon.alert::before,
+        &.alert [class="icon"]::before {
+            content: "\f00d";
+        }
+        .icon.question::before,
+        &.question [class="icon"]::before {
+            content: "\f128";
+        }
+
+
+        // Panel Styles
+
+        &.info {
+            @include topbar-panel-bar-style($panel-info-color);
+        }
+        &.success {
+            @include topbar-panel-bar-style($panel-success-color);
+        }
+        &.alert {
+            @include topbar-panel-bar-style($panel-alert-color);
+        }
+        &.warning {
+            @include topbar-panel-bar-style($panel-warning-color);
+        }
+        &.question {
+            @include topbar-panel-bar-style($panel-question-color);
+        }
+    }
+}
+
+@mixin topbar-panel-body {
+    @include panel-body(transparent, 1px solid #d9d9d9);
+}
+
+@mixin topbar-panel {
+    @include topbar-panel-body;
+    @include topbar-panel-bar;
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.panel {
+        @include panel;
+    }
+
+    #{$namespace}.topbar-panel {
+        @include topbar-panel;
+    }
+}

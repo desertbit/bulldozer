@@ -1,0 +1,196 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$input-base-color: #FFF !default;
+$input-text-color: #333 !default;
+$input-heighlight-color: #ff7600 !default;
+
+$input-border-radius : $global-radius;
+
+/*
+ *  Mixins
+ */
+
+@mixin input-size($font-size: rem-calc(14px), $padding: 7px) {
+    font-size: $font-size;
+    padding: $padding;
+}
+
+@mixin input-body {
+    // Override browser default style
+    display: block;
+    outline:none;   
+    border: 1px solid darken($input-base-color, 12%);
+    border-radius: 0;
+    width: 100%;
+    margin: rem-calc(3px) 0;
+    transition: all ease 0.15s;
+    font-family: inherit;
+    
+    // Overwrite mobile mozilla inner shadow
+    background-image: none;
+
+    // Overwrite safari round corners
+    -webkit-apperance: none;
+
+    &.shadow {
+        @include box-shadow(0px 1px 1px rgba(0, 0, 0, 0.075) inset);
+    }
+    
+    &.border {
+        border-width: 2px;
+    }
+    
+    &.auto-width{
+        width: auto;
+    }
+    
+    // ERRROR    
+    &.error{
+        background-color: lighten(#F00, 48%);
+        border-color:lighten(#F00, 41%);
+        color: lighten(#F00, 30%);
+    }
+    
+    &.success {
+        background-color: lighten(#0F0, 48%);
+        border-color:#bbd9bb;
+        color: lighten(#0F0, 30%);
+    }
+    
+    &.round {
+        @include border-radius(999px);
+    }
+    
+    &.radius {
+        @if($input-border-radius  == $global-radius-min OR $input-border-radius  == $global-radius OR $input-border-radius  == $global-radius-min){
+            @include global-border-radius($input-border-radius );
+        }
+        @else {
+            @include border-radius($input-border-radius );
+        }
+    }
+    
+    &:focus {
+        background-color: #FFF;
+        border-color: #ff7600;
+        box-shadow: 0 0 5px #ff7600;
+        -webkit-box-shadow: 0 0 5px #ff7600;
+        -moz-box-shadow: 0 0 5px #ff7600;
+    }
+}
+
+@mixin input {
+    @include input-body;
+    @include input-size;
+
+    &.small {
+        @include input-size($padding: 3px 5px);
+    }
+
+    &.large {
+        @include input-size($padding: 10px);
+    }
+}
+
+/*
+ * TODO: Finish this!
+ */
+@mixin select {
+    @include input;
+
+    &:hover {
+        background-color: #f3f3f3;
+        border-color: #999999;
+    }
+
+    &:disabled {
+        background-color: #ddd;
+        cursor: default;
+    }
+}
+
+@mixin input-bar {
+    display: inline-block;
+    position: relative;
+    //float: left;
+    white-space: nowrap;
+    overflow: hidden;
+    border: 1px solid  darken($input-base-color, 13%);
+    @include clearfix(both);
+
+    span, label {
+        padding: 7px 10px;
+        float: left;
+        margin: 0px;
+
+        //background-color:  darken($input-base-color, 3%);
+        border: 0;
+        border-right-width: 0px;
+        color: darken($input-base-color, 40%);
+        @include border-radius(3px 0 0 3px);
+    }
+    input[type], textarea {
+        display: none;
+        margin: 0px;
+        border: 0;
+        @include border-radius(0 3px 3px 0);
+    }
+    input[type=checkbox] {
+        position: absolute;
+        opacity: 0;
+        left: 0;
+        top: 0px;
+    }
+    input[type=checkbox]:checked ~ input[type] {
+        display: inline-block;
+    }
+    &:focus {
+        background-color:  darken($input-base-color, 50%);
+        input[type] {
+
+        }
+    }
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    input[type="text"]#{$namespace},
+    input[type="password"]#{$namespace},
+    input[type="date"]#{$namespace},
+    input[type="datetime"]#{$namespace},
+    input[type="datetime-local"]#{$namespace},
+    input[type="month"]#{$namespace},
+    input[type="week"]#{$namespace},
+    input[type="email"]#{$namespace},
+    input[type="number"]#{$namespace},
+    input[type="search"]#{$namespace},
+    input[type="tel"]#{$namespace},
+    input[type="time"]#{$namespace},
+    input[type="url"]#{$namespace},
+    textarea#{$namespace}
+    {
+        @include input;
+    }
+    
+    #{$namespace}.input-bar {
+        @include input-bar;
+    }
+
+    select#{$namespace} {
+        @include select;
+    }
+}

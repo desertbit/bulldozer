@@ -1,0 +1,308 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+//
+// Description : Applyes clearfix
+//
+// Options: can be set to top, bottom or both. both is default
+//
+
+@mixin clearfix($position: both){
+    @if $position == 'both' {
+        &:before, &:after{
+            content: "";
+            display: table;
+
+        }
+        &:after {
+            clear: both;
+        }
+    }
+    @elseif ($position == 'top' OR $position == 'bottom') {
+        &:#{$position}{
+            content: "";
+            display: table;
+            clear: both;
+        }
+    }
+}
+
+@mixin font-awesome-font {
+    font-family: FontAwesome;
+    font-style: normal;
+    font-weight: normal;
+    text-decoration: inherit;
+}
+
+//
+// Description : exports cross browser styles by applying prefixes
+//
+// Input: $suffix is the command (transition, animation...)
+//
+// Output: cross browser style commands
+//
+
+@mixin cross-browser-prefix($suffix, $val, $webkit:true, $moz:true, $ie:true, $opera:true){
+    @if($webkit){
+        -webkit-#{$suffix}: $val;
+    }
+    @if($moz){
+        -moz-#{$suffix}: $val;
+    }
+    @if($ie){
+        -ms-#{$suffix}: $val;
+    }
+    @if($opera){
+        -o-#{$suffix}: $val;
+    }
+    #{$suffix}: $val;
+}
+
+//
+// Description : Shortcut cross browser mixins
+//
+
+@mixin border-radius($arg) {
+    @include cross-browser-prefix(border-radius, $arg);
+}
+
+@mixin box-shadow($arg) {
+    @include cross-browser-prefix(box-shadow, $arg);
+}
+
+@mixin user-select($arg) {
+    @include cross-browser-prefix(user-select, $arg);
+}
+
+@mixin transform($arg){
+    @include cross-browser-prefix(transform, $arg);
+}
+
+@mixin transition($arg){
+    @include cross-browser-prefix(transition, $arg);
+}
+
+@mixin animation($str) {
+    @include cross-browser-prefix(animation, $str);
+}
+
+@mixin box-sizing($type:border-box) {
+    @include cross-browser-prefix(box-sizing, $type);
+
+}
+
+//
+// Description : Sets image for retina uses SVG and has png fallback
+//
+
+@mixin background-image($name,
+    $size:false,
+    $image-path: '../img',
+    $fallback-extension: 'png',
+    $retina-suffix: '@2x'
+    ){
+    background-image: url(#{$image-path}/#{$name}.svg);
+    @if($size){
+        background-size: $size;
+    }
+    .no-svg &{
+        background-image: url(#{$image-path}/#{$name}.#{$fallback-extension});
+
+        @media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5) {
+            background-image: url(#{$image-path}/#{$name}#{$retina-suffix}.#{$fallback-extension});
+        }
+    }
+}
+
+//
+// Description : Exports cross browser keyframes for animations
+//
+
+@mixin keyframes($animation-name) {
+    @-webkit-keyframes $animation-name {
+        @content;
+    }
+    @-moz-keyframes $animation-name {
+        @content;
+    }
+    @-ms-keyframes $animation-name {
+        @content;
+    }
+    @-o-keyframes $animation-name {
+        @content;
+    }
+    @keyframes $animation-name {
+        @content;
+    }
+}
+
+//
+// Description : Generates selectors from map
+//
+
+@mixin map-to-selectors($list, $template) {
+  $selectors: ();
+  @each $value in $list {
+    $selector: unquote(gsub($template, '\{\{VALUE\}\}', $value));
+    $selectors: append($selectors, $selector, comma);
+  }
+  #{$selectors} { @content; }
+}
+
+@mixin class-from-map($map){
+    @each $param, $value in $map {
+         @if str-index($param, default) == null {
+            &.#{$param} {
+                @each $par, $val in $value {
+                    #{$par}: $val;
+                }
+            }
+         }
+        @else {
+            @each $par, $val in $value {
+                    #{$par}: $val;
+            }
+        }
+    }
+}
+
+//
+// Description : Generates arrows for dropdowns
+//
+
+@mixin generate-arrow($background-color:#FFF, $border-color:#aaa, $border-width:1px, $size:8px, $position:top, $corner: true){
+    &:after, &:before {
+        @if $position == top {
+            bottom: 100%;
+            left: 50%;
+
+            @if $corner {
+                left: 15px;
+            }
+        }
+        @if $position == left {
+            top: 15%;
+            right: 100%;
+
+            @if $corner {
+                top:15px;
+            }
+        }
+        @if $position == right {
+            top: 15%;
+            left: 100%;
+            @if $corner {
+                top: 15px;
+            }
+        }
+        @if $position == bottom {
+            top: 100%;
+            left: 50%;
+
+            @if $corner {
+                left: 15px;
+            }
+        }
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+        border-color: transparent;
+    }
+
+    &:before {
+        border-width: $size+1;
+        @if $position == top {
+            border-bottom-color: $border-color;
+            margin-left: -($size + 1);
+        }
+        @if $position == left {
+            margin-top: -($size + 1);
+            border-right-color: $border-color;
+        }
+        @if $position == right {
+            margin-top: -($size + 1);
+            border-left-color: $border-color;
+        }
+        @if $position == bottom {
+            margin-left:-($size + 1);
+            border-top-color: $border-color;
+        }
+
+    }
+    &:after {
+        border-width: $size;
+        @if $position == top {
+            border-bottom-color: $background-color;
+            margin-left: -($size);
+        }
+        @if $position == left {
+            margin-top: -($size );
+            border-right-color: $background-color;
+        }
+        @if $position == right {
+            margin-top: -($size);
+            border-left-color: $background-color;
+        }
+        @if $position == bottom {
+            margin-left: -($size);
+            border-top-color: $background-color;
+        }
+    }
+}
+
+/*
+ * Description : Hide element without display:none;
+ */
+
+%visuallyhidden {
+    margin: -1px;
+    padding: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip: rect(0, 0, 0, 0);
+    position: absolute;
+}
+
+
+/*
+ * Font-awesome class
+ */
+
+.font-awesome {
+    font-family: FontAwesome;
+    font-style: normal;
+    font-weight: normal;
+    text-decoration: inherit;
+}
+
+@mixin global-border-radius($radius){
+    @if $radius == $global-radius-min {
+        @extend .radius-small;
+    }
+    @if $radius == $global-radius {
+        @extend .radius-small;
+    }
+    @if $radius == $global-radius-max {
+        @extend .radius-large;
+    }
+}
+
+.radius-small {
+    @include border-radius(3px);
+}
+
+.radius-medium {
+    @include border-radius(5px);
+}
+.radius-large {
+    @include border-radius(8px);
+}

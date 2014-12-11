@@ -1,0 +1,31 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Mixins
+ */
+
+@mixin code {
+    padding: 15px;
+    display: block;
+    font-family: 'Source Code Pro';
+    white-space: pre-wrap;
+
+    @include border-radius(5px);
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-global-html-classes() {
+    code {
+        @include code;
+    }
+}

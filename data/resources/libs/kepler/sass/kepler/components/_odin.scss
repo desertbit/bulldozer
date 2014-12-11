@@ -1,0 +1,78 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  ### Odin Validation ###
+ */
+
+/*
+ *  Variables
+ */
+
+$validation-failed-color: #F04124 !default;
+$validation-error-color: #F04124 !default;
+
+
+/*
+ *  Mixins
+ */
+
+@mixin odin-failed-border($color:$validation-failed-color) {
+    border: 2px solid $color !important;
+}
+
+@mixin odin-error($color:$validation-error-color) {
+    position: relative;
+    display: block;
+    padding: 8px 10px 8px 34px;
+    margin: 3px 0 7px 0;
+    background-color: $color;
+    color: #FFF;
+    font-weight: bold;
+    font-size: rem-calc(10px);
+    vertical-align: middle;
+
+    @include border-radius(3px);
+
+    &::before {
+            position: absolute;
+            display: block;
+            top: 50%;
+            left: 0;
+            width: 34px;
+            margin: -8px 0;
+            line-height: 16px;
+            font-size: 16px;
+            font-family: FontAwesome;
+            font-weight: normal;
+            font-style: normal;
+            text-decoration: inherit;
+            color: lighten($color, 27%);
+            content: "\f071";
+            text-align: center;
+            vertical-align: middle;
+        }
+}
+
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace} .kepler-odin-failed-border,
+    #{$namespace}.kepler-odin-failed-border {
+        @include odin-failed-border;
+    }
+
+    #{$namespace} .kepler-odin-error,
+    #{$namespace}.kepler-odin-error {
+        @include odin-error;
+    }
+}

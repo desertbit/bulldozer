@@ -1,0 +1,621 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+// Set padding sizes for different button sizes
+$button-small: rem-calc(10) rem-calc(14) !default;
+$button-medium: rem-calc(12) rem-calc(16) !default;
+$button-large: rem-calc(14)  rem-calc(18)!default;
+
+// Determine if default HTML buttons schould be changed
+$override-html-buttons: $html-button-override !default;
+
+// We use this to control the display property.
+$button-display: inline-block !default;
+$button-margin: rem-calc(3) 0 !default;
+
+// We use these to control button text styles.
+$button-font-small: rem-calc(14) !default;
+$button-font-medium: rem-calc(16) !default;
+$button-font-large: rem-calc(20) !default;
+$button-font-align: center !default;
+
+// We use these to control button border styles.
+$button-border-width: 0px !default;
+$button-border-style: solid !default;
+
+// We use this to set the default radius used throughout the core.
+$button-radius: $global-radius !default;
+
+// We use this to set default opacity for disabled buttons.
+$button-disabled-opacity: 0.8 !default;
+
+
+// Default button settings
+$button-font-family: $global-font-family !default;
+$button-font-color: #fff !default;
+
+// Base color scemes
+
+// Default button style
+$button-default-color: #eee;
+$button-default-font-color: #fff;
+
+// Warning button styles
+$button-warning-color: #ffb28a;
+$button-warning-font-color: #fff;
+
+// Alert button styles
+$button-alert-color:  #ff7c7c;
+$button-alert-font-color:#fff;
+
+// Success button styles
+$button-success-color:  #58a250;
+$button-success-font-color:#fff;
+
+// Info button styles
+$button-info-color:  #56bdff;
+$button-info-font-color:#fff;
+
+/*
+ * @mixin
+ *
+ * Generatesd basic layout for button without styles
+*/
+
+@mixin button-body(
+    $style:true, // Should the default button layout be applied?
+    $display:$button-display, // Default display settings
+    $button-loading-indicator: true, // Export loading indicator button classes please set variables at top of file fot this feature
+    $transition: true,
+    $icon-margin: 5px // Only sets vertical margin inside i.
+    ) {
+
+    // Override default browser settings for button
+    outline: none;
+    border: none;
+    display: inline-block;
+
+    // Specific style for icon placement
+    @if $icon-margin{
+        i {
+            margin: 0 rem-calc(4);
+        }
+    }
+
+    // Default button layout and settings
+    @if $style {
+        font-family: $button-font-family;
+        line-height: normal;
+        margin: $button-margin;
+        position: relative;
+        text-decoration: none;
+        text-align: $button-font-align;
+        -webkit-appearance: none;
+        -webkit-border-radius:0;
+        @include user-select(none);
+    }
+
+    // Include transition effect
+    @if $transition {
+        @include transition(all 0.2s ease);
+    }
+    @if $display { display: $display; }
+    // Generate loading 3D transform styles if active
+    @if $button-loading-indicator != false {
+        @include button-loading-classes;
+    }
+}
+
+/*
+* @mixins
+* --------------------
+* Here we generate the different sizes of buttons
+*
+*/
+
+
+@mixin button-loading-classes(
+    $button-loading-data-name : data-kepler-button-loading,
+    $button-loading-box-name : load-indicator,
+    $button-loading-loadbar-name : progress-bar,
+    $button-loading-active-name : active,
+    $button-loading-z: 25px,
+    $button-loading-animation: bottom,
+    $button-ready-fade: 0.3s
+    ){
+    &[#{$button-loading-data-name}] {
+        position: relative;
+        // transform prefixes cannot be set with cross-browser-prefix mixin due to SASS sctring limitations
+        -webkit-transition: -webkit-transform 0.33s;
+        -moz-transition: -moz-transform 0.33s;
+        -ms-transition: -ms-transform .33s;
+        transition: transform .33s; /* Animate the transform properties */
+        // Use preserve-3d to pass 3d transform to child element
+        @include cross-browser-prefix(transform-style, preserve-3d);
+
+        .#{$button-loading-box-name}{
+            position: absolute;
+
+            background: #DEDEDE;
+            overflow: hidden;
+
+            @if $button-loading-animation == bottom {
+                top: 100%;
+                width: 100%;
+                height: $button-loading-z;
+                left: 0px;
+                // Init loading face of recktangle 90 deg flipped
+                @include transform(rotateX(-90deg) translateZ(-$button-loading-z/2));
+            }
+            @if $button-loading-animation == top {
+                bottom: 100%;
+                width: 100%;
+                height: $button-loading-z;
+                left: 0px;
+                // Init loading face of recktangle 90 deg flipped
+                @include transform(rotateX(90deg) translateZ(-$button-loading-z/2));
+            }
+            @if $button-loading-animation == left {
+                top: 0;
+                width: $button-loading-z;
+                height: 100%;
+                left: $button-loading-z;
+                // Init loading face of recktangle 90 deg flipped
+                @include transform(rotateY(90deg) );
+            }
+
+            .#{$button-loading-loadbar-name}{
+                width: 0%;
+                position: absolute;
+                height:inherit;
+                left: 0px;
+                top: 0px;
+                background: lighten($button-success-color, 10%);
+            }
+        }
+        // Active styles
+        // The idea is to rotate the butten and the loading bar class by 90 deg
+        &.active {
+            @if $button-loading-animation == bottom {
+                @include transform(rotateX(90deg));
+            }
+            @if $button-loading-animation == top {
+                @include transform(rotateX(-90deg));
+            }
+            @if $button-loading-animation == left {
+                @include transform(rotateY(-90deg));
+            }
+        }
+        &.complete::after, &.failed::after{
+            position: absolute;
+
+            font-family: FontAwesome;
+            font-style: normal;
+            font-weight: normal;
+            text-decoration: inherit;
+            left: 0px;
+            top: 0px;
+            opacity: 0;
+            padding-top: 10%;
+            height: 100%;
+            width: 100%;
+
+            // include complete failed overlay
+            @if $button-ready-fade {
+                @at-root {
+                    @include keyframes(fade-in-and-out){
+                        from { opacity: 1;}
+                        50% { opacity: 1;}
+                        to   { opacity: 0;}
+                    }
+                }
+                @include animation(fade-in-and-out 2s);
+            }
+
+        }
+        &.complete::after {
+            content: "\f00c";
+            color: lighten($button-success-color, 30%);
+            background-color: $button-success-color;
+        }
+
+        &.failed::after {
+            content: "\f00d";
+            color: lighten($button-alert-color, 30%);
+            background-color: $button-alert-color;
+        }
+    }
+}
+
+/*
+* @mixins
+* --------------------
+* Here we generate the different sizes of buttons
+*
+*/
+
+@mixin button-size(
+    $padding: $button-medium,
+    $font-size: auto)
+{
+    // Set no padding if set to false
+    @if $padding {
+        padding: $padding;
+    }
+    // Set font-size if not false
+    @if $font-size {
+        @if $font-size == auto {
+            @if $padding == $button-small {  font-size: $button-font-small;}
+            @if $padding == $button-medium {  font-size: $button-font-medium;}
+            @if $padding == $button-large {  font-size: $button-font-large;}
+        }
+        @else {
+            font-size: $font-size;
+        }
+    }
+
+}
+
+/*
+* @mixins
+* ----------------------------------
+* Here we generate styles for the buttons
+*
+*/
+
+@mixin button-style(
+    $background: $button-default-color,
+    $background-hover: invert-color-hue($background, 5%),
+    $background-active: invert-color-hue($background, 35%),
+    $font-color: invert-color-hue($background),
+    $font-hover-color: invert-color-hue($background-hover),
+    $font-active-color:invert-color-hue($background-active),
+    $border-width: $button-border-width,
+    $border-hover-width: false,
+    $border-color: darken($background, 5%),
+    $border-hover-color: false,
+    $disabled: true, // Generate disabled classes
+    $disabled-color: invert-color-hue($background),
+    $button-badge: badge, // Generates badge class color override if given class. To deactivate set to false.
+    $button-cursor: pointer,
+    $override-loading-color: false
+    )
+{
+    // Disable background if set to false
+    @if $background != false {
+        background: $background;
+    }
+    @if $disabled {
+        &.disabled, &.disabled:hover, &.disabled:active, [disabled] {
+            opacity: 0.8;
+            cursor: not-allowed;
+            @include box-shadow(none);
+            color: $disabled-color;
+            background-image: repeating-linear-gradient(
+                45deg,
+                rgba(0, 0, 0, 0.1),
+                rgba(0, 0, 0, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 20px
+            );
+        }
+    }
+    // Set font color
+    @if $font-color != false {
+        color: $font-color;
+    }
+    // Set color outside to override default border color
+    border-color: $border-color;
+    // Border style
+    @if $border-width > 0 {
+        border-width: $border-width;
+        border-style: solid;
+    }
+
+    // Generate label color classes for buttons
+    @if $button-badge{
+        .#{$button-badge} {
+            background-color: invert-color-hue($background, 20%);
+            color: $background;
+        }
+    }
+    // Generate button cursor
+    @if $button-cursor{
+        cursor: pointer;
+    }
+
+    // Set hover styles
+    &:hover {
+        // Set font-color hover
+        @if $font-hover-color != false {
+            color: $font-hover-color;
+        }
+        @if $background-hover != false {
+            background: $background-hover;
+        }
+        @if $border-hover-width != false{
+            &:hover{
+                border-width: $border-hover-width;
+                border-color: $border-hover-color;
+            }
+        }
+    }
+
+    // Set active styles
+    &:active, &.active {
+        @include box-shadow(inset 0 0 2px 2px rgba(0,0,0,0.1));
+        @if $font-active-color != false {
+            color: $font-active-color;
+        }
+        @if $background-active != false {
+            background: $background-active;
+            border-color: invert-color-hue($border-color, 5%);
+        }
+    }
+}
+
+/*
+*
+* mixin
+* ----------------
+* This mixin exports all prebuild sizes styles and classes of buttons
+*
+*/
+
+
+@mixin button{
+    // Generate button layout defaults
+    @include button-body;
+
+    // Generate button sizes
+    &.small {
+        @include button-size($button-small);
+    }
+    &.large {
+        @include button-size($button-large);
+    }
+
+    // Default size
+    @include button-size($button-medium); // Default setting
+
+    // Generate default button style
+    @include button-style;
+    
+    // 
+    &.expand {
+        width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    // Generate style presets
+    &.border {
+        border-width:1px; border-style: solid;
+    }
+    &.radius { 
+        @if($button-radius == $global-radius-min OR $button-radius == $global-radius OR $button-radius == $global-radius-min){
+            @include global-border-radius($button-radius);
+        }
+        @else {
+            @include border-radius($button-radius);
+        }
+    }
+
+    &.shadow {
+        @include box-shadow(inset 0 -4px 0 0 rgba(0,0,0,0.1));
+    }
+
+
+
+    // Generate custom button styles
+    &.dark{
+        @include button-style($background:#333);
+    }
+
+    &.alert{
+        @include button-style($background:$button-alert-color);
+    }
+
+    &.info{
+        @include button-style($background:$button-info-color);
+        }
+    &.warning{
+        @include button-style($background:$button-warning-color);
+    }
+    &.success{
+        @include button-style($background:$button-success-color, $disabled-color: #195700);
+    }
+}
+
+/*
+ *
+ * mixin
+ * ----------------
+ * This mixin is used to generate a link styles
+ *
+ */
+
+@mixin links(
+    $uppercase: true,
+    $cursor: pointer,
+    $font-color: #ff5300,
+    $font-family: false,
+    $margin: auto 10px,
+    $font-hover-color: invert-color-hue($font-color),
+    $underline-height: 3px, // set to false to deactivate line
+    $underline-color: invert-color-hue($font-color),
+    $underline-transition: slide-up // Select transition to use for hover set to false to disable
+    ) {
+    position: relative;
+    display: inline-block;
+    outline: none;
+    color: $font-color;
+    text-decoration: none;
+    letter-spacing: 1px;
+
+    @if $uppercase {
+        text-transform: uppercase;
+    }
+    @if $cursor {
+        cursor: $cursor;
+    }
+    @if type-of($font-color) == color {
+        color: $font-color;
+    }
+    @if $font-family {
+        font-family: $font-family;
+    }
+    @if $margin {
+        margin: $margin;
+    }
+
+    // Check if line is activated generate css style
+    @if $underline-height {
+        @include link-transition-style($underline-transition, $underline-height);
+    }
+}
+
+/*
+*
+* mixin
+* ----------------
+* This mixin generates transition effects for link hover and etc.
+* Now only supporting two effects expansion planned
+*
+*/
+
+@mixin link-transition-style($type, $height: 3px, $width : 100%, $color: #ff5300, $duration: 0.3s, $fade: true) {
+    &:after {
+        position: absolute;
+        left: 0;
+        width: $width;
+        height: $height;
+        background: $color;
+        content: '';
+        -webkit-transition : opacity $duration, -webkit-transform $duration;
+        -moz-transition : opacity $duration, -moz-transform $duration;
+        -o-transition : opacity $duration, -o-transform $duration;
+        transition : opacity $duration, transform $duration;
+
+        @if $type == slide-up {
+            top: 110%;
+            @include transform(translateY(10px));
+        }
+
+        @if $type == slide-down {
+            top: -10%;
+            @include transform(translateY(-10px));
+        }
+
+        @if fade {
+            opacity: 0;
+        }
+    }
+    // Set hover styles for underline
+    &:hover:after,
+    &:focus:after {
+
+        @if $type == slide-up, $type == slide-down {
+
+            @include transform(translateY(0px));
+        }
+
+        @if fade {
+            opacity: 1;
+        }
+    }
+}
+
+/*
+*
+* mixin
+* ----------------
+* Generate button group styles
+*
+*/
+
+@mixin button-group(
+    $float-default: left,
+    $display : inline-block,
+    $opposit-float-class: true, // If set to true mixin generates a class for opposit floating
+    $separator-line: 1px, // separator line width if 0 or false is not generated color is beeing set by button styles
+    $margin: 0 5px, // Space outside the button group
+    $button-class: button, // Class name for buttons
+    $radius-class: radius, // Class name for radius class
+    $border-radius: $global-radius
+    ) {
+    @if $display {
+        display: inline-block;
+    }
+
+    // Here we generate opposit float direction class
+    @if $opposit-float-class {
+        &.#{opposit-direction($float-default)} {
+            float: opposit-direction($float-default);
+        }
+    }
+
+    @if $margin!= false {
+        margin: $margin;
+    }
+
+    //float to opposit direction creates class with opposit direction name eg. float is left --> .right
+    .#{$button-class} {
+        float: left;
+
+        @if $separator-line {
+                &:not(:last-child) {
+                    border-right-width: $separator-line;
+                    border-right-style: solid;
+                }
+        }
+    }
+    // Remove radius from child buttons and add it to first and last one
+    @if $radius-class {
+        &.#{$radius-class} .#{$button-class} {
+            &.#{$radius-class}{
+                @include border-radius(0);
+            }
+            &:first-child {
+                @include border-radius($border-radius 0 0 $border-radius);
+            }
+
+            &:last-child {
+                @include border-radius(0 $border-radius $border-radius 0);
+            }
+
+        }
+    }
+
+    // Adds a class to remove sparator lines
+    @if $separator-line {
+        .no-separator{
+            .#{$button-class} {
+                border-right:none;
+            }
+        }
+    }
+}
+
+// Here we export the styles into the container classes for usage
+
+@if include-html-classes() {
+    #{$namespace} {
+        &.button, &button{
+            @include button;
+        }
+
+        &.link{
+            @include links;
+        }
+
+        &.button-group {
+            @include button-group;
+        }
+    }
+}
+
+

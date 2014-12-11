@@ -1,0 +1,59 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Mixins
+ */
+
+@mixin nebula {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    z-index: 100;
+    overflow: hidden;
+
+    @include box-sizing(border-box);
+
+    // Clearfix
+    @include clearfix(before);
+    @include clearfix(after);
+}
+
+@mixin nebula-dummy {
+    @include nebula;
+    
+    display: none;
+    z-index: -1;
+    pointer-events: none;
+}
+
+@mixin nebula-end {
+    width: 100%;
+    height: 0;
+    content: "";
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.nebula {
+        @include nebula;
+    }
+    
+    #{$namespace}.nebula-dummy {
+        @include nebula-dummy;
+    }
+    
+    #{$namespace}.nebula-end {
+        @include nebula-end;
+    }
+}

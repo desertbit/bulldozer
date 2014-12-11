@@ -1,0 +1,55 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$tooltip-bg-color: #2f2f2f !default;
+$tooltip-text-color: #fff !default;
+
+
+
+/*
+ *  Mixins
+ */
+
+@mixin tooltip-base {
+    @include popover-base($tooltip-bg-color);
+    
+    color: $tooltip-text-color;
+    white-space: nowrap;
+
+    // Media query
+    @media #{$small-only} {
+        width: auto !important;
+        left: auto !important;
+        right: auto !important;
+    }
+}
+
+@mixin tooltip-arrows($background:$tooltip-bg-color, $border:darken($tooltip-bg-color, 15%)) {
+    @include popover-arrows($background, $border);
+}
+
+@mixin tooltip {
+    @include tooltip-base;
+    @include tooltip-arrows;
+    @include popover-styles;
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.tooltip {
+        @include tooltip;
+    }
+}

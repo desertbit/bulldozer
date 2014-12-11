@@ -1,0 +1,258 @@
+/*
+*  Kepler Frontend Framework
+*  Copyright, DesertBit
+*  Free to use under the GPL license.
+*  http://www.gnu.org/copyleft/gpl.html
+*/
+
+/*
+*  Variables
+*/
+
+//Grid classes names
+$grid-column-names : '.column, .columns';
+
+$grid-columns: 12 !default;
+$default-float: left;
+// Set opposit float
+$opposite-float: opposite-direction($default-float);
+
+$grid-inner-gutter: 30px !default;
+$grid-outter-gutter: null !default;
+
+// Spacing applied with the custom spacing classes
+$grid-space: 15px;
+
+// Grid sizes
+
+$grid-size-list:( small: $small-up, medium : $medium-up, large : $large-up);
+
+/*
+ * function: column-calc
+ *
+ * description: Calculates width in percent for each column
+ * input: $grid-size: total number of columns in grid
+ *        $column-size: size of to export columns relative to grid size
+ * output: column width in percent
+ */
+
+@function column-calc($grid-size, $column-size) {
+    @return ( 100% / $grid-size ) * $column-size;
+}
+
+/*
+* mixin: grid
+*
+* description: defines standart rules for grid element
+*
+*/
+
+@mixin grid{
+
+    /* TODO: ADD
+     * - nesting
+     * - collapse
+     */
+    width: 100%;
+    margin: 0 auto;
+
+    // Clear float after grid mixin found in ../_mixins.scss
+    @include clearfix();
+}
+
+@mixin grid-sizes-default{
+    @each $map-size-name, $map-size in $grid-size-list {
+        @media #{$map-size} {
+            @include grid-html-classes($size-name:#{$map-size-name});
+        }
+    }
+}
+
+@mixin grid-column(
+    $column-size:false,
+    $column-inner-gutter: $grid-inner-gutter,
+    $column-outter-gutter: $grid-outter-gutter,
+    $grid-size: $grid-columns,
+    $last-column:false,
+    $center:false,
+    $offset:false,
+    $push:false,
+    $pull:false,
+    $float:true,
+    $position:false) {
+
+    @if $column-size {
+
+        @if type-of($column-outter-gutter) == number {
+            width: calc(#{column-calc($grid-size, $column-size)} - #{$column-outter-gutter});
+        }
+        @else {
+            width: column-calc($grid-size, $column-size);
+        }
+        // If last column, float naturally instead of to the right
+        @if $last-column { float: opposite-direction($default-float); }
+    }
+
+    // Source Ordering, adds left/right depending on which you use.
+    @if $push {
+        margin-#{$default-float}: column-calc($grid-columns, $push);
+        right: auto;
+    }
+
+    @if $pull {
+        margin-#{$default-float}:column-calc($grid-columns, $pull);
+        left: auto;
+    }
+    // Generate gutter for collumn
+    // Here we add the gutter to the column if gutter is set
+    // is only adding gutter to outter class .column & .columns to prevent redundancy
+    @if $column-size==false {
+        @if type-of($column-outter-gutter) == number {
+            margin-left: $column-outter-gutter / 2;
+            margin-right: $column-outter-gutter / 2;
+        }
+        @if type-of($column-inner-gutter) == number {
+            padding-left: $column-inner-gutter / 2;
+            padding-right: $column-inner-gutter / 2;
+        }
+
+    }
+
+    // If positioned for default .column, include relative position
+    // push and pull require position set
+    @if $position or $push or $pull {
+        position: relative;
+    }
+
+
+    @if $float {
+        @if $float == left or $float == true { float: $default-float; }
+        @else if $float == right { float: opposite-direction($default-float); }
+        @else { float: none; }
+    }
+
+    // If centered, get rid of float and add appropriate margins
+    @if $center {
+        margin-#{$default-float}: auto;
+        margin-#{$opposite-float}: auto;
+        float: none;
+    }
+
+    // If offset, calculate appropriate margins
+    @if $offset { margin-#{$default-float}: column-calc($grid-columns, $offset) !important; }
+
+    // Extra spaing classes
+    &.space-bottom {
+        padding-bottom: $grid-space;
+    }
+    &.space-top {
+        padding-top: $grid-space;
+    }
+    &.space {
+        padding-top: $grid-space;
+        padding-bottom: $grid-space;
+    }
+}
+
+@mixin grid-column-extra-styles {
+    &.no-gutter {
+        padding: 0;
+    }
+    &.space-bottom {
+        padding-bottom: $grid-space;
+    }
+    &.space-top {
+        padding-top: $grid-space;
+    }
+    &.space {
+        @extend .space-top;
+        @extend .space-bottom;
+    }
+}
+
+// Create presentational classes for grid
+//
+// $size-name - Name of class to use, i.e. "large" will generate .large-1, .large-2, etc.
+@mixin grid-html-classes(
+    $size-name,
+    $push-class : true,
+    $pull-class : true,
+    $center-class : true,
+    $column-name : $grid-column-names
+    ) {
+
+
+    // Include pull classes if $pull-class set to true
+    @if $pull-class {
+        @for $column-size from 0 through $grid-columns - 1 {
+            .#{$size-name}-pull-#{$column-size} {
+                @include grid-column($pull:$column-size,$float:false);
+            }
+        }
+    }
+    // Include push classes if $pull-class set to true
+    @if $push-class {
+        @for $column-size from 0 through $grid-columns - 1 {
+            .#{$size-name}-push-#{$column-size} {
+                @include grid-column($push:$column-size,$float:false);
+            }
+        }
+    }
+
+
+    @for $column-size from 1 through $grid-columns {
+        .#{$size-name}-#{$column-size} { @include grid-column($column-size:$column-size, $float:false); }
+    }
+
+
+
+    @for $column-size from 1 through $grid-columns {
+        .#{$size-name}-offset-#{$column-size} { @include grid-column($offset:$column-size, $float:false); }
+    }
+    .#{$size-name}-reset-order {
+        margin-#{$default-float}: 0;
+        margin-#{opposite-direction($default-float)}: 0;
+        left: auto;
+        right: auto;
+        float: $default-float;
+    }
+
+    // Generate column rules
+
+    #{$column-name} {
+        @include grid-column($column-size:false, $position:true);
+
+        // Generate centered class if set to true
+        &.#{$size-name}-centered {
+            @include grid-column($center:true, $float:false);
+        }
+        // Fighting [class*="column"] + [class*="column"]:last-child
+        &.#{$size-name}-centered:last-child {
+            float: none;
+        }
+    }
+
+}
+
+@if include-html-classes() {
+    #{$namespace}.grid {
+        @include grid;
+    }
+
+    // Add default .column style
+    #{$grid-column-names} {
+        min-height: 1px;
+        @include grid-column($column-size:$grid-columns);
+        @include grid-column-extra-styles;
+    }
+
+    // Add grid sizes
+
+    // Generate grid sizes with default settings
+    #{$namespace} {
+        @include grid-sizes-default();
+    }
+}
+
+
+

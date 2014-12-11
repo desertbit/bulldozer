@@ -1,0 +1,100 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$core-font:         $global-font-family !default;
+$primary-color:     #3b3b3b !default;
+$primary-bg-color:  #FFF !default;
+
+// This is the default html and body font-size for the base rem value.
+$rem-base: 16px !default;
+
+
+/*
+ *  Mixins
+ */
+
+@mixin html-label {
+    display: block;
+    cursor: pointer;
+    line-height: 1.5;
+    font-weight: normal;
+    margin-bottom: 0;
+    font-size: rem-calc(12px);
+    color: invert-color-hue($primary-color, 10%);
+
+    &.right {
+        float: none;
+        text-align: right
+    }
+
+    small {
+        font-size: rem-calc(9px);
+    }
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-global-html-classes() {
+    body, html {
+        font-size: $rem-base;
+        font: 100% $core-font;
+        font-weight: normal;
+        text-decoration: none;
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    body {
+        color: $primary-color;
+        background-color: $primary-bg-color;
+    }
+
+    // Set box-sizing globally to handle padding and border widths
+    *,
+    *:before,
+    *:after {
+        @include box-sizing(border-box);
+    }
+
+    label {
+        @include html-label;
+    }
+}
+
+
+@if include-html-classes() {
+    //
+    // Some global classes
+    //
+    
+    //radius classes 
+    #{$namespace}.radius-hard {
+        @include border-radius(15px);
+    }
+
+    #{$namespace}.radius-soft {
+        @include border-radius(3px);
+    }
+
+    #{$namespace}.radius {
+        @include border-radius(5px);
+    }
+
+    label#{$namespace} {
+        @include html-label;
+    }
+}

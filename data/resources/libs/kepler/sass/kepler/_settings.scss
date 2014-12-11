@@ -1,0 +1,38 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+// Whenever SASS should generate the HTML classes
+$include-html-classes: true !default;
+
+// Whenever SASS should generate the global HTML classes which are not in the kepler namespace
+$include-global-html-classes: true !default;
+
+// Whenever fonts should be included
+$include-fonts: true !default;
+
+// Whenever the extra data tables style rules should be included (Important for datatables.js)
+$include-data-tables: true !default;
+
+// Whenever normalize should be included
+$include-normalize: true !default;
+
+// If set to true, this is the same as if all the above rules are set to false.
+// This is a useful shortcut to extend the kepler mixins by custom classes without any other ballast.
+$include-only-minimal: false !default;
+
+// The HTML class namespace
+$namespace: '.kepler' !default;
+
+// Override default HTML buttons
+$html-button-override : true !default;
+
+// Global radius values
+$global-radius-min: 3px !default;
+$global-radius:     5px !default;
+$global-radius-max: 10px !default;
+
+$global-font-family: 'Open Sans', sans-serif !default;

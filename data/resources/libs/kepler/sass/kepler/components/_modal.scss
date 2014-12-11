@@ -1,0 +1,205 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$modal-color: #4d4d4d !default;
+$modal-bg-color: #FFF !default;
+$modal-backdrop-color: rgba(0, 0, 0, 0.5) !default;
+$modal-round-corners: 5px !default; //use false
+$modal-padding-top: 16px !default;
+$modal-padding-bottom: 16px !default;
+$modal-padding-left: 7px !default;
+$modal-padding-right: 7px !default;
+
+$modal-small : 450px !default;
+$modal-medium: 850px !default;
+$modal-large : 1250px !default;
+
+
+
+/*
+ *  Mixins
+ */
+
+@mixin modal-backdrop-base {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: $modal-backdrop-color;
+    overflow-y: auto;
+    transition: background-color 0.3s;
+
+	&.invisible {
+		background-color: rgba(0, 0, 0, 0);
+        transition: background-color 0.3s;
+	}
+}
+
+@mixin modal-scroll-area {
+    .scroll-area {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-height: auto;
+        overflow-y: auto;
+
+        // Clearfix
+        @include clearfix(before);
+        @include clearfix(after);
+    }
+}
+
+@mixin modal-backdrop {
+    @include modal-backdrop-base;
+    @include modal-scroll-area;
+}
+
+@mixin modal-size($width: $modal-small) {
+    width: $width;
+
+    @media (max-width: $width + 70px) {
+        margin: 15px auto;
+        width: 92% !important;
+    }
+}
+
+@mixin modal-sizes {
+    &.small {
+        @include modal-size($width: $modal-small);
+    }
+
+    &.medium {
+        @include modal-size($width: $modal-medium);
+    }
+
+    &.large {
+        @include modal-size($width: $modal-large);
+    }
+}
+
+@mixin modal-styles {
+    &.radius {
+        @include border-radius($modal-round-corners);
+    }
+
+    &.shadow {
+        @include box-shadow(0 0 10px 10px rgba(0,0,0,0.1));
+    }
+}
+
+@mixin modal-close-button($color:#868686,
+    $hoverColor:#2e2e2e,
+    $fontSize:18px,
+    $top:20px)
+{
+    position: absolute;
+    top: $top;
+    right: 20px;
+    height: 26px;
+    line-height: 26px;
+    color: $color;
+    cursor: pointer;
+    font-size: $fontSize;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    z-index: 1;
+
+    @include user-select(none);
+
+    &:hover {
+        color: $hoverColor;
+    }
+}
+
+@mixin modal-fade-effect {
+    // Soft fade in
+    opacity: 0;
+    transform: scale(0.9);
+    transition: visibility 0s 0.3s, opacity 0.3s, transform 0.3s;
+    // Open class for transition
+    &.open {
+        opacity: 1;
+        transform: scale(1);
+
+    }
+}
+
+@mixin modal-base {
+    @include topbar-panel-body;
+    @include topbar-panel-bar($modal-padding-top, $modal-padding-right, $modal-padding-bottom, $modal-padding-left);
+
+    position: relative;
+    display: none;
+    background-color: $modal-bg-color;
+    margin: 40px auto;
+    outline: none;
+    border: none;
+    color: $modal-color;
+
+    // Clearfix
+    @include clearfix(before);
+    @include clearfix(after);
+
+    // Default size
+    @include modal-size;
+
+    .topbar {
+        .close-modal {
+            @include modal-close-button(inherit, #efefef, rem-calc(25px), 17px);
+        }
+    }
+}
+
+@mixin modal {
+    @include modal-base;
+    @include modal-sizes;
+    @include modal-styles;
+    @include modal-fade-effect;
+
+    > .close-modal {
+        @include modal-close-button;
+    }
+}
+
+@mixin modal-open {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.modal-backdrop {
+        @include modal-backdrop;
+    }
+    
+    #{$namespace}.modal {
+        @include modal;
+    }
+
+    #{$namespace}.modal-open,
+    #{$namespace}.modal-backdrop.modal-open .scroll-area {
+        @include modal-open;
+    }
+}
+
+@if include-global-html-classes() {
+    .kepler-modal-open {
+        @include modal-open;
+    }
+}

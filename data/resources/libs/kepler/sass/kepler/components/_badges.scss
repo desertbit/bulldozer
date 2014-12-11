@@ -1,0 +1,67 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$badge-dark: #3b3b3b !default;
+$badge-light: #f0f0f0 !default;
+
+
+/*
+ *  Mixins
+ */
+
+@mixin badge {
+    display: inline-block;
+    min-width: rem-calc(10);
+    min-height: rem-calc(10);
+    padding: rem-calc(5) rem-calc(7);
+    font-size: rem-calc(12);
+    font-weight: bold;
+    line-height: rem-calc(10);
+    vertical-align: middle;
+    white-space: nowrap;
+    text-align: center;
+    
+    @include border-radius(10px);
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.badge{
+        @include badge;
+
+        &.right {
+            margin-left: rem-calc(15);
+        }
+
+        &.left {
+            margin-right: rem-calc(15);
+        }
+
+        &.dark {
+            background-color: $badge-dark;
+            color: $badge-light;
+        }
+
+        &.light {
+            background-color: $badge-light;
+            color: $badge-dark;
+        }
+
+        &:empty {
+            display: none;
+        }
+    }
+}

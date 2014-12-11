@@ -1,0 +1,109 @@
+/*
+*  Kepler Frontend Framework
+*  Copyright, DesertBit
+*  Free to use under the GPL license.
+*  http://www.gnu.org/copyleft/gpl.html
+*/
+
+/*
+ * Varables
+ */
+
+// Color Settings
+$pagination-bg-color : #fafafa;
+
+// Size presets
+$pagination-small : 3px 6px;
+$pagination-medium : 5px 10px;
+$pagination-large : 8px 14px;
+
+$pagination-font-size : inherit;
+
+$pagination-dataTables : true;
+
+@mixin pagination($rounded-corners : 5px){
+    display: inline-block;
+    text-align: center;
+    margin-top:5px;
+    margin-bottom: 5px;
+};
+
+@mixin pagelink(
+    $current-class : true,
+    $current-shadow : true,
+    $color-style : true,
+    $position: true,
+    $base-color: $pagination-bg-color,
+    $font-color: invert-color-hue($pagination-bg-color))
+{
+    @if $position {
+        display: inline-block;
+        padding: 5px 10px;
+        border-width: 1px;
+        border-style: solid;
+        border-right-width: 0;
+        &:last-child {
+            border-right-width: 1px;
+        }
+    }
+    @if $color-style {
+        background-color: $base-color;
+        border-color:invert-color-hue($base-color, 10%);
+        color: invert-color-hue($base-color, 25%);
+    }
+    @if current-class!= false AND ($color-style OR $current-shadow) {
+        &.current {
+            @if $color-style {
+                color: invert-color-hue($base-color, 45%);
+                border-color: darken($pagination-bg-color, 8%);
+                background-color: darken($pagination-bg-color, 8%);
+            }
+            @if $current-shadow {
+                @include box-shadow(inset 0 0 10px rgba(0,0,0,0.1));
+            }
+        }
+    }
+}
+
+@mixin pagelink-size($size: $pagination-medium, $font-size-scale: 1){
+    padding: $size;
+    @if type-op($pagination-font-size) == number {
+        font-size: rem-calc($pagination-font-size * $font-size-scale);
+    }
+};
+
+@if include-html-classes() {
+
+    #{$namespace}.pagination {
+        @include pagination;
+
+        // sizes
+        &.small a.pagelink{
+            @include pagelink-size($pagination-small);
+        }
+
+        &.large a.pagelink{
+            @include pagelink-size($pagination-large);
+        }
+
+        a.pagelink {
+            color:#FFF;
+            @include pagelink;
+            &.dark {
+                @include pagelink($base-color: #242424);
+            }
+            // include default size
+            @include pagelink-size;
+        }
+        // Apply radius TODO find better way
+        > a.pagelink {
+            &:first-child {
+                @include border-radius(0 3px 3px 0);
+            }
+            &:last-child {
+                @include border-radius(0 3px 3px 0);
+            }
+        }
+
+    }
+}

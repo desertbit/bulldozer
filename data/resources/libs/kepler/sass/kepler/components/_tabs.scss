@@ -1,0 +1,124 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$tabs-bg-color: #FFF !default;
+$tabs-border-color: #ddd !default;
+$tabs-border-radius: 4px 4px 0 0 !default;
+$tabs-button-font-size: rem-calc(16px) !default;
+$tabs-button-hover-color: #f2f2f2 !default;
+
+
+
+/*
+ *  Mixins
+ */
+
+@mixin tabs {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+    list-style: none;
+    background-color: $tabs-bg-color;
+    border-bottom: 1px solid $tabs-border-color;
+
+    // Clearfix
+    @include clearfix(before);
+    @include clearfix(after);
+
+    li {
+        float: left;
+        cursor: pointer;
+        margin-bottom: -1px;
+
+
+        @include border-radius($tabs-border-radius);
+        @include user-select(none);
+
+        a, span, small {
+            @include user-select(none);
+        }
+
+        a {
+            display: block;
+            padding: 0 rem-calc(15px);
+            margin: rem-calc(15px) 0;
+            font-size: $tabs-button-font-size;
+            border-right: 1px solid #DDD;
+            color: #8d8d8d;
+        }
+
+        &:last-child > a {
+            border-right: 0;
+        }
+
+        &.active {
+            //border: 1px solid $tabs-border-color;
+            border-bottom: 4px solid #ff6f00;
+
+            a {
+                color: #ff6f00;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+@mixin tabs-content-base {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: $tabs-bg-color;
+
+    // Clearfix
+    @include clearfix(before);
+    @include clearfix(after);
+}
+
+@mixin tab-content {
+    .tab-content {
+        display: none;
+        position: relative;
+        width: 100%;
+        margin: 0;
+        padding: rem-calc(10px) 0;
+
+        // Clearfix
+        @include clearfix(before);
+        @include clearfix(after);
+
+        &.active {
+            display: block;
+        }
+    }
+}
+
+@mixin tabs-content {
+    @include tabs-content-base;
+    @include tab-content;
+}
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.tabs {
+        @include tabs;
+    }
+
+    #{$namespace}.tabs-content {
+        @include tabs-content;
+    }
+}

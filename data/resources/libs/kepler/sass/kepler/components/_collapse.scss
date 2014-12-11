@@ -1,0 +1,149 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$collapse-border: 1px solid #e3e3e3 !default;
+$collapse-color: #333 !default;
+$collapse-hover-bg: #d6d5d5 !default;
+$collapse-active-color: #FFF !default;
+$collapse-active-bg: #ff7600 !default;
+
+/*
+ *  Mixins
+ */
+
+@mixin collapse-trigger {
+    padding: 10px;
+    border-bottom: $collapse-border;
+    color: $collapse-color;
+    cursor: pointer;
+
+    @include user-select(none);
+
+    &:last-child {
+        border: none;
+    }
+    
+    &:hover {
+        background-color: $collapse-hover-bg;
+    }
+    
+    &.active {
+        background-color: $collapse-active-bg;
+        color: $collapse-active-color;
+    }
+}
+
+@mixin collapse-content {
+    display: none;
+
+    @include clearfix;
+}
+
+@mixin collapse {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+
+    @include clearfix;
+}
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.collapse {
+        @include collapse;
+    }
+
+    #{$namespace}.collapse-trigger,
+    #{$namespace} .collapse-trigger {
+        @include collapse-trigger;
+    }
+
+    #{$namespace}.collapse-content,
+    #{$namespace} .collapse-content {
+        @include collapse-content;
+    }
+}
+
+
+// TEMPORALY ADDED HERE MUST BE MOVED !!!!
+// Foldable mobile friendly element skeleton
+// TODO : MIXIN STRUCTURE FOR FOLDING ELEMENTS
+#{$namespace}.mobile-fold {
+    > .foldable {
+        display: inline;
+
+        &.open ul li {
+            display: block;
+        }
+    }
+    .mobile {
+        display: inline-block;
+        width: auto;
+
+        > .fa {
+            line-height: inherit;
+        }
+    }
+    display: inline;
+
+     ul {
+        list-style: none;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        width: 100%;
+        li {
+            line-height: normal;
+            display: block;
+            width: 100%;
+            float: left;
+            > * {
+                width:inherit;
+                margin: 0;
+            }
+
+            @media #{$small-only} {
+                    display: none;
+            }
+        }
+    }
+    // Display overide for non mobile devices
+    @media #{$medium-up} {
+    .mobile {
+            display: none;
+        }
+    ul {
+            display: inline;
+            position: relative;
+            li {
+                width: auto;
+                margin: auto;
+                display: inline;
+                line-height: inherit;
+
+                &.mobile {
+                    display: none;
+                }
+            }
+        }
+    }
+    // include a clearfix to prevent following content to flow into
+    @include clearfix;
+}

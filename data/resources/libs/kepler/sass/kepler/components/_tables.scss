@@ -1,0 +1,95 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$table-color: #535353 !default;
+$table-head-color: #fff !default;
+$table-border-color: #ddd !default;
+$table-font-color: #5f5f5f !default;
+$table-hover-class: true !default;
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+
+     table#{$namespace} {
+        border: 1px solid lighten($table-border-color,5%);
+        margin-top: rem-calc(10px);
+        margin-bottom: rem-calc(10px);
+        border-collapse: collapse;
+        vertical-align: middle;
+        font-weight: 400;
+        color: $table-font-color;
+         ::selection {color:#fff;background:#3c3c3c;}
+         ::-moz-selection {color:#fff;background:#3c3c3c;}
+        thead, tfoot {
+            border: 0;
+            border-style: solid;
+            border-color:lighten($table-border-color,5%);
+            color: #5c5c5c;
+            text-align: center;
+            font-size: rem-calc(14);
+            
+            th {
+                padding: rem-calc(12);
+
+                &:not(:last-child){
+                    border-right: 1px solid lighten($table-border-color,5%);
+                }
+            }
+        }
+         
+        thead {
+            border-width: 0;
+            
+            th {
+                border-bottom-width: 2px;
+            }
+        }
+         
+        tbody {        
+            background-color: lighten($table-color, 80%);
+            
+            td {
+                border-width: 0;
+                border-color: $table-border-color;
+                border-style: solid;
+                border-top-width: 1px;
+                vertical-align: middle;
+                text-align: left;
+                padding: rem-calc(14);
+                
+            }
+            td:not(:last-child) {
+                border-right-width: 1px;
+            }
+            tr{
+
+                
+                &:nth-child(2n){
+                    background-color: #F9F9F9;
+                }
+            }
+        }
+        
+        tfoot {
+            border-top-width: 2px;
+            border-bottom-width: 1px;
+        }
+
+         @if $table-hover-class {
+            &.hover tbody > tr:hover {
+                 background-color: #e6e6e6 !important;
+             }
+         }
+    }
+}

@@ -1,0 +1,35 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+@if not $include-only-minimal and $include-fonts {
+    
+    // Open Sans
+    @font-face {
+        font-family: 'Open Sans';
+        src: url('../fonts/OpenSans/OpenSans-Regular-webfont.eot');
+        src: url('../fonts/OpenSans/OpenSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
+             url('../fonts/OpenSans/OpenSans-Regular-webfont.woff') format('woff'),
+             url('../fonts/OpenSans/OpenSans-Regular-webfont.ttf') format('truetype'),
+             url('../fonts/OpenSans/OpenSans-Regular-webfont.svg#open_sansregular') format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+ 
+    // Source Code Pro
+    @font-face {
+        font-family: 'Source Code Pro';
+        src: url('../fonts/SourceCodePro/EOT/SourceCodePro-Regular.eot');
+        src: url('../fonts/SourceCodePro/EOT/SourceCodePro-Regular.eot?#iefix') format('embedded-opentype'),
+             url('../fonts/SourceCodePro/WOFF/OTF/SourceCodePro-Regular.otf.woff') format('woff'),
+             url('../fonts/SourceCodePro/WOFF/TTF/SourceCodePro-Regular.ttf.woff') format('truetype'),
+             url('../fonts/SourceCodePro/SVG/SourceCodePro-Regular.svg') format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    
+}

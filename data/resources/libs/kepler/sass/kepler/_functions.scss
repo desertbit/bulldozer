@@ -1,0 +1,123 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+// Function which returns a boolean value whenever HTML classes should be included
+@function include-html-classes() {
+    @if not $include-only-minimal and $include-html-classes {
+        @return true;
+    }
+    @return false;
+}
+
+// Function which returns a boolean value whenever global HTML classes should be included
+@function include-global-html-classes() {
+    @if not $include-only-minimal and $include-global-html-classes {
+        @return true;
+    }
+    @return false;
+}
+
+// Retuns opposit direction. Exapmle input left output right
+@function opposit-direction($value) {
+    @if $value == left {
+        @return right;
+    }
+    @if $value == right {
+        @return left;
+    } 
+    @else{ @return none;}
+}
+
+
+// Gets lightness of color and darkens or lightens it depending on lightness
+@function invert-color-hue($color , $amount: 30%) { 
+    @if (lightness($color) > 50) {
+        @return darken($color,$amount); // Lighter backgorund, return dark color
+    } @else {
+        @return lighten($color,$amount); // Darker background, return light color
+    }
+}
+
+// Alpha function in development
+// Problems with handling strings in SASS
+@function value-prefix-filter($str, $prefix) {
+    @if type-of($str) == string and type-of($prefix) == string {
+        $index : str-index(quote($str), " transform");
+
+        @if $index {
+            @while($index > 0 ){
+                    $str: str-insert($str, $index, $prefix);
+                    // Call the function again till no more transforms accure
+                    $index: str-index(quote($str), " transform")+1;
+                @return $str;
+            }
+        }
+    }
+    @return $str;
+}
+
+// Source from Foundation.scss
+// REM CALC 
+
+// New Syntax, allows to optionally calculate on a different base value to counter compounding effect of rem's.
+// Call with 1, 2, 3 or 4 parameters, 'px' is not required but supported:
+// 
+//   rem-calc(10 20 30px 40);
+// 
+// Space delimited, if you want to delimit using comma's, wrap it in another pair of brackets
+// 
+//   rem-calc((10, 20, 30, 40px));
+// 
+// Optionally call with a different base (eg: 8px) to calculate rem.
+// 
+//   rem-calc(16px 32px 48px, 8px);
+// 
+// If you require to comma separate your list
+// 
+//   rem-calc((16px, 32px, 48), 8px);
+@function rem-calc($values, $base-value: $rem-base) {
+    $max: length($values);
+
+    @if $max == 1 { @return convert-to-rem(nth($values, 1), $base-value); }
+
+    $remValues: ();
+    @for $i from 1 through $max {
+        $remValues: append($remValues, convert-to-rem(nth($values, $i), $base-value));
+    }
+    @return $remValues;
+}
+
+@function lower-bound($range) {
+    @if length($range) <= 0 {
+        @return 0;
+    }
+    @return nth($range,1);
+}
+
+
+@function upper-bound($range) {
+    @if length($range) < 2 {
+        @return 999999999999;
+    }
+    @return nth($range, 2);
+}
+
+// Source from Foundation.scss
+// STRIP UNIT
+// It strips the unit of measure and returns it
+@function strip-unit($num) {
+    @return $num / ($num * 0 + 1);
+}
+
+
+// Source from Foundation.scss
+// CONVERT TO REM
+@function convert-to-rem($value, $base-value: $rem-base)  {
+    $value: strip-unit($value) / strip-unit($base-value) * 1rem;
+    @if ($value == 0rem) { $value: 0; } // Turn 0rem into 0
+    @return $value;
+}

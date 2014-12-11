@@ -1,0 +1,163 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$popover-bg-color: #FFF !default;
+$popover-round-corners: 5px !default;
+$popover-padding: 6px;
+$popover-small : 150px !default;
+$popover-medium: 250px !default;
+$popover-large : 350px !default;
+
+
+
+/*
+ *  Mixins
+ */
+
+@mixin popover-size($width : $popover-medium, $height: false) {
+    @if $width {
+        width: $width;
+    }
+
+    @if $height {
+        overflow: scroll;
+        height: $height;
+    }
+    @else {
+        height: auto;
+    }
+}
+
+@mixin popover-sizes {
+    &.small {
+        @include popover-size($width: $popover-small);
+    }
+
+    &.medium {
+        @include popover-size($width: $popover-medium);
+    }
+
+    &.large {
+        @include popover-size($width: $popover-large);
+    }
+}
+
+@mixin popover-base($bg-color:$popover-bg-color) {
+    position: absolute;
+    display: none;
+    background-color: $bg-color;
+    border: 1px solid darken($bg-color, 15%);
+    width: auto;
+    padding: $popover-padding;
+
+    // Media query
+    @media #{$small-only} {
+        width: auto !important;
+        left: 15px !important;
+        right: 15px !important;
+    }
+
+    &.context-menu {
+        padding: 0;
+
+        > ul {
+            width: auto;
+            list-style-type: none;
+            margin: 5px;
+            padding: 0;
+            @include clearfix;
+
+            li {
+                display: block;
+                padding: 0 20px;
+                width: inherit;
+                height: 50px;
+                line-height: 50px;
+                font-size: 14px;
+                text-align: left;
+                vertical-align: middle;
+                cursor: pointer;
+
+                //to standardize
+                color: #333;
+                list-style-type: none;
+
+                &:not(:first-child){
+                    border-top: 1px solid #eee;
+                }
+
+                &:hover {
+                    color: #FFF;
+                    background-color: #ff7600;
+                    @include border-radius($popover-round-corners);
+                }
+            }
+        }
+    }
+
+    .close {
+        position: absolute;
+        top: rem-calc(12px);
+        right: rem-calc(12px);
+        cursor: pointer;
+        color: #646464;
+        font-weight: bold;
+        font-size: rem-calc(14px);
+
+        &:hover {
+             color: #141414;
+        }
+    }
+}
+
+@mixin popover-arrows($background:$popover-bg-color, $border:darken($popover-bg-color, 15%)) {
+    &.arrow-bottom{
+        @include generate-arrow($border-color:$border, $background-color:$background);
+    }
+    &.arrow-right{
+        @include generate-arrow($position:left, $border-color:$border, $background-color:$background);
+    }
+    &.arrow-left{
+        @include generate-arrow($position:right, $border-color:$border, $background-color:$background);
+    }
+    &.arrow-top{
+        @include generate-arrow($position:bottom, $border-color:$border, $background-color:$background);
+    }
+}
+
+@mixin popover-styles {
+    &.radius{
+        @include border-radius($popover-round-corners);
+    }
+
+    &.shadow{
+        @include box-shadow(0px 6px 12px rgba(0, 0, 0, 0.176));
+    }
+}
+
+@mixin popover {
+    @include popover-base;
+    @include popover-sizes;
+    @include popover-arrows;
+    @include popover-styles;
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.popover {
+        @include popover;
+    }
+}

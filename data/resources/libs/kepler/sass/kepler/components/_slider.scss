@@ -1,0 +1,215 @@
+/*
+*  Kepler Frontend Framework
+*  Copyright, DesertBit
+*  Free to use under the GPL license.
+*  http://www.gnu.org/copyleft/gpl.html
+*/
+
+@mixin slider-dot(
+    $size: 13px,
+    $round: true,
+    $transition: true,
+    $cursor: pointer,
+    $margin: 5px,
+    $color: rgba(255, 255, 255, 0.3),
+    $active-color: white,
+    $active-class: '.active',
+    $hover-color: $active-color
+    )
+{
+    // Default slider element styles
+    display: inline-block;
+    cursor: $cursor;
+
+    // Size and placement styles
+    width: $size;
+    height: $size;
+    margin: $margin;
+
+    // Add radius if activated
+    @if $round {
+        @include border-radius($size/2);
+    }
+
+    // Set color sceme
+    background: $color;
+
+    // Add transition efffect if enablead
+    @if $transition {
+        -webkit-transition: -webkit-transform 0.3s ease, background-color 0.3s ease;
+        transition: transform 0.3s ease, background-color 0.3s ease;
+    }
+
+    @if $active-class != false {
+       &#{$active-class} {
+            background-color: white;
+            -webkit-transform: scale(1.3);
+            transform: scale(1.3);
+        }
+    }
+
+    @if type-of($hover-color) == color {
+        &:hover, &:focus {
+            background-color: $hover-color;
+        }
+    }
+}
+
+@mixin navigation()
+{
+}
+
+/* MIXIN for navigation text */
+
+@mixin navtext($content: 'MOVE', $disable-class: '.no-nav-text', $position: right, $spacing: 10px, $include-font-awesome: false){
+
+    $pseudo-element : 'after';
+
+
+
+    &::#{$pseudo-element} {
+
+        @if $position == left {
+            padding-right: $spacing;
+            @include transform(translate(-50px, 0));
+        }
+        @if $position == right {
+            padding-left: $spacing;
+            @include transform(translate(50px, 0));
+        }
+        @if $position == top {
+            padding-bottom: $spacing;
+            @include transform(translate(0, 50px));
+        }
+        @if $position == bottom {
+            padding-top: $spacing;
+            @include transform(translate(0, -50px));
+        }
+        // Add font awesome if needed
+        @if $include-font-awesome {
+            @extend .font-awesome;
+        }
+
+        opacity: 0;
+        content: $content;
+    }
+    &:hover::#{$pseudo-element}{
+        opacity: 1;
+        @include transform(translate(0px, 0));
+    }
+}
+
+
+// TODO mixify styles
+@if include-html-classes() {
+    #{$namespace} {
+        &.slider-dot {
+            @include slider-dot;
+        }
+    
+        // Add font awesome font style to elements to use fa icons
+        &.slider-play, &.slider-next::after, &.slider-prev::before {
+            @extend .font-awesome;
+        }
+
+        &.slider-nav {
+            position: absolute;
+            text-align: center;
+            width: 100%;
+            bottom: 10px;
+        }
+
+        &.slider-prev, &.slider-next{
+            position: absolute;
+            cursor: pointer;
+            top: 50%;
+            height: 60px;
+            font-size: 60px;
+            color: #FFF;
+            margin-top: -30px;
+            line-height: 60px;
+        }
+
+        &.slider-prev {
+            left: 10px;
+            &:not(.no-nav-text) {
+                &::after {
+                    padding-left: 10px;
+                    content: "PREVIOUS";
+                    @include transform(translate(50px, 0));
+                }
+                &:hover::after {
+                    opacity: 1;
+                    @include transform(translate(0px, 0));
+                }
+            }
+            &::before {
+                content:  "\f104";
+            }
+        }
+
+        &.slider-next {
+            right: 10px;
+            &:not(.no-nav-text) {
+                &::before {
+                    padding-right: 10px;
+                    content: "NEXT";
+                    @include transform(translate(-50px, 0));
+                }
+                &:hover::before {
+                    opacity: 1;
+                    @include transform(translate(0px, 0));
+                }
+            }
+            &::after {
+                content:  "\f105";
+            }
+        }
+
+        &.slider-prev:not(.no-nav-text)::after , &.slider-next:not(.no-nav-text)::before {
+                position: relative;
+                display: inline-block;
+                font-size: 20px;
+                top: -13px;
+                text-shadow: 1px 1px #666;
+                font-weight: 600;
+                opacity: 0;
+                @include transition(all 0.2s ease 0s);
+
+
+        }
+
+        &.slider-play {
+            position: absolute;
+            cursor: pointer;
+            bottom: 10px;
+            font-size: 25px;
+            line-height: 25px;
+            left: 10px;
+
+            &::before {
+                content:  "\f04b";
+            }
+            &.pause::before {
+                content:  "\f04c";
+            }
+        }
+
+        [data-kepler-slider] {
+            position: relative;
+            overflow: hidden;
+
+            .wrap {
+                position: relative;
+                top: 0px;
+                @include transition(transform .8s ease-in-out);
+            }
+
+            [data-kepler-slide] {
+                float: left;
+                display: inline-block;
+            }
+        }
+    }
+
+}

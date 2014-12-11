@@ -1,0 +1,79 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$label-round-corners: 5px !default;
+$label-info-color: #79b7ff !default;
+$label-secondary-color: #767676 !default;
+$label-success-color: #82ac67 !default;
+$label-error-color: #ff6853 !default;
+$label-color: #e3882e !default;
+
+
+
+/*
+ *  Mixins
+ */
+
+@mixin label-style($base-color:lighten($label-color, 40%)) {
+    background-color: $base-color;
+    color: invert-color-hue($base-color, 30%);
+}
+
+@mixin label-body {
+    display: inline;
+    position: relative;
+	margin: 10px 0;
+	padding: rem-calc(4) rem-calc(8);
+	font-weight: inherit;
+    font-family: inherit;
+	font-size: inherit;
+    line-height: rem-calc(35);
+}
+
+@mixin label {
+    @include label-body;
+    @include label-style($label-color);
+    @include border-radius($label-round-corners);
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.label {
+        @include label;
+        
+        &.small {
+            font-size: rem-calc(12);
+            font-weight: bold;
+            vertical-align: middle;
+        }
+
+        &.error {
+            @include label-style($label-error-color);
+        }
+
+        &.info {
+            @include label-style($label-info-color);
+        }
+
+        &.success {
+            @include label-style($label-success-color);
+        }
+
+        &.secondary{
+            @include label-style($label-secondary-color);
+        }
+    }
+}

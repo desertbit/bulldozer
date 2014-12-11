@@ -1,0 +1,171 @@
+/*
+*
+* mixin
+* ----------------
+* Generate switch basic layout
+*
+*/
+
+@mixin switch-body($display: inline-block,
+    $margin: 2px 5px ,
+    $cursor: pointer,
+    $push-classes: true // If set to true generates 2 classes to push the element down this way you can easily align the switch to you text or elements
+    ) {
+        display: $display;
+        position: relative;
+        // We use border box to include border inside the box
+        box-sizing: border-box;
+
+        @if $cursor {
+            cursor: $cursor;
+        }
+        @if margin {
+            margin: $margin
+        }
+
+        &::after {
+            display: block;
+            content: '';
+            position: absolute;
+        }
+
+        // Here we generate align classes
+        @if $push-classes {
+            &.push{
+                margin-bottom: -3%;
+            }
+            &.push-strong {
+                margin-bottom: -6%;
+            }
+        }
+    }
+
+/*
+*
+* mixin
+* ----------------
+* Generate switch sizes
+*
+*/
+
+@mixin switch-size($size:38px){
+    width: $size*2;
+    height: $size;
+    @include border-radius($size/2);
+}
+
+@mixin switch-style(
+    $background: #f2f2f2,
+    $type: checkbox,
+    $transition:   (background-color ease 0.3s),
+    $shadow:(0px 2px 5px rgba(0, 0, 0, 0.3)),
+    $border-width: 1px, // Set this to false to disable border
+    $border-color: darken($background, 5%), // apply border color for inner switch toggle (note please change this value if you don't use color as background)
+    $border-style: solid,
+    $toggle-background: #FFF,
+    $toggle-radius: full,
+    $toggle-transition: (margin ease 0.3s)){
+
+        // Here the border styles are set
+        @if $border-width {
+            border: $border-width $border-style $border-color;
+        }
+
+        // Here we apply background styles
+        @if $background {
+            background: $background;
+        }
+
+        // Here we set the transition for the switch parent
+        @if $transition {
+            @include transition($transition);
+        }
+        // Styles for switch toggle
+        &::after {
+            // Set switch size relative to parent
+            width: 50%;
+            height: 100%;
+            // Here we set the transition
+            @if $toggle-transition {
+                // Note please dont use transition mixin for transform property (transform needs prefix in webkit browserts)
+                @include transition($toggle-transition);
+            }
+            @if $toggle-background {
+                background: $toggle-background;
+            }
+            // switch shadow
+            @if $shadow {
+                @include box-shadow($shadow);
+            }
+            // Switch border radius
+            @if $toggle-radius {
+                @if $toggle-radius == full {
+                    @include border-radius(50%);
+                }
+                @else {
+                    @include border-radius($radius);
+                }
+            }
+        }
+        // Styles for active class
+        &.on {
+            // On active simply move pseudo element to the right
+            &::after {
+                margin-left: 50%;
+            }
+            // Change background of switch on active
+            background-color: #a3ffb0;
+        }
+        // This class is only needed if the switch should be colored red if off
+        &.off {
+            background-color: #ffa3aa;
+        }
+
+        // Here we generate the hide input checkbox class
+
+
+    }
+
+@mixin generate-switch($type: checkbox, $inner-name:switch-inner) {
+
+    // Size classes
+    @if $type == checkbox {
+        display: inline-block;
+        input[type=checkbox]  {
+            display: none;
+            opacity: 0;
+
+        }
+        input[disabled] ~ .#{$inner-name} {
+            opacity: 0.4;
+        }
+        input[type=checkbox]:checked ~ .#{$inner-name} {
+            // On active simply move pseudo element to the right
+            &::after {
+                margin-left: 50%;
+            }
+            // Change background of switch on active
+            background-color: #a3ffb0;
+        }
+
+        &.small .#{$inner-name} {@include switch-size($size: 30px)}
+        &.large .#{$inner-name} {@include switch-size($size: 45px)}
+
+        .#{$inner-name}{
+            @include switch-body;
+            @include switch-size;
+            @include switch-style($type: checkbox);
+        }
+    }
+}
+
+
+// Here we export the styles into the container classes for usage
+
+@if include-html-classes() {
+    #{$namespace}{
+        &.switch{
+            @include generate-switch;
+        }
+    }
+}

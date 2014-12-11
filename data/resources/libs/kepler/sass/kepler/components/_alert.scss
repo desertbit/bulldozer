@@ -1,0 +1,131 @@
+/*
+ *  Kepler Frontend Framework
+ *  Copyright, DesertBit
+ *  Free to use under the GPL license.
+ *  http://www.gnu.org/copyleft/gpl.html
+ */
+
+/*
+ *  Variables
+ */
+
+$alert-radius: $global-radius-min !default;
+$alert-font-size: rem-calc(12px) !default;
+$alert-close-size: rem-calc(14px) !default;
+
+$alert-color: #497eb9 !default;
+$alert-icon: "\f129" !default;
+
+$alert-secondary-color: #767676 !default;
+$alert-secondary-icon: "\f129" !default;
+
+$alert-success-color: #3b8d34 !default;
+$alert-success-icon: "\f00c" !default;
+
+$alert-error-color: #ad1c0a !default;
+$alert-error-icon: "\f00d" !default;
+
+$alert-warning-color: #d06000 !default;
+$alert-warning-icon: "\f071" !default;
+
+
+
+/*
+ *  Mixins
+ */
+
+@mixin alert-base {
+    position: relative;
+	display: block;
+	margin: 10px 0;
+	padding: rem-calc(16px) rem-calc(22px);
+	font-weight: normal;
+	font-size: $alert-font-size;
+    line-height: $alert-font-size;
+    vertical-align: middle;
+}
+
+@mixin alert-style($base-color:$alert-color, $icon:$alert-icon) {
+    background-color: lighten($base-color, 40%);
+    border-left: 8px solid lighten($base-color, 10%);
+    color: lighten($base-color, 5%);
+
+    .close {
+        position: absolute;
+        top: rem-calc(16px);
+        right: rem-calc(16px);
+        cursor: pointer;
+        font-weight: bold;
+        font-size: $alert-close-size;
+        color: $base-color;
+
+        &:hover {
+            color: lighten($base-color, 30%);
+        }
+    }
+
+    &.icon {
+        border-left: none;
+        padding-left: 50px;
+        box-shadow: inset 40px 0 0 0 lighten($base-color, 10%);
+
+        &::before {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            margin: -13px 0;
+            width: 40px;
+            font-size: 26px;
+            line-height: 26px;
+            text-decoration: inherit;
+            vertical-align: middle;
+            text-align: center;
+            color: #FFF;
+            background-color: lighten($base-color, 10%);
+            content: $icon;
+            @extend .font-awesome;
+        }
+    }
+}
+
+@mixin alert() {
+    @include alert-base;
+    @include alert-style;
+}
+
+
+
+/*
+ *  CSS Classes
+ */
+
+@if include-html-classes() {
+    #{$namespace}.alert-box {
+        @include alert;
+
+        &.radius{
+            @if($alert-radius == $global-radius-min OR $alert-radius == $global-radius OR $alert-radius == $global-radius-min){
+                @include global-border-radius($alert-radius);
+            }
+            @else {
+                @include border-radius($alert-radius);
+            }
+        }
+
+        &.error {
+            @include alert-style($alert-error-color, $alert-error-icon);
+        }
+
+        &.warning {
+            @include alert-style($alert-warning-color, $alert-warning-icon);
+        }
+
+        &.success {
+            @include alert-style($alert-success-color, $alert-success-icon);
+        }
+
+        &.secondary{
+            @include alert-style($alert-secondary-color, $alert-secondary-icon);
+        }
+    }
+}
