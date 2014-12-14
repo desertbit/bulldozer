@@ -21,7 +21,9 @@ import (
 
 const (
 	saveLoopTimeout       = 1 * time.Minute
-	cleanupExpiredTimeout = 1 * time.Minute
+	cleanupExpiredTimeout = 2 * time.Minute
+
+	cleanupExpiredSessionsBatchSize = 100
 
 	bucketName = "s"
 )
@@ -34,11 +36,17 @@ var (
 	db              *bolt.DB
 	bucketNameBytes = []byte(bucketName)
 
+	stopSaveLoop      chan struct{} = make(chan struct{})
+	stopCleanupDBLoop chan struct{} = make(chan struct{})
+
+	// The previous database iteration key for scanning for expired sessions
+	prevExpiredScanKey []byte
+
 	changedSessions      map[string]*Session = make(map[string]*Session)
 	changedSessionsMutex sync.Mutex
 
-	stopSaveLoop           chan struct{} = make(chan struct{})
-	stopCleanupExpiredLoop chan struct{} = make(chan struct{})
+	removeSessionIDs      []string
+	removeSessionIDsMutex sync.Mutex
 )
 
 //##############//
@@ -67,7 +75,7 @@ func Init() {
 
 	// Start the loops in a new goroutine
 	go saveLoop()
-	go cleanupExpiredLoop()
+	go cleanupDBLoop()
 }
 
 // Release releases this store package.
@@ -77,15 +85,18 @@ func Release() {
 		return
 	}
 
-	// Close the database on exit
-	db.Close()
-
 	// Stop the loops by triggering the quit trigger
 	close(stopSaveLoop)
-	close(stopCleanupExpiredLoop)
+	close(stopCleanupDBLoop)
 
 	// Finally save all unsaved sessions before exiting
 	saveUnsavedSessions()
+
+	// Remove all the manual removed sessions without scanning for expired sessions
+	cleanupDBSessions(true)
+
+	// Close the database on exit
+	db.Close()
 }
 
 //###############//
@@ -99,26 +110,29 @@ type dbSessionBuffer struct {
 
 // registerChangedSession notifies the daemon to save the sessions' changes
 func registerChangedSession(s *Session) {
-	// Lock the mutex
-	changedSessionsMutex.Lock()
-	defer changedSessionsMutex.Unlock()
+	// Start this in a new goroutine to not block the calling function...
+	go func() {
+		// Lock the mutex
+		changedSessionsMutex.Lock()
+		defer changedSessionsMutex.Unlock()
 
-	// Add the session pointer to the map
-	changedSessions[s.id] = s
+		// Add the session pointer to the map
+		changedSessions[s.id] = s
+	}()
 }
 
 func saveLoop() {
-	// Create a new timer
-	timer := time.NewTimer(saveLoopTimeout)
+	// Create a new ticker
+	ticker := time.NewTicker(saveLoopTimeout)
 
 	defer func() {
-		// Stop the timer
-		timer.Stop()
+		// Stop the ticker
+		ticker.Stop()
 	}()
 
 	for {
 		select {
-		case <-timer.C:
+		case <-ticker.C:
 			// Save all unsaved sessions
 			saveUnsavedSessions()
 		case <-stopSaveLoop:
@@ -129,13 +143,17 @@ func saveLoop() {
 }
 
 func saveUnsavedSessions() {
+	// Skip if the session max age is not set
+	if settings.Settings.SessionMaxAge <= 0 {
+		return
+	}
+
 	err := func() (err error) {
 		// Lock the mutex
 		changedSessionsMutex.Lock()
 
-		// Get the length of the map and return if it is empty
-		l := len(changedSessions)
-		if l == 0 {
+		// Return if the map is empty
+		if len(changedSessions) == 0 {
 			// Unlock the mutex again befure returning
 			changedSessionsMutex.Unlock()
 			return nil
@@ -151,31 +169,60 @@ func saveUnsavedSessions() {
 		changedSessionsMutex.Unlock()
 
 		// Create a temporary database buffer for the batched write procedure
-		dbBuffer := make([]dbSessionBuffer, l)
+		var dbBuffer []dbSessionBuffer
+
+		// Create the expire timestamp
+		expiresAt := time.Now().Unix() + int64(settings.Settings.SessionMaxAge)
 
 		// Iterate over all changed session and save them to the database
-		for id, s := range tmpChangedSessions {
-			// Prepare the data
+		for _, s := range tmpChangedSessions {
+			// Skip if this session if flagged as invalid
+			if !s.valid {
+				continue
+			}
+
+			// Prepare the session values data to be encoded
 			var buf bytes.Buffer
 			enc := gob.NewEncoder(&buf)
-			err = enc.Encode(s.values)
+
+			func() {
+				// Lock the mutex
+				s.mutex.Lock()
+				defer s.mutex.Unlock()
+
+				// Encode the data
+				err = enc.Encode(s.values)
+			}()
+
+			// Catch any encoding error
 			if err != nil {
 				return
 			}
+
+			// Create a new proto session
+			protoSession := &protobuf.Session{
+				Values:    buf.Bytes(),
+				ExpiresAt: &expiresAt,
+			}
+
+			// Marshal the proto session to a bytes slice
 			var data []byte
-			data, err = newProtoSession(buf.Bytes())
+			data, err = proto.Marshal(protoSession)
 			if err != nil {
 				return
 			}
 
 			// Add the data to the temporary database buffer
-			dbBuffer = append(dbBuffer, dbSessionBuffer{[]byte(id), data})
+			dbBuffer = append(dbBuffer, dbSessionBuffer{[]byte(s.id), data})
 		}
 
 		// Now save everything to the database
 		err = db.Update(func(tx *bolt.Tx) (err error) {
 			// Get the bucket
 			b := tx.Bucket(bucketNameBytes)
+			if b == nil {
+				return fmt.Errorf("no bucket '%s' found!", bucketName)
+			}
 
 			// Save all the buffered sessions data
 			for _, buf := range dbBuffer {
@@ -196,27 +243,145 @@ func saveUnsavedSessions() {
 	}
 }
 
-func cleanupExpiredLoop() {
-	// Create a new timer
-	timer := time.NewTimer(cleanupExpiredTimeout)
+func cleanupDBLoop() {
+	// Create a new ticker
+	ticker := time.NewTicker(cleanupExpiredTimeout)
 
 	defer func() {
-		// Stop the timer
-		timer.Stop()
+		// Stop the ticker
+		ticker.Stop()
 	}()
 
 	for {
 		select {
-		case <-timer.C:
-			// TODO
-		case <-stopCleanupExpiredLoop:
+		case <-ticker.C:
+			// Cleanup all expired and deleted sessions from the database
+			cleanupDBSessions(false)
+		case <-stopCleanupDBLoop:
 			// Just exit the loop
 			return
 		}
 	}
 }
 
+func cleanupDBSessions(skipExpiredSessions bool) {
+	var err error
+	expiredSessionIDs := make([][]byte, 0)
+
+	if !skipExpiredSessions {
+		// Cleanup all expired database sessions
+		err = db.View(func(tx *bolt.Tx) error {
+			// Get the bucket
+			b := tx.Bucket(bucketNameBytes)
+			if b == nil {
+				return fmt.Errorf("no bucket '%s' found!", bucketName)
+			}
+
+			c := b.Cursor()
+			i := 0
+			var isExpired bool
+
+			for k, v := c.Seek(prevExpiredScanKey); ; k, v = c.Next() {
+				// If we hit the end of our sessions then
+				// exit and start over next time.
+				if k == nil {
+					prevExpiredScanKey = nil
+					return nil
+				}
+
+				// Increment the counter
+				i++
+
+				// The flag if the session is expired
+				isExpired = false
+
+				// Get the proto session value from the session data
+				// and check if the session is expired.
+				protoSession, err := getProtoSession(v)
+				if err != nil {
+					// Just remove the session with the invalid session data
+					isExpired = true
+				} else if protoSessionExpired(protoSession) {
+					isExpired = true
+				}
+
+				if isExpired {
+					// Copy the byte slice key, because this data is
+					// not safe outside of this transaction.
+					temp := make([]byte, len(k))
+					copy(temp, k)
+
+					// Add it to the expired sessios IDs slice
+					expiredSessionIDs = append(expiredSessionIDs, temp)
+				}
+
+				if i >= cleanupExpiredSessionsBatchSize {
+					// Store the current key to the previous key.
+					// Copy the byte slice key, because this data is
+					// not safe outside of this transaction.
+					prevExpiredScanKey = make([]byte, len(k))
+					copy(prevExpiredScanKey, k)
+					return nil
+				}
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			glog.Errorf("sessions database: obtain expired sessions error: %v", err)
+		}
+	}
+
+	// Add all session IDs to the expired map,
+	// which should be removed from the database.
+	if len(removeSessionIDs) > 0 {
+		func() {
+			// Lock the mutex
+			removeSessionIDsMutex.Lock()
+			defer removeSessionIDsMutex.Unlock()
+
+			for _, id := range removeSessionIDs {
+				expiredSessionIDs = append(expiredSessionIDs, []byte(id))
+			}
+
+			// Clear the slice again
+			removeSessionIDs = nil
+		}()
+	}
+
+	if len(expiredSessionIDs) > 0 {
+		// Remove the expired sessions from the database
+		err = db.Update(func(tx *bolt.Tx) error {
+			// Get the bucket
+			b := tx.Bucket(bucketNameBytes)
+			if b == nil {
+				return fmt.Errorf("no bucket '%s' found!", bucketName)
+			}
+
+			// Remove all expired sessions in the slice
+			for _, id := range expiredSessionIDs {
+				err = b.Delete(id)
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			glog.Errorf("sessions database: remove expired sessions error: %v", err)
+		}
+	}
+}
+
 func getSessionFromDB(id string) (*Session, error) {
+	// Check if the ID is flagged to be removed
+	if idIsRemoved(id) {
+		return nil, ErrNotFound
+	}
+
 	var values map[interface{}]interface{}
 
 	// Try to obtain the session from the database
@@ -225,6 +390,9 @@ func getSessionFromDB(id string) (*Session, error) {
 
 		// Get the bucket
 		b := tx.Bucket(bucketNameBytes)
+		if b == nil {
+			return fmt.Errorf("no bucket '%s' found!", bucketName)
+		}
 
 		// Obtain the session data
 		data := b.Get(idb)
@@ -240,15 +408,8 @@ func getSessionFromDB(id string) (*Session, error) {
 
 		// Check if the session is epxired
 		if protoSessionExpired(protoSession) {
-			// TODO: Move this to another goroutine!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// Remove the session data from the database again
-			err = db.Update(func(txu *bolt.Tx) error {
-				return txu.Bucket(bucketNameBytes).Delete(idb)
-			})
-			if err != nil {
-				return err
-			}
-
+			// This session is expired. Just return a not found error.
+			// The cleanupExpiredLoop will handle deletion of it.
 			return ErrNotFound
 		}
 
@@ -268,11 +429,45 @@ func getSessionFromDB(id string) (*Session, error) {
 
 	// Create a new session and set the values map
 	s := &Session{
-		id:     id,
-		values: values,
+		id:          id,
+		valid:       true,
+		values:      values,
+		cacheValues: make(map[interface{}]interface{}),
 	}
 
 	return s, nil
+}
+
+func removeSessionFromDB(id string) {
+	// Lock the mutex
+	removeSessionIDsMutex.Lock()
+	defer removeSessionIDsMutex.Unlock()
+
+	// Add the id to the slice
+	removeSessionIDs = append(removeSessionIDs, id)
+
+	// Lock the mutex
+	changedSessionsMutex.Lock()
+	defer changedSessionsMutex.Unlock()
+
+	// Remove the session also from the changed sessions map if present
+	delete(changedSessions, id)
+}
+
+// idIsRemoved checks if the ID is flagged to be removed
+func idIsRemoved(id string) bool {
+	// Lock the mutex
+	removeSessionIDsMutex.Lock()
+	defer removeSessionIDsMutex.Unlock()
+
+	// Check if the ID is in the slice for the removed session IDs
+	for _, rId := range removeSessionIDs {
+		if id == rId {
+			return true
+		}
+	}
+
+	return false
 }
 
 func sessionIDExistsInDB(id string) (exists bool, err error) {
@@ -282,6 +477,9 @@ func sessionIDExistsInDB(id string) (exists bool, err error) {
 	err = db.View(func(tx *bolt.Tx) error {
 		// Get the bucket
 		b := tx.Bucket(bucketNameBytes)
+		if b == nil {
+			return fmt.Errorf("no bucket '%s' found!", bucketName)
+		}
 
 		// Try to obtain the session data
 		data := b.Get([]byte(id))
@@ -292,18 +490,6 @@ func sessionIDExistsInDB(id string) (exists bool, err error) {
 		return nil
 	})
 
-	return
-}
-
-func newProtoSession(values []byte) (data []byte, err error) {
-	expiresAt := time.Now().Unix() + int64(settings.Settings.SessionMaxAge)
-
-	s := &protobuf.Session{
-		Values:    values,
-		ExpiresAt: &expiresAt,
-	}
-
-	data, err = proto.Marshal(s)
 	return
 }
 

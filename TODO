@@ -22,4 +22,7 @@ Add session level based timeouts
 Update store timeouts of session after a frequent time if the session is still connected
 
 
+Set cookie max age to settings.Settings.SessionMaxAge if authenticated
+
+
 - Implement better password hash encryption

@@ -88,6 +88,9 @@ func serve() error {
 }
 
 func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
+	// TODO: Block to many accesses on this function from the same IP
+	// Also add this to websockets access handler
+
 	// Create a new session object and
 	// obtain the unique socket session token.
 	_, _, err := sessions.New(rw, req)

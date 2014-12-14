@@ -12,14 +12,17 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"github.com/chuckpreslar/emission"
-	"github.com/golang/glog"
 	"github.com/gorilla/securecookie"
 	"net/http"
 	"sync"
 )
 
 const (
-	cookieName = "id"
+	// Value keys
+	keyCookieToken = "bzrCookieToken"
+
+	// Cache value keys
+	cacheKeyCookieToken = "bzrCookieToken"
 )
 
 var (
@@ -51,6 +54,8 @@ type Session struct {
 
 	stream  *stream.Stream
 	emitter *emission.Emitter
+
+	storeSession *store.Session
 }
 
 // SessionID returns the session ID
@@ -62,6 +67,17 @@ func (s *Session) SessionID() string {
 func (s *Session) SendCommand(cmd string) {
 	s.stream.Write(cmd)
 }
+
+// Value returns the session value for the given key
+func (s *Session) Value(key string) {
+	// Don't allow to access some important private session values
+	if key == keyCookieToken {
+		// return nil
+	}
+
+}
+
+// TODO: add cachevalues....
 
 //##############//
 //### Public ###//
@@ -94,55 +110,30 @@ func Release() {
 // A unique socket access token is returned.
 // Use this token to connect to the session socket.
 func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
-	var sessionId string
-
-	// Try to obtain the bulldozer session cookie.
-	// If no cookie is found, then the new session is created automatically,
-	// if sessionId is emtpy or invalid.
-	cookie, err := req.Cookie(cookieName)
-	if err == nil {
-		err = secureCookie.Decode(cookieName, cookie.Value, &sessionId)
+	// Get the store session
+	var err error
+	var storeSession *store.Session
+	for {
+		storeSession, err = getStoreSession(rw, req)
 		if err != nil {
-			// This is not a fatal error. Just log it, reset sessionId and create a new session.
-			// The new session is created automatically, if sessionId is emtpy or invalid.
-			glog.Errorf("failed to decode session cookie: %v", err)
-			sessionId = ""
-		}
-	} else if err != http.ErrNoCookie {
-		// Return the error if this is not the not found cookie error
-		return nil, "", err
-	}
-
-	// TODO: Should we renew the cookie max age as in store?
-
-	// TODO: Check if invalid!!!
-	// Check if no session ID was found
-	if len(sessionId) == 0 {
-		// TODO: create new one
-		_, sessionId, err = store.New()
-
-		// Encode the session ID
-		encoded, err := secureCookie.Encode(cookieName, sessionId)
-		if err != nil {
-			// Return the encoding error
 			return nil, "", err
 		}
 
-		// TODO: Set cookie max age
-
-		// Create a new session cookie
-		cookie = &http.Cookie{
-			Name:     cookieName,
-			Value:    encoded,
-			Path:     "/",
-			MaxAge:   0,                                   //settings.Settings.SessionMaxAge,
-			HttpOnly: true,                                // Don't allow scripts to manipulate the cookie
-			Secure:   settings.Settings.SecureHttpsAccess, // Only send this cookie over a secure https connection if provided
+		// Add a lock for this new session
+		if !storeSession.Lock() {
+			// If this fails, then the current storeSession pointer has been
+			// released from memory, by another parallel Unlock request.
+			// This might never happen, but we have to handle this, by just
+			// making another call to store.Get...
+			continue
 		}
 
-		// Set the session cookie
-		http.SetCookie(rw, cookie)
+		break
 	}
+
+	// TODO: Onclose unlock store session
+
+	// TODO: Flash messages
 
 	// TODO: Rename this!!!
 	var sid string
@@ -153,7 +144,8 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 
 	// Create a new session
 	s := &Session{
-		stream: stream.New(),
+		stream:       stream.New(),
+		storeSession: storeSession,
 	}
 
 	// Create a new emitter and set the recover function

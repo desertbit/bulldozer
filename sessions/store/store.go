@@ -23,12 +23,127 @@ var (
 //### Public ###//
 //##############//
 
-// New should create and return a new session
-func New() (s *Session, id string, err error) {
+// New should create and return a new session.
+// This operation is thread-safe.
+func New() (*Session, error) {
 	// Lock the mutex
 	mutex.Lock()
 	defer mutex.Unlock()
 
+	id, err := newUniqueSessionID()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new session
+	s := &Session{
+		id:          id,
+		valid:       true,
+		values:      make(map[interface{}]interface{}),
+		cacheValues: make(map[interface{}]interface{}),
+	}
+
+	// Add the session to the map
+	sessions[id] = s
+
+	// Don't save anything to the backend.
+	// This is done automatically as soon as any data is set to the session.
+
+	return s, nil
+}
+
+// Get should return a session fitting to the session ID.
+// This operation is thread-safe.
+func Get(id string) (*Session, error) {
+	// Lock the mutex
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	// Try to get the session from the cached sessions map
+	s, ok := sessions[id]
+	if ok {
+		return s, nil
+	}
+
+	// Try to obtain the session from the database
+	var err error
+	s, err = getSessionFromDB(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add the session to the map
+	sessions[id] = s
+
+	return s, nil
+}
+
+// Remove removes the session completly from the cache and database
+// This operation is thread-safe.
+func Remove(id string) {
+	// Lock the mutex
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	// Try to get the session from the cached sessions map
+	s, ok := sessions[id]
+	if ok {
+		// Set the valid flag to false, to be sure, this
+		// session won't be saved to the database
+		s.valid = false
+	}
+
+	// Delete the session from the map
+	delete(sessions, id)
+
+	// Remove the session also from the database
+	removeSessionFromDB(id)
+}
+
+// AssignNewSessionID invalidates the old ID and creates a new ID for the session.
+// This operation is thread-safe.
+func AssignNewSessionID(s *Session) error {
+	// Lock the session mutex
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	// Lock the mutex
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	// Create a new session ID
+	id, err := newUniqueSessionID()
+	if err != nil {
+		return err
+	}
+
+	// Delete the session from the map
+	delete(sessions, s.id)
+
+	// Remove the session also from the database
+	removeSessionFromDB(s.id)
+
+	// Set the new session ID
+	s.id = id
+
+	// Add the session with the new ID to the map
+	sessions[id] = s
+
+	// Register the changed session if the values map is not emtpy
+	if len(s.values) > 0 {
+		registerChangedSession(s)
+	}
+
+	return nil
+}
+
+//###############//
+//### Private ###//
+//###############//
+
+// newUniqueSessionID creates a new unique session ID.
+// Be sure to lock the mutex before calling this method!
+func newUniqueSessionID() (id string, err error) {
 	// Obtain a new unique session Id
 	for {
 		// Get a new session ID
@@ -56,42 +171,5 @@ func New() (s *Session, id string, err error) {
 		break
 	}
 
-	// Create a new session
-	s = &Session{
-		id:     id,
-		values: make(map[interface{}]interface{}),
-	}
-
-	// Add the session to the map
-	sessions[id] = s
-
-	// Don't save anything to the backend.
-	// This is done automatically as soon as any data is set to the session.
-
 	return
-}
-
-// Get should return a session fitting to the session ID
-func Get(id string) (*Session, error) {
-	// Lock the mutex
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	// Try to get the session from the cached sessions map
-	s, ok := sessions[id]
-	if ok {
-		return s, nil
-	}
-
-	// Try to obtain the session from the database
-	var err error
-	s, err = getSessionFromDB(id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Add the session to the map
-	sessions[id] = s
-
-	return s, nil
 }
