@@ -93,28 +93,27 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 
 	// Create a new session object and
 	// obtain the unique socket session token.
-	_, _, err := sessions.New(rw, req)
+	session, accessToken, err := sessions.New(rw, req)
 	if err != nil {
 		glog.Errorf("new session error: %v", err)
 		http.Error(rw, "Internal Server Error", 500)
 		return
 	}
 
-	// Obtain the url path
-	path := req.URL.Path
-
 	// Execute the route
-	statusCode, body := execRoute(path)
+	statusCode, body := execRoute(req.URL.Path)
 
 	// Create the template data struct
 	data := struct {
-		Path             string
+		SessionID        string
+		AccessToken      string
 		Body             string
 		JSLibs           []string
 		Styles           []string
 		LoadingIndicator template.HTML
 	}{
-		path,
+		session.SessionID(),
+		accessToken,
 		body,
 		javaScripts,
 		styleSheets,
@@ -127,6 +126,8 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	// Execute the body template
 	bodyTemplate.Execute(rw, data)
 }
+
+// TODO: Remove the script tag on success
 
 // This is the static html template body loaded only on session initialization
 const htmlBody = `
@@ -148,7 +149,7 @@ const htmlBody = `
 	<div id="bulldozer-body">{{.Body}}</div>
 	<script>
 		$(document).ready(function() {
-			Bulldozer.init("{{.Path}}");
+			Bulldozer.socket.init("{{.SessionID}}","{{.AccessToken}}");
 		});
 	</script>
 	<noscript>

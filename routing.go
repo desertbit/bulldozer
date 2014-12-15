@@ -6,8 +6,8 @@
 package bulldozer
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"github.com/golang/glog"
-	"strings"
 	"sync"
 )
 
@@ -67,7 +67,7 @@ func Route(path string, f RouteFunc) {
 // status code with the body string.
 func execRoute(path string) (int, string) {
 	// This is a temporary fix
-	path = toPath(path)
+	path = utils.ToPath(path)
 
 	// Lock the mutex
 	pageRoutesMutex.Lock()
@@ -81,23 +81,4 @@ func execRoute(path string) (int, string) {
 	}
 
 	return 200, "Hello World"
-}
-
-// TODO: Remove this again. This is a temporary fix
-// toPath returns a valid path
-func toPath(path string) string {
-	// Trim, to lower and replace all empty spaces
-	path = strings.Replace(strings.ToLower(strings.TrimSpace(path)), " ", "-", -1)
-
-	// Remove the following / if necessary
-	if strings.HasSuffix(path, "/") {
-		path = path[:len(path)-1]
-	}
-
-	// Append a leading / if necessary
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
-
-	return path
 }

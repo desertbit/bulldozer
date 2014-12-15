@@ -49,6 +49,24 @@ func RandomString(n int) string {
 	return string(bytes)
 }
 
+// ToPath returns a valid path.
+func ToPath(path string) string {
+	// Trim, to lower and replace all empty spaces
+	path = strings.Replace(strings.ToLower(strings.TrimSpace(path)), " ", "-", -1)
+
+	// Remove the following / if necessary
+	if strings.HasSuffix(path, "/") {
+		path = path[:len(path)-1]
+	}
+
+	// Append a leading / if necessary
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+
+	return path
+}
+
 // EscapeJS escapes a string to be send over the SendCommand method.
 // This method escapes all backslaches, simple quotes and new lines.
 func EscapeJS(data string) string {

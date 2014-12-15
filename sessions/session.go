@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	expireAccessSocketTimeout = 15 * time.Second
+	expireAccessSocketTimeout = 25 * time.Second
 
 	sessionIDLength         = 15
 	socketAccessTokenLength = 40
@@ -70,6 +70,7 @@ type Sessions map[string]*Session
 
 type Session struct {
 	sessionID string
+	path      string
 
 	socketAccess *socketAccessGateway
 	emitter      *emission.Emitter
@@ -86,6 +87,11 @@ type Session struct {
 // SessionID returns the session ID
 func (s *Session) SessionID() string {
 	return s.sessionID
+}
+
+// Path returns the current URL path
+func (s *Session) Path() string {
+	return s.path
 }
 
 // SendCommand sends a javascript command to the client
@@ -219,6 +225,7 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 
 	// Create a new session with a random socket token
 	s := &Session{
+		path:                          utils.ToPath(req.URL.Path),
 		stream:                        stream.New(),
 		storeSession:                  storeSession,
 		stopExpireAccessSocketTimeout: make(chan struct{}),
@@ -230,7 +237,7 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 		RecoverWith(recoverEmitter)
 
 	// Get the remote address and user agent
-	remoteAddr := req.RemoteAddr
+	remoteAddr, _ := utils.RemoteAddress(req)
 	userAgent := req.Header.Get("User-Agent")
 
 	// Set the session socket to a dummy socket.

@@ -6,6 +6,7 @@
 package socket
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"github.com/golang/glog"
 	"github.com/gorilla/websocket"
 	"io"
@@ -47,6 +48,8 @@ type WebSocket struct {
 	onRead  func(string)
 
 	userAgent string
+
+	remoteAddrFunc func() string
 }
 
 func NewWebSocket() *WebSocket {
@@ -64,7 +67,7 @@ func (w *WebSocket) Type() SocketType {
 }
 
 func (w *WebSocket) RemoteAddr() string {
-	return w.ws.RemoteAddr().String()
+	return w.remoteAddrFunc()
 }
 
 func (w *WebSocket) UserAgent() string {
@@ -195,6 +198,23 @@ func handleWebSocket(rw http.ResponseWriter, req *http.Request) {
 	// Set the websocket connection and the user agent
 	w.ws = ws
 	w.userAgent = req.Header.Get("User-Agent")
+
+	// Get the remote address and set the remote address get function
+	remoteAddr, requestMethodUsed := utils.RemoteAddress(req)
+	if requestMethodUsed {
+		// Obtain the remote address from the websocket
+		w.remoteAddrFunc = func() string {
+			return utils.RemovePortFromRemoteAddr(w.ws.RemoteAddr().String())
+		}
+	} else {
+		// Obtain the remote address from the current string.
+		// It was obtained using the request Headers. So don't use the
+		// websocket RemoteAddr() method, because it does not return
+		// the clients IP address.
+		w.remoteAddrFunc = func() string {
+			return remoteAddr
+		}
+	}
 
 	// Trigger the new socket connection function
 	triggerOnNewSocketConnection(w)

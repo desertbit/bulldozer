@@ -161,7 +161,7 @@ func handleAjaxSocket(w http.ResponseWriter, req *http.Request) {
 
 		// Set the uid and client information
 		a.uid = uid
-		a.remoteAddr = req.RemoteAddr
+		a.remoteAddr, _ = utils.RemoteAddress(req)
 		a.userAgent = req.Header.Get("User-Agent")
 
 		// Create a new poll token
@@ -218,7 +218,7 @@ func handleAjaxSocket(w http.ResponseWriter, req *http.Request) {
 	ajaxMutex.Unlock()
 
 	// Update the remote address
-	a.remoteAddr = req.RemoteAddr
+	a.remoteAddr, _ = utils.RemoteAddress(req)
 
 	// Trigger the onRead function if defined
 	if a.onRead != nil {
