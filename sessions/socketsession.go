@@ -293,22 +293,21 @@ func (ss *socketSession) onRead(data string) {
 		return
 	}
 
-	/*
-		// Get the request with the task string as type
-		request, ok := requests[task]
-		if !ok {
-			glog.Warningf("session request for task type '%s' not found!", task)
-			ss.receivedInvalidRequest(false)
-			return
-		}
+	// Get the request with the task string as type
+	request, ok := requests[task]
+	if !ok {
+		glog.Warningf("session request for task type '%s' not found!", task)
+		ss.receivedInvalidRequest(false)
+		return
+	}
 
-		// Call the request function
-		err := request(ss.session, m)
-		if err != nil {
-			glog.Warningf("session request '%s': error: %s", task, err.Error())
-			ss.receivedInvalidRequest(false)
-			return
-		}*/
+	// Call the request function
+	err := request(ss.session, m)
+	if err != nil {
+		glog.Warningf("session request '%s': error: %v", task, err)
+		ss.receivedInvalidRequest(false)
+		return
+	}
 }
 
 // getDataMap creates a data map out of a string.

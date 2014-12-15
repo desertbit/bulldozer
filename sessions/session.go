@@ -97,6 +97,8 @@ func (s *Session) Value(key string) {
 
 }
 
+// TODO: add cachevalues....
+
 // Dirty sets the session values to an unsaved state,
 // which will trigger the save trigger handler.
 // Use this method, if you don't want to always call the
@@ -104,8 +106,6 @@ func (s *Session) Value(key string) {
 func (s *Session) Dirty() {
 	s.storeSession.Dirty()
 }
-
-// TODO: add cachevalues....
 
 //##############//
 //### Public ###//
@@ -163,10 +163,6 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 	// Hint: If any error return is added here, don't forget to unlock the store session!
 
 	// TODO: CHeck if block for different socket types is working!
-
-	// TODO: Check store cache release
-
-	// TODO: Fix cookie parallel cookie goroutine bug
 
 	// Create a new session with a random socket token
 	s := &Session{

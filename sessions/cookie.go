@@ -124,8 +124,6 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 
 		// Start a new goroutine to reset the last token string and the flag
 		go func() {
-			// TODO: Bug here. OParallel access!!
-
 			// Sleep
 			time.Sleep(cookieValueTimeout)
 
