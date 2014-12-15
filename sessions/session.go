@@ -64,6 +64,8 @@ type socketAccessGateway struct {
 //### Session Struct ###//
 //######################//
 
+// Hint: All session methods are thread-safe.
+
 type Sessions map[string]*Session
 
 type Session struct {
@@ -76,6 +78,9 @@ type Session struct {
 	socket       socket.Socket
 
 	stopExpireAccessSocketTimeout chan struct{}
+
+	isClosed   bool
+	closeMutex sync.Mutex
 }
 
 // SessionID returns the session ID
@@ -88,16 +93,45 @@ func (s *Session) SendCommand(cmd string) {
 	s.stream.Write(cmd)
 }
 
-// Value returns the session value for the given key
-func (s *Session) Value(key string) {
-	// Don't allow to access some important private session values
-	if key == keyCookieToken {
-		// return nil
-	}
-
+// IsClosed returns a boolean indicating if the session socket connection is closed.
+func (s *Session) IsClosed() bool {
+	return s.isClosed
 }
 
-// TODO: add cachevalues....
+// Close closes the socket connection and removes the session
+func (s *Session) Close() {
+	// Call the socket close method.
+	// This will trigger the removeSession function.
+	s.socket.Close()
+}
+
+// SocketType returns the session's socket type
+func (s *Session) SocketType() socket.SocketType {
+	return s.socket.Type()
+}
+
+// RemoteAddr returns the client remote address
+func (s *Session) RemoteAddr() string {
+	return s.socket.RemoteAddr()
+}
+
+// Get returns the session value for the given key.
+// A single variadic argument is accepted, and it is optional:
+// if a function is set, this function will be called if no value
+// exists for the given key.
+func (s *Session) Get(key string, vars ...func() interface{}) (interface{}, bool) {
+	return s.storeSession.Get(key, vars...)
+}
+
+// Set sets the value with the given key.
+func (s *Session) Set(key interface{}, value interface{}) {
+	s.storeSession.Set(key, value)
+}
+
+// Delete removes the value with the given key.
+func (s *Session) Delete(key interface{}) {
+	s.storeSession.Delete(key)
+}
 
 // Dirty sets the session values to an unsaved state,
 // which will trigger the save trigger handler.
@@ -105,6 +139,24 @@ func (s *Session) Value(key string) {
 // Set() method for pointer values.
 func (s *Session) Dirty() {
 	s.storeSession.Dirty()
+}
+
+// CacheGet obtains the cache value.
+// A single variadic argument is accepted, and it is optional:
+// if a function is set, this function will be called if no value
+// exists for the given key.
+func (s *Session) CacheGet(key interface{}, vars ...func() interface{}) (interface{}, bool) {
+	return s.storeSession.CacheGet(key, vars...)
+}
+
+// CacheSet sets the cache value with the given key.
+func (s *Session) CacheSet(key interface{}, value interface{}) {
+	s.storeSession.CacheSet(key, value)
+}
+
+// CacheDelete removes the cache value with the given key.
+func (s *Session) CacheDelete(key interface{}) {
+	s.storeSession.CacheDelete(key)
 }
 
 //##############//
@@ -162,24 +214,38 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 
 	// Hint: If any error return is added here, don't forget to unlock the store session!
 
-	// TODO: CHeck if block for different socket types is working!
+	// TODO: Check if block for different socket types is working!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Create a new session with a random socket token
 	s := &Session{
 		stream:                        stream.New(),
 		storeSession:                  storeSession,
 		stopExpireAccessSocketTimeout: make(chan struct{}),
+		isClosed:                      false,
 	}
 
 	// Create a new emitter and set the recover function
 	s.emitter = emission.NewEmitter().
 		RecoverWith(recoverEmitter)
 
+	// Get the remote address and user agent
+	remoteAddr := req.RemoteAddr
+	userAgent := req.Header.Get("User-Agent")
+
+	// Set the session socket to a dummy socket.
+	s.socket = socket.NewSocketDummy(remoteAddr, userAgent)
+
+	// Add a custom event function to remove the session on close.
+	s.socket.OnClose(func() {
+		removeSession(s)
+	})
+
 	// Create a new socket access gateway
 	s.socketAccess = &socketAccessGateway{
 		Token:      utils.RandomString(socketAccessTokenLength),
-		RemoteAddr: req.RemoteAddr,
-		UserAgent:  req.Header.Get("User-Agent"),
+		RemoteAddr: remoteAddr,
+		UserAgent:  userAgent,
 	}
 
 	// Lock the mutex
@@ -267,6 +333,16 @@ func GetSessions(f func(sessions Sessions)) {
 
 // removeSession removes the session from the active session map
 func removeSession(s *Session) {
+	// Check if already closed.
+	// This method should be called only once for each session.
+	s.closeMutex.Lock()
+	if s.isClosed {
+		s.closeMutex.Unlock()
+		return
+	}
+	s.isClosed = true
+	s.closeMutex.Unlock()
+
 	// Trigger the end session events
 	triggerOnCloseSession(s)
 	s.triggerOnClose()

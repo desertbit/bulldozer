@@ -14,16 +14,20 @@ import (
 //###########################//
 
 type DummySocket struct {
-	isClosed bool
-	mutex    sync.Mutex
-	onClose  func()
+	remoteAddr string
+	userAgent  string
+	isClosed   bool
+	mutex      sync.Mutex
+	onClose    func()
 }
 
-func NewSocketDummy() *DummySocket {
+func NewSocketDummy(remoteAddr string, userAgent string) *DummySocket {
 	// Create a new dummy socket struct
 	return &DummySocket{
-		isClosed: false,
-		onClose:  nil,
+		remoteAddr: remoteAddr,
+		userAgent:  userAgent,
+		isClosed:   false,
+		onClose:    nil,
 	}
 }
 
@@ -32,11 +36,11 @@ func (s *DummySocket) Type() SocketType {
 }
 
 func (s *DummySocket) RemoteAddr() string {
-	return ""
+	return s.remoteAddr
 }
 
 func (s *DummySocket) UserAgent() string {
-	return ""
+	return s.userAgent
 }
 
 func (s *DummySocket) IsClosed() bool {

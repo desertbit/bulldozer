@@ -90,12 +90,28 @@ func (s *Session) Unlock() {
 //### Main Values ###//
 //###################//
 
-// Get obtains the value. This operation is thread-safe.
-func (s *Session) Get(key interface{}) (value interface{}, ok bool) {
+// Get obtains the value.
+// A single variadic argument is accepted, and it is optional:
+// if a function is set, this function will be called if no value
+// exists for the given key.
+// This operation is thread-safe.
+func (s *Session) Get(key interface{}, vars ...func() interface{}) (value interface{}, ok bool) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	value, ok = s.values[key]
+
+	// If no value is found and the create function variable
+	// is set, then call the function and set the new value.
+	if !ok && len(vars) > 0 {
+		value = vars[0]()
+		s.values[key] = value
+		ok = true
+
+		// Register the changed session
+		registerChangedSession(s)
+	}
+
 	return
 }
 
@@ -125,12 +141,25 @@ func (s *Session) Delete(key interface{}) {
 //### Cache Values ###//
 //####################//
 
-// CacheGet obtains the cache value. This operation is thread-safe.
-func (s *Session) CacheGet(key interface{}) (value interface{}, ok bool) {
+// CacheGet obtains the cache value.
+// A single variadic argument is accepted, and it is optional:
+// if a function is set, this function will be called if no value
+// exists for the given key.
+// This operation is thread-safe.
+func (s *Session) CacheGet(key interface{}, vars ...func() interface{}) (value interface{}, ok bool) {
 	s.cacheValuesMutex.Lock()
 	defer s.cacheValuesMutex.Unlock()
 
 	value, ok = s.cacheValues[key]
+
+	// If no value is found and the create function variable
+	// is set, then call the function and set the new value.
+	if !ok && len(vars) > 0 {
+		value = vars[0]()
+		s.cacheValues[key] = value
+		ok = true
+	}
+
 	return
 }
 

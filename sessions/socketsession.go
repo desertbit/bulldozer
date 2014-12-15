@@ -236,6 +236,9 @@ func (ss *socketSession) onRead(data string) {
 			return
 		}
 
+		// Set the session pointer
+		ss.session = s
+
 		// Stop the expire timeout
 		close(s.stopExpireAccessSocketTimeout)
 
@@ -245,9 +248,6 @@ func (ss *socketSession) onRead(data string) {
 
 		// Set the socket to the session
 		s.socket = ss.socketConn
-
-		// Set the session pointer
-		ss.session = s
 
 		// Tell the client the token
 		ss.socketConn.Write(ss.token.get())
