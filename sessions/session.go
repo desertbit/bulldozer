@@ -15,14 +15,21 @@ import (
 	"github.com/gorilla/securecookie"
 	"net/http"
 	"sync"
+	"time"
 )
 
 const (
+	expireAccessSocketTimeout = 15 * time.Second
+
+	sessionIDLength         = 15
+	socketAccessTokenLength = 40
+
 	// Value keys
 	keyCookieToken = "bzrCookieToken"
 
 	// Cache value keys
 	cacheKeyCookieToken = "bzrCookieToken"
+	cacheKeySocketType  = "bzrSocketType"
 )
 
 var (
@@ -40,7 +47,17 @@ func init() {
 	socket.InitHttpHandlers()
 
 	// Set the function
-	//socket.OnNewSocketConnection(onNewSocketConnection)
+	socket.OnNewSocketConnection(onNewSocketConnection)
+}
+
+//####################################//
+//### Socket Access Gateway Struct ###//
+//####################################//
+
+type socketAccessGateway struct {
+	Token      string
+	RemoteAddr string
+	UserAgent  string
 }
 
 //######################//
@@ -50,17 +67,20 @@ func init() {
 type Sessions map[string]*Session
 
 type Session struct {
-	sessionId string
+	sessionID string
 
-	stream  *stream.Stream
-	emitter *emission.Emitter
-
+	socketAccess *socketAccessGateway
+	emitter      *emission.Emitter
 	storeSession *store.Session
+	stream       *stream.Stream
+	socket       socket.Socket
+
+	stopExpireAccessSocketTimeout chan struct{}
 }
 
 // SessionID returns the session ID
 func (s *Session) SessionID() string {
-	return s.sessionId
+	return s.sessionID
 }
 
 // SendCommand sends a javascript command to the client
@@ -75,6 +95,14 @@ func (s *Session) Value(key string) {
 		// return nil
 	}
 
+}
+
+// Dirty sets the session values to an unsaved state,
+// which will trigger the save trigger handler.
+// Use this method, if you don't want to always call the
+// Set() method for pointer values.
+func (s *Session) Dirty() {
+	s.storeSession.Dirty()
 }
 
 // TODO: add cachevalues....
@@ -113,8 +141,9 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 	// Get the store session
 	var err error
 	var storeSession *store.Session
+	var newStoreSessionCreated bool
 	for {
-		storeSession, err = getStoreSession(rw, req)
+		storeSession, newStoreSessionCreated, err = getStoreSession(rw, req)
 		if err != nil {
 			return nil, "", err
 		}
@@ -131,35 +160,41 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 		break
 	}
 
-	// TODO: Onclose unlock store session
+	// Hint: If any error return is added here, don't forget to unlock the store session!
 
-	// TODO: Flash messages
+	// TODO: CHeck if block for different socket types is working!
 
-	// TODO: Rename this!!!
-	var sid string
-	socketToken := "TODO"
+	// TODO: Check store cache release
 
-	// TODO: Delete this session if no socket connection is connected!!!!!!!!!!!!!! after timeout
-	// ANd also delete the store session from the db
+	// TODO: Fix cookie parallel cookie goroutine bug
 
-	// Create a new session
+	// Create a new session with a random socket token
 	s := &Session{
-		stream:       stream.New(),
-		storeSession: storeSession,
+		stream:                        stream.New(),
+		storeSession:                  storeSession,
+		stopExpireAccessSocketTimeout: make(chan struct{}),
 	}
 
 	// Create a new emitter and set the recover function
 	s.emitter = emission.NewEmitter().
 		RecoverWith(recoverEmitter)
 
+	// Create a new socket access gateway
+	s.socketAccess = &socketAccessGateway{
+		Token:      utils.RandomString(socketAccessTokenLength),
+		RemoteAddr: req.RemoteAddr,
+		UserAgent:  req.Header.Get("User-Agent"),
+	}
+
 	// Lock the mutex
 	sessionsMutex.Lock()
 	defer sessionsMutex.Unlock()
 
 	// Obtain a new unique session Id
+	var sid string
 	for {
 		// Get a new session ID
-		sid = utils.RandomString(15)
+		sid = utils.RandomString(sessionIDLength)
 
 		// Check if the session Id is already used.
 		// This is very unlikely, but we have to check this!
@@ -171,7 +206,7 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 	}
 
 	// Set the session ID
-	s.sessionId = sid
+	s.sessionID = sid
 
 	// Add the session to the map
 	sessions[sid] = s
@@ -179,8 +214,55 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 	// Trigger the new session hook after the mutex is unlocked again
 	defer triggerOnNewSession(s)
 
+	// Remove the session if no socket connected to this session
+	// after a specific timeout.
+	go func() {
+		// Create a new timer
+		timer := time.NewTimer(expireAccessSocketTimeout)
+
+		defer func() {
+			// Stop the timer
+			timer.Stop()
+		}()
+
+		select {
+		case <-timer.C:
+			// Remove the session
+			removeSession(s)
+
+			// Delete the store session from the store, if it is a newly created one.
+			if newStoreSessionCreated {
+				store.Remove(storeSession.ID())
+			}
+		case <-s.stopExpireAccessSocketTimeout:
+			// Just exit the loop
+			return
+		}
+	}()
+
 	// Return the new created session
-	return s, socketToken, nil
+	return s, s.socketAccess.Token, nil
+}
+
+// GetSession returns a session with the given session ID.
+// ok is false, if the session was not found.
+func GetSession(sessionID string) (s *Session, ok bool) {
+	// Lock the mutex
+	sessionsMutex.Lock()
+	defer sessionsMutex.Unlock()
+
+	s, ok = sessions[sessionID]
+	return
+}
+
+// GetSessions calls the passed function with all current active session.
+// This is done with a function call, because a mutex has to be locked to access the sessions map.
+func GetSessions(f func(sessions Sessions)) {
+	// Lock the mutex
+	sessionsMutex.Lock()
+	defer sessionsMutex.Unlock()
+
+	f(sessions)
 }
 
 //###############//
@@ -193,10 +275,13 @@ func removeSession(s *Session) {
 	triggerOnCloseSession(s)
 	s.triggerOnClose()
 
+	// Remove the lock for this store session
+	s.storeSession.Unlock()
+
 	// Lock the mutex
 	sessionsMutex.Lock()
 	defer sessionsMutex.Unlock()
 
 	// Remove the session from the map
-	delete(sessions, s.sessionId)
+	delete(sessions, s.sessionID)
 }

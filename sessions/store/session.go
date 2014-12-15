@@ -6,6 +6,7 @@
 package store
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -27,9 +28,18 @@ type Session struct {
 	cacheValuesMutex sync.Mutex
 }
 
-// ID returns the unique session ID. Don't expose this.
+// ID returns the unique session ID. Don't expose this information.
 func (s *Session) ID() string {
 	return s.id
+}
+
+// Dirty sets the session values to an unsaved state,
+// which will trigger the save trigger handler.
+// Use this method, if you don't want to always call the
+// Set() method for pointer values.
+func (s *Session) Dirty() {
+	// Register the changed session
+	registerChangedSession(s)
 }
 
 // Lock increments the lock count. If you call lock, you have to also call unlock.
@@ -47,7 +57,7 @@ func (s *Session) Lock() bool {
 	}
 
 	s.lockCount++
-
+	fmt.Printf("%v ", s.lockCount)
 	return true
 }
 
@@ -59,7 +69,7 @@ func (s *Session) Unlock() {
 	defer s.mutex.Unlock()
 
 	s.lockCount--
-
+	fmt.Printf("%v ", s.lockCount)
 	if s.lockCount <= 0 {
 		// Set the lockCount to -1, which indicates, that
 		// this session is going to be released from cache.
@@ -68,9 +78,11 @@ func (s *Session) Unlock() {
 		// Lock the main mutex for the sessions map
 		mutex.Lock()
 		defer mutex.Unlock()
-
+		fmt.Printf("\n\nCache state:        %v", sessions)
 		// Delete the session from the map
 		delete(sessions, s.id)
+		fmt.Printf("\nReleased session:   %v", s.id)
+		fmt.Printf("\nCache state:        %v", sessions)
 	}
 }
 

@@ -76,6 +76,23 @@ func Init() {
 	// Start the loops in a new goroutine
 	go saveLoop()
 	go cleanupDBLoop()
+
+	/* Hint: For debugging purpose
+	go func() {
+		for {
+			db.View(func(tx *bolt.Tx) error {
+				b := tx.Bucket(bucketNameBytes)
+				b.ForEach(func(k, v []byte) error {
+					fmt.Printf("key=%s, value size=%v\n", k, len(v))
+					return nil
+				})
+				return nil
+			})
+			fmt.Println("=====================================")
+			time.Sleep(5 * time.Second)
+		}
+	}()
+	*/
 }
 
 // Release releases this store package.

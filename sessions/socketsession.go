@@ -5,17 +5,15 @@
 
 package sessions
 
-/*
 import (
 	"code.desertbit.com/bulldozer/bulldozer/sessions/socket"
 	"code.desertbit.com/bulldozer/bulldozer/sessions/stream"
 	"github.com/golang/glog"
+	"strings"
 	"time"
 )
 
 const (
-	RequestTypeInit = "init"
-
 	socketKeyPing = "ping"
 	socketKeyPong = "pong"
 
@@ -23,8 +21,11 @@ const (
 	socketValueSessionInit    = "init"
 	socketValueInvalidRequest = "invalid_request"
 
+	socketKeyInit  = "init"
 	socketKeyToken = "tok"
 	socketKeyTask  = "tsk"
+
+	initTokenDelimiter = "#"
 
 	// Send pings to peer with this period
 	pingPeriod = 30 * time.Second
@@ -148,7 +149,7 @@ func (ss *socketSession) onClose() {
 
 	// Remove the session if defined
 	if ss.session != nil {
-		session.Remove(ss.session)
+		removeSession(ss.session)
 	}
 }
 
@@ -177,26 +178,85 @@ func (ss *socketSession) onRead(data string) {
 			return
 		}
 
-		// Create a new session
-		ss.session = session.New(ss.socketConn, ss.stream)
-
-		// Tell the client the session Id and token
-		ss.socketConn.Write(ss.session.SessionID() + "&" + ss.token.get())
-
-		// Get the request with the init string as type
-		request, ok := requests[RequestTypeInit]
-		if ok {
-			// Call the request function
-			err := request(ss.session, m)
-			if err != nil {
-				glog.Warningf("session request '%s': error: %s", RequestTypeInit, err.Error())
-				ss.receivedInvalidRequest(true)
-				return
-			}
+		// Try to obtain the init token
+		initToken, ok := m[socketKeyInit]
+		if !ok {
+			glog.Warningf("missing init token in client request")
+			ss.receivedInvalidRequest(true)
+			return
 		}
 
-		// Trigger the new session hook
-		session.TriggerOnNewSession(ss.session)
+		// Extract the session ID and the socket access token from the init token
+		pos := strings.Index(initToken, initTokenDelimiter)
+		if pos < 0 || pos >= len(initToken) {
+			glog.Warningf("invalid init token in client request: missing delimiter: %s", initToken)
+			ss.receivedInvalidRequest(true)
+			return
+		}
+
+		sid = initToken[:pos]
+		socketTocken := initToken[pos+1:]
+
+		if sid == "" || socketTocken == "" {
+			glog.Warningf("invalid init token in client request: %s", initToken)
+			ss.receivedInvalidRequest(true)
+			return
+		}
+
+		// Try to get the session with the session ID
+		s, ok := GetSession(sid)
+		if !ok {
+			glog.Warningf("invalid init token in client request: session with ID '%s' not found!", sid)
+			ss.receivedInvalidRequest(true)
+			return
+		}
+
+		// Check if the socket access token, remote address and user agent is valid
+		if s.socketAccess == nil ||
+			s.socketAccess.Token != socketTocken ||
+			s.socketAccess.RemoteAddr != ss.socketConn.RemoteAddr() ||
+			s.socketAccess.UserAgent != ss.socketConn.UserAgent() {
+			glog.Warningf("invalid socket access: token, remote address or user agent don't match!")
+			ss.receivedInvalidRequest(true)
+			return
+		}
+
+		// Invalidate the socket access gateway of this session.
+		// A connection was successfully established.
+		s.socketAccess = nil
+
+		// Check if the new socket connection has the same socket type
+		// than other active socket connections in the same store session.
+		socketType, ok := s.storeSession.CacheGet(cacheKeySocketType)
+		if !ok {
+			s.storeSession.CacheSet(cacheKeySocketType, ss.socketConn.Type())
+		} else if socketType != ss.socketConn.Type() {
+			glog.Errorf("session socket connected with a different socket type than the other active socket sessions: remote address: %s", ss.socketConn.RemoteAddr())
+			ss.receivedInvalidRequest(true)
+			return
+		}
+
+		// Stop the expire timeout
+		close(s.stopExpireAccessSocketTimeout)
+
+		// Set the new socket stream to the session
+		pStream := s.stream
+		s.stream = ss.stream
+
+		// Set the socket to the session
+		s.socket = ss.socketConn
+
+		// Set the session pointer
+		ss.session = s
+
+		// Tell the client the token
+		ss.socketConn.Write(ss.token.get())
+
+		// Write all previous buffered stream data to the new stream
+		data := pStream.Read()
+		if len(data) > 0 {
+			s.stream.Write(data)
+		}
 
 		return
 	}
@@ -210,8 +270,8 @@ func (ss *socketSession) onRead(data string) {
 	}
 
 	// Check if the session matches and if the token is valid
-	if ss.session.SessionID() != sid || !ss.token.isTokenValid(token) {
-		glog.Warningf("socket session: session does not exists or the session ID or session token is invalid!")
+	if ss.session.sessionID != sid || !ss.token.isTokenValid(token) {
+		glog.Warningf("socket session: the session ID or session token is invalid!")
 		ss.receivedInvalidRequest(true)
 		return
 	}
@@ -233,21 +293,22 @@ func (ss *socketSession) onRead(data string) {
 		return
 	}
 
-	// Get the request with the task string as type
-	request, ok := requests[task]
-	if !ok {
-		glog.Warningf("session request for task type '%s' not found!", task)
-		ss.receivedInvalidRequest(false)
-		return
-	}
+	/*
+		// Get the request with the task string as type
+		request, ok := requests[task]
+		if !ok {
+			glog.Warningf("session request for task type '%s' not found!", task)
+			ss.receivedInvalidRequest(false)
+			return
+		}
 
-	// Call the request function
-	err := request(ss.session, m)
-	if err != nil {
-		glog.Warningf("session request '%s': error: %s", task, err.Error())
-		ss.receivedInvalidRequest(false)
-		return
-	}
+		// Call the request function
+		err := request(ss.session, m)
+		if err != nil {
+			glog.Warningf("session request '%s': error: %s", task, err.Error())
+			ss.receivedInvalidRequest(false)
+			return
+		}*/
 }
 
 // getDataMap creates a data map out of a string.
@@ -299,4 +360,3 @@ func getDataMap(s string) map[string]string {
 
 	return m
 }
-*/

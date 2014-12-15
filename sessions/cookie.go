@@ -23,9 +23,8 @@ const (
 )
 
 func init() {
-	// Register the custom structs to gob
+	// Register the custom struct to gob
 	gob.Register(&sessionCookie{})
-	gob.Register(&cookieValue{})
 }
 
 //#######################//
@@ -46,7 +45,10 @@ type cookieValue struct {
 //### Private ###//
 //###############//
 
-func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session, error) {
+// getStoreSession returns the store session fitting to the cookie or creates a new one.
+// A boolean is returned indicating if a new session was created.
+func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session, bool, error) {
+	var newStoreSessionCreated bool = false
 	var sCookie sessionCookie
 	var storeSession *store.Session
 
@@ -62,14 +64,14 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 		}
 	} else if err != http.ErrNoCookie {
 		// Return the error if this is not the not found cookie error
-		return nil, err
+		return nil, false, err
 	}
 
 	// Try to obtain the store session with the cookie session ID
 	if len(sCookie.ID) > 0 {
 		storeSession, err = store.Get(sCookie.ID)
 		if err != nil && err != store.ErrNotFound {
-			return nil, err
+			return nil, false, err
 		}
 
 		if storeSession != nil {
@@ -100,8 +102,11 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 		// Create a new session
 		storeSession, err = store.New()
 		if err != nil {
-			return nil, err
+			return nil, false, err
 		}
+
+		// Set the flag
+		newStoreSessionCreated = true
 
 		// Set the new store session ID to the session cookie
 		sCookie.ID = storeSession.ID()
@@ -119,6 +124,8 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 
 		// Start a new goroutine to reset the last token string and the flag
 		go func() {
+			// TODO: Bug here. OParallel access!!
+
 			// Sleep
 			time.Sleep(cookieValueTimeout)
 
@@ -137,7 +144,7 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 		encoded, err := secureCookie.Encode(cookieName, sCookie)
 		if err != nil {
 			// Return the encoding error
-			return nil, err
+			return nil, false, err
 		}
 
 		// TODO: Set cookie max age to settings.Settings.SessionMaxAge if authenticated and if remeber login is set
@@ -159,10 +166,7 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 		storeSession.Set(keyCookieToken, sCookie.Token)
 	}
 
-	// TODO: Renew session ID if this session with the ID is the first connection
-	// store.AssignNewSessionID(ss)
-
-	return storeSession, nil
+	return storeSession, newStoreSessionCreated, nil
 }
 
 func getCachedCookieValue(storeSession *store.Session) (value *cookieValue) {

@@ -26,3 +26,9 @@ Set cookie max age to settings.Settings.SessionMaxAge if authenticated
 
 
 - Implement better password hash encryption
+
+
+
+Session Store
+=============
+* Implement Flash messages
