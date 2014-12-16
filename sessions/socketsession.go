@@ -248,10 +248,11 @@ func (ss *socketSession) initSocketSession(m map[string]string, sid string, acce
 
 	// Check if the new socket connection has the same socket type
 	// than other active socket connections in the same store session.
-	socketType, _ := s.storeSession.CacheGet(cacheKeySocketType, func() interface{} {
+	socketTypeI, _ := s.storeSession.CacheGet(cacheKeySocketType, func() interface{} {
 		return ss.socketConn.Type()
 	})
-	if socketType != ss.socketConn.Type() {
+	socketType, ok := socketTypeI.(socket.SocketType)
+	if !ok || socketType != ss.socketConn.Type() {
 		glog.Errorf("session socket connected with a different socket type than the other active socket sessions: remote address: %s", ss.socketConn.RemoteAddr())
 		ss.receivedInvalidRequest(true)
 		return

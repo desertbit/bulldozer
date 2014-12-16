@@ -19,6 +19,18 @@ var (
 	sessions map[string]*Session = make(map[string]*Session)
 )
 
+/* Hint: For debugging purpose
+func init() {
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			mutex.Lock()
+			fmt.Printf("Cache state:  %v\n", sessions)
+			mutex.Unlock()
+		}
+	}()
+}*/
+
 //##############//
 //### Public ###//
 //##############//
@@ -45,6 +57,9 @@ func New() (*Session, error) {
 
 	// Add the session to the map
 	sessions[id] = s
+
+	// Remove the session from the cache if not locked after the timeout
+	removeSessionFromCacheAfterTimeout(s)
 
 	// Don't save anything to the backend.
 	// This is done automatically as soon as any data is set to the session.
@@ -74,6 +89,9 @@ func Get(id string) (*Session, error) {
 
 	// Add the session to the map
 	sessions[id] = s
+
+	// Remove the session from the cache if not locked after the timeout
+	removeSessionFromCacheAfterTimeout(s)
 
 	return s, nil
 }

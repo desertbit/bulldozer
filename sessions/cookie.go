@@ -76,7 +76,7 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 
 		if storeSession != nil {
 			// Check if the cookie token is valid
-			cookieToken, ok := storeSession.Get(keyCookieToken)
+			cookieTokenI, ok := storeSession.Get(keyCookieToken)
 			if !ok {
 				// No cookie token session value found.
 				// Remove the store session, because it is invalid.
@@ -84,14 +84,21 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 
 				// Reset the storeSession pointer to nil, so a new session is createdd.
 				storeSession = nil
-			} else if cookieToken != sCookie.Token {
-				// Obtain the cached cookie value from the session
-				cValue := getCachedCookieValue(storeSession)
+			} else {
+				cookieToken, ok := cookieTokenI.(string)
+				if !ok || cookieToken != sCookie.Token {
+					// Obtain the cached cookie value from the session
+					cValue := getCachedCookieValue(storeSession)
 
-				// Check if the cookie token was the previous token
-				if cValue.LastToken == "" || cValue.LastToken != sCookie.Token {
-					// Reset the storeSession pointer to nil, so a new session is createdd.
-					storeSession = nil
+					// Check if the cookie token was the previous token
+					if cValue.LastToken == "" || cValue.LastToken != sCookie.Token {
+						// Log
+						addr, _ := utils.RemoteAddress(req)
+						glog.Warningf("invalid client session cookie token '%s' from client: %s", sCookie.Token, addr)
+
+						// Reset the storeSession pointer to nil, so a new session is createdd.
+						storeSession = nil
+					}
 				}
 			}
 		}

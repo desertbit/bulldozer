@@ -220,9 +220,6 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 
 	// Hint: If any error return is added here, don't forget to unlock the store session!
 
-	// TODO: Check if block for different socket types is working!
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 	// Create a new session with a random socket token
 	s := &Session{
 		path:                          utils.ToPath(req.URL.Path),

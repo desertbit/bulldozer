@@ -147,11 +147,12 @@ const htmlBody = `
 <body>
 	{{.LoadingIndicator}}
 	<div id="bulldozer-body">{{.Body}}</div>
-	<script>
+	<div id="bulldozer-script"><script>
 		$(document).ready(function() {
 			Bulldozer.socket.init("{{.SessionID}}","{{.AccessToken}}");
+			$("#bulldozer-script").remove();
 		});
-	</script>
+	</script></div>
 	<noscript>
 		<div class="">
 			<h1>Oops!</h1>

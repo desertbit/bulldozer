@@ -168,22 +168,16 @@ func saveUnsavedSessions() {
 	err := func() (err error) {
 		// Lock the mutex
 		changedSessionsMutex.Lock()
+		// Unlock it first after the database transaction,
+		// to be really sure, that no parallel getSessionFromDB()
+		// call is retrieving an old unsaved value from the database,
+		// if the session was released from the session cache.
+		defer changedSessionsMutex.Unlock()
 
 		// Return if the map is empty
 		if len(changedSessions) == 0 {
-			// Unlock the mutex again befure returning
-			changedSessionsMutex.Unlock()
 			return nil
 		}
-
-		// Create a copy of the changed sessions map
-		tmpChangedSessions := changedSessions
-
-		// Clear the changed sessions map
-		changedSessions = make(map[string]*Session)
-
-		// Unlock the mutex again
-		changedSessionsMutex.Unlock()
 
 		// Create a temporary database buffer for the batched write procedure
 		var dbBuffer []dbSessionBuffer
@@ -192,7 +186,7 @@ func saveUnsavedSessions() {
 		expiresAt := time.Now().Unix() + int64(settings.Settings.SessionMaxAge)
 
 		// Iterate over all changed session and save them to the database
-		for _, s := range tmpChangedSessions {
+		for _, s := range changedSessions {
 			// Skip if this session if flagged as invalid
 			if !s.valid {
 				continue
@@ -232,6 +226,9 @@ func saveUnsavedSessions() {
 			// Add the data to the temporary database buffer
 			dbBuffer = append(dbBuffer, dbSessionBuffer{[]byte(s.id), data})
 		}
+
+		// Clear the changed sessions map
+		changedSessions = make(map[string]*Session)
 
 		// Now save everything to the database
 		err = db.Update(func(tx *bolt.Tx) (err error) {
@@ -353,18 +350,19 @@ func cleanupDBSessions(skipExpiredSessions bool) {
 	// Add all session IDs to the expired map,
 	// which should be removed from the database.
 	if len(removeSessionIDs) > 0 {
-		func() {
-			// Lock the mutex
-			removeSessionIDsMutex.Lock()
-			defer removeSessionIDsMutex.Unlock()
+		// Lock the mutex
+		removeSessionIDsMutex.Lock()
+		// Unlock it first after the database transaction,
+		// to be really sure, that no parallel getSessionFromDB()
+		// call is retrieving a deleted session.
+		defer removeSessionIDsMutex.Unlock()
 
-			for _, id := range removeSessionIDs {
-				expiredSessionIDs = append(expiredSessionIDs, []byte(id))
-			}
+		for _, id := range removeSessionIDs {
+			expiredSessionIDs = append(expiredSessionIDs, []byte(id))
+		}
 
-			// Clear the slice again
-			removeSessionIDs = nil
-		}()
+		// Clear the slice again
+		removeSessionIDs = nil
 	}
 
 	if len(expiredSessionIDs) > 0 {
@@ -395,8 +393,25 @@ func cleanupDBSessions(skipExpiredSessions bool) {
 
 func getSessionFromDB(id string) (*Session, error) {
 	// Check if the ID is flagged to be removed
-	if idIsRemoved(id) {
+	if sessionIsRemoved(id) {
 		return nil, ErrNotFound
+	}
+
+	// Check if the session is in the changed session map.
+	// This might happen, if the session was released from the cache,
+	// but changes still have to be saved to the database.
+	// Not checking this, would be fatal, leading to load
+	// out-dated data from the database...
+	if s, ok := getChangedSession(id); ok {
+		// Reset the lock count of the session, because it
+		// will be added again to the session cache.
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
+		if s.lockCount < 0 {
+			s.lockCount = 0
+		}
+
+		return s, nil
 	}
 
 	var values map[interface{}]interface{}
@@ -423,7 +438,7 @@ func getSessionFromDB(id string) (*Session, error) {
 			return err
 		}
 
-		// Check if the session is epxired
+		// Check if the session is expired
 		if protoSessionExpired(protoSession) {
 			// This session is expired. Just return a not found error.
 			// The cleanupExpiredLoop will handle deletion of it.
@@ -471,8 +486,8 @@ func removeSessionFromDB(id string) {
 	delete(changedSessions, id)
 }
 
-// idIsRemoved checks if the ID is flagged to be removed
-func idIsRemoved(id string) bool {
+// sessionIsRemoved checks if the ID is flagged to be removed
+func sessionIsRemoved(id string) bool {
 	// Lock the mutex
 	removeSessionIDsMutex.Lock()
 	defer removeSessionIDsMutex.Unlock()
@@ -485,6 +500,16 @@ func idIsRemoved(id string) bool {
 	}
 
 	return false
+}
+
+func getChangedSession(id string) (s *Session, ok bool) {
+	// Lock the mutex
+	changedSessionsMutex.Lock()
+	defer changedSessionsMutex.Unlock()
+
+	// Try to obtain the changed session
+	s, ok = changedSessions[id]
+	return
 }
 
 func sessionIDExistsInDB(id string) (exists bool, err error) {

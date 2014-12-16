@@ -6,8 +6,12 @@
 package store
 
 import (
-	"fmt"
 	"sync"
+	"time"
+)
+
+const (
+	removeSessionFromCacheTimeout = 5 * time.Second
 )
 
 //###############//
@@ -57,7 +61,7 @@ func (s *Session) Lock() bool {
 	}
 
 	s.lockCount++
-	fmt.Printf("%v ", s.lockCount)
+
 	return true
 }
 
@@ -69,20 +73,13 @@ func (s *Session) Unlock() {
 	defer s.mutex.Unlock()
 
 	s.lockCount--
-	fmt.Printf("%v ", s.lockCount)
-	if s.lockCount <= 0 {
-		// Set the lockCount to -1, which indicates, that
-		// this session is going to be released from cache.
-		s.lockCount = -1
 
-		// Lock the main mutex for the sessions map
-		mutex.Lock()
-		defer mutex.Unlock()
-		fmt.Printf("\n\nCache state:        %v", sessions)
-		// Delete the session from the map
-		delete(sessions, s.id)
-		fmt.Printf("\nReleased session:   %v", s.id)
-		fmt.Printf("\nCache state:        %v", sessions)
+	if s.lockCount <= 0 {
+		// Be sure the lock count is 0
+		s.lockCount = 0
+
+		// Remove the session from the cache if not locked after the timeout
+		removeSessionFromCacheAfterTimeout(s)
 	}
 }
 
@@ -177,4 +174,35 @@ func (s *Session) CacheDelete(key interface{}) {
 	defer s.cacheValuesMutex.Unlock()
 
 	delete(s.cacheValues, key)
+}
+
+//###############//
+//### Private ###//
+//###############//
+
+// removeSessionFromCacheAfterTimeout removes the session from the cache if
+// not locked within the timeout.
+func removeSessionFromCacheAfterTimeout(s *Session) {
+	go func() {
+		// Sleep
+		time.Sleep(removeSessionFromCacheTimeout)
+
+		// Lock the session mutex to access the lock count variable
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
+
+		// If not locked by any instance, then remove this session from the cache again
+		if s.lockCount == 0 {
+			// Set the lockCount to -1, which indicates, that
+			// this session is going to be released from cache.
+			s.lockCount = -1
+
+			// Lock the main mutex for the sessions map
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			// Delete the session from the map
+			delete(sessions, s.id)
+		}
+	}()
 }
