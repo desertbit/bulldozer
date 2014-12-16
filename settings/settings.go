@@ -61,6 +61,9 @@ func init() {
 		CookieHashKey:  []byte(defaultCookieHashKey),
 		CookieBlockKey: []byte(defaultCookieBlockKey),
 		SessionMaxAge:  60 * 60 * 24 * 14, // 14 Days
+
+		FirewallMaxRequestsPerMinute: 100,
+		FirewallReleaseBlockAfter:    60 * 5, // 5 minutes
 	}
 
 	// Set the temporary directory path
@@ -172,6 +175,11 @@ type settings struct {
 
 	// The maximum session age in seconds
 	SessionMaxAge int
+
+	// The maximum allowed requests per minute before the IP is blocked
+	FirewallMaxRequestsPerMinute int
+	// Release the blocked remote address after x seconds
+	FirewallReleaseBlockAfter int
 }
 
 func (s *settings) PublicPath() string {

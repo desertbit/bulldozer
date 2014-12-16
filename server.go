@@ -6,6 +6,7 @@
 package bulldozer
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/firewall"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"fmt"
@@ -88,8 +89,12 @@ func serve() error {
 }
 
 func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
-	// TODO: Block to many accesses on this function from the same IP
-	// Also add this to websockets access handler
+	// Block to many accesses from the same remote address
+	if allow, remoteAddr := firewall.NewRequest(req); !allow {
+		glog.Infof("blocked incomming request from remote address '%s': too many requests", remoteAddr)
+		http.Error(rw, "Too Many Requests", 429)
+		return
+	}
 
 	// Create a new session object and
 	// obtain the unique socket session token.
