@@ -30,7 +30,8 @@ var (
 //### Public ###//
 //##############//
 
-// Init initializes the bulldozer workspace and settings
+// Init initializes the bulldozer workspace and settings.
+// If you want to set any bulldozer settings, then do this before calling this method!
 func Init() {
 	// Set the isInitialized flag to true
 	isInitialized = true
@@ -63,8 +64,20 @@ func Init() {
 		}()
 	}
 
+	// Check if the settings are valid
+	err := settings.Check()
+	if err != nil {
+		glog.Fatalln(err)
+	}
+
 	// Create the important directories if they don't exist
-	err := createDirectories()
+	err = createDirectories()
+	if err != nil {
+		glog.Fatalln(err)
+	}
+
+	// Load the core templates
+	err = loadCoreTemplates()
 	if err != nil {
 		glog.Fatalln(err)
 	}
@@ -80,17 +93,11 @@ func Bulldoze() {
 		glog.Fatalf("failed to bulldoze: bulldozer is not initialized! It is required to call the bulldoze.Init method before bulldozing!")
 	}
 
-	// Check if the settings are valid
-	err := settings.Check()
-	if err != nil {
-		glog.Fatalln(err)
-	}
-
 	// Initialize the bulldozer sub packages
 	sessions.Init()
 
 	// Start the server
-	err = serve()
+	err := serve()
 	if err != nil {
 		glog.Fatalln(err)
 	}
@@ -130,13 +137,15 @@ func createDirectories() (err error) {
 	// Create the slice of folder paths
 	dirs := [...]string{
 		settings.Settings.TmpPath,
-		settings.Settings.PublicPath(),
-		settings.Settings.PagesPath(),
+		settings.Settings.PublicPath,
+		settings.Settings.PagesPath,
+		settings.Settings.TemplatesPath,
+		settings.Settings.CoreTemplatesPath,
 	}
 
 	// Create the directories
 	for _, dir := range dirs {
-		err = utils.MkDirIfNotExist(dir)
+		err = utils.MkDirIfNotExists(dir)
 		if err != nil {
 			return fmt.Errorf("failed to create directory: '%s': %v", dir, err)
 		}

@@ -18,6 +18,8 @@ const (
 	 *  Public
 	 */
 
+	TemplateSuffix = ".tmpl"
+
 	// The socket types
 	TypeTcpSocket  SocketType = 1 << iota
 	TypeUnixSocket SocketType = 1 << iota
@@ -82,14 +84,23 @@ func init() {
 		glog.Fatalf("GOPATH is not set!")
 	}
 
+	// Append a trailing slash if not already present
 	Settings.GoPath = utils.AddTrailingSlashToPath(Settings.GoPath)
+	Settings.WorkingPath = utils.AddTrailingSlashToPath(Settings.WorkingPath)
 
-	// Set the defaut bulldozer paths
-	Settings.BulldozerResourcesPath = Settings.GoPath + bulldozerGoPath + "data/resources"
-	Settings.BulldozerTranslationPath = Settings.GoPath + bulldozerGoPath + "data/translations"
-
-	// Set the sessions database path
+	// Set the paths
 	Settings.SessionsDatabasePath = Settings.TmpPath + sessionsDatabaseName
+
+	Settings.PublicPath = Settings.WorkingPath + "public"
+	Settings.PagesPath = Settings.WorkingPath + "pages"
+	Settings.TemplatesPath = Settings.WorkingPath + "templates"
+	Settings.CoreTemplatesPath = Settings.TemplatesPath + "/core"
+
+	Settings.BulldozerSourcePath = Settings.GoPath + bulldozerGoPath
+	Settings.BulldozerCoreTemplatesPath = Settings.BulldozerSourcePath + "/data/templates"
+	Settings.BulldozerResourcesPath = Settings.BulldozerSourcePath + "/data/resources"
+	Settings.BulldozerTranslationPath = Settings.BulldozerSourcePath + "/data/translations"
+
 }
 
 //##############//
@@ -98,10 +109,6 @@ func init() {
 
 // Check checks if the settings are correct and valid
 func Check() error {
-	// Append a trailing slash if not already present
-	Settings.GoPath = utils.AddTrailingSlashToPath(Settings.GoPath)
-	Settings.WorkingPath = utils.AddTrailingSlashToPath(Settings.WorkingPath)
-
 	// Check if the Site url is valid
 	if !strings.HasPrefix(Settings.SiteUrl, "http://") &&
 		!strings.HasPrefix(Settings.SiteUrl, "https://") {
@@ -158,12 +165,20 @@ type settings struct {
 	ListenAddress string
 	ServeFiles    bool
 
-	GoPath                   string
-	BulldozerResourcesPath   string
-	BulldozerTranslationPath string
-	WorkingPath              string
-	TmpPath                  string
-	SessionsDatabasePath     string
+	GoPath               string
+	WorkingPath          string
+	TmpPath              string
+	SessionsDatabasePath string
+
+	PublicPath        string
+	PagesPath         string
+	TemplatesPath     string
+	CoreTemplatesPath string
+
+	BulldozerSourcePath        string
+	BulldozerCoreTemplatesPath string
+	BulldozerResourcesPath     string
+	BulldozerTranslationPath   string
 
 	// The CookieHashKey is required, used to authenticate the cookie value using HMAC.
 	// It is recommended to use a key with 32 or 64 bytes.
@@ -180,12 +195,4 @@ type settings struct {
 	FirewallMaxRequestsPerMinute int
 	// Release the blocked remote address after x seconds
 	FirewallReleaseBlockAfter int
-}
-
-func (s *settings) PublicPath() string {
-	return s.WorkingPath + "public"
-}
-
-func (s *settings) PagesPath() string {
-	return s.WorkingPath + "pages"
 }

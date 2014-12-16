@@ -65,7 +65,7 @@ func Route(path string, f RouteFunc) {
 
 // execRoute executes the routes and returns the
 // status code with the body string.
-func execRoute(path string) (int, string) {
+func execRoute(path string) (int, string, error) {
 	// This is a temporary fix
 	path = utils.ToPath(path)
 
@@ -76,9 +76,14 @@ func execRoute(path string) (int, string) {
 	// Try to obtain the page route if present
 	_, ok := pageRoutes[path]
 	if !ok {
-		// TODO: Handle 404 not found
-		return 404, "404 Not found"
+		// Execute the not found page
+		out, err := execNotFoundTemplate()
+		if err != nil {
+			return 500, "", err
+		}
+
+		return 404, out, nil
 	}
 
-	return 200, "Hello World"
+	return 200, "Hello World", nil
 }

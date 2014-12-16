@@ -12,17 +12,8 @@ import (
 	"encoding/hex"
 	"html/template"
 	"math/big"
-	"os"
 	"strings"
 )
-
-func MkDirIfNotExist(path string) error {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return os.Mkdir(path, 0700)
-	}
-
-	return nil
-}
 
 func AddTrailingSlashToPath(path string) string {
 	return strings.TrimSuffix(path, "/") + "/"
