@@ -23,6 +23,7 @@ const (
 	errorTemplateFilename            = "error" + settings.TemplateSuffix
 	notFoundTemplateFilename         = "notfound" + settings.TemplateSuffix
 	loadingIndicatorTemplateFilename = "loadingindicator" + settings.TemplateSuffix
+	noScriptTemplateFilename         = "noscript" + settings.TemplateSuffix
 )
 
 var (
@@ -265,6 +266,7 @@ const htmlBody = `
 	{{end}}
 </head>
 <body>
+	<noscript>{{template "` + noScriptTemplateFilename + `"}}</noscript>
 	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplateFilename + `"}}</div>
 	<div id="bulldozer-body">{{.Body}}</div>
 	<div id="bulldozer-script"><script>
@@ -273,14 +275,5 @@ const htmlBody = `
 			$("#bulldozer-script").remove();
 		});
 	</script></div>
-	<noscript>
-		<div class="">
-			<h1>Oops!</h1>
-			<h2>No Javascript enabled!</h2>
-			<div class="error-details">
-				Please enable JavaScript to load this page!
-			</div>
-		</div>
-	</noscript>
 </body>
 </html>`
