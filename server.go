@@ -23,6 +23,7 @@ const (
 	errorTemplateFilename            = "error" + settings.TemplateSuffix
 	notFoundTemplateFilename         = "notfound" + settings.TemplateSuffix
 	loadingIndicatorTemplateFilename = "loadingindicator" + settings.TemplateSuffix
+	connectionLostTemplateFilename   = "connectionlost" + settings.TemplateSuffix
 	noScriptTemplateFilename         = "noscript" + settings.TemplateSuffix
 )
 
@@ -268,6 +269,7 @@ const htmlBody = `
 <body>
 	<noscript>{{template "` + noScriptTemplateFilename + `"}}</noscript>
 	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplateFilename + `"}}</div>
+	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplateFilename + `"}}</div>
 	<div id="bulldozer-body">{{.Body}}</div>
 	<div id="bulldozer-script"><script>
 		$(document).ready(function() {
