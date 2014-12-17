@@ -88,7 +88,7 @@ func addRequest(remoteAddr string) {
 		blockListMutex.Lock()
 		defer blockListMutex.Unlock()
 
-		// Add the remote address with a timestamp to the block map
+		// Add the remote address with the timestamp to the block map
 		blockList[remoteAddr] = timestamp
 
 		return
