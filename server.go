@@ -68,13 +68,13 @@ func loadCoreTemplates() (err error) {
 	// Create and parse the core template
 	coreTemplate, err = template.New("core").Parse(htmlBody)
 	if err != nil {
-		return fmt.Errorf("core template parsing error: %s", err.Error())
+		return fmt.Errorf("core template parsing error: %v", err)
 	}
 
 	// Parse the templates files in the core templates directory
 	coreTemplate, err = coreTemplate.ParseGlob(pattern)
 	if err != nil {
-		return fmt.Errorf("core templates parsing error: %s", err.Error())
+		return fmt.Errorf("core templates parsing error: %v", err)
 	}
 
 	return nil

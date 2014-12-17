@@ -6,6 +6,7 @@
 package bulldozer
 
 import (
+	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"github.com/golang/glog"
 	"sync"
@@ -23,7 +24,7 @@ var (
 //#####################//
 
 type pageRoute struct {
-	UId          string
+	UID          string
 	TemplateName string
 }
 
@@ -31,14 +32,14 @@ type pageRoute struct {
 //### Public ###//
 //##############//
 
-func RoutePage(path string, pageTemplate string, uId string) {
+func RoutePage(path string, pageTemplate string, UID string) {
 	// Lock the mutex
 	pageRoutesMutex.Lock()
 	defer pageRoutesMutex.Unlock()
 
 	// Create a new page route object
 	p := &pageRoute{
-		UId:          uId,
+		UID:          UID,
 		TemplateName: pageTemplate,
 	}
 
@@ -74,7 +75,7 @@ func execRoute(path string) (int, string, error) {
 	defer pageRoutesMutex.Unlock()
 
 	// Try to obtain the page route if present
-	_, ok := pageRoutes[path]
+	p, ok := pageRoutes[path]
 	if !ok {
 		// Execute the not found page
 		out, err := execNotFoundTemplate()
@@ -85,5 +86,21 @@ func execRoute(path string) (int, string, error) {
 		return 404, out, nil
 	}
 
-	return 200, "Hello World", nil
+	// Create the template data struct
+	data := struct {
+		Hallo string
+	}{
+		"Hallo Welt :D",
+	}
+
+	// TODO!!!!!!!!!!!
+	// Execute the template
+	var b bytes.Buffer
+	err := pageTemplates.ExecuteTemplate(&b, p.TemplateName, data)
+	if err != nil {
+		// TODO
+		return 500, "Error executing template!", err
+	}
+
+	return 200, b.String(), nil
 }

@@ -71,14 +71,19 @@ func Init() {
 	}
 
 	// Create the important directories if they don't exist
-	err = createDirectories()
-	if err != nil {
+	if err = createDirectories(); err != nil {
 		glog.Fatalln(err)
 	}
 
 	// Load the core templates
-	err = loadCoreTemplates()
-	if err != nil {
+	if err = loadCoreTemplates(); err != nil {
+		glog.Fatalln(err)
+	}
+
+	// TODO: Don't fatal on pages templates parse error!!!!!!!!!!!!!!!!!
+
+	// Load the pages templates
+	if err = parsePages(); err != nil {
 		glog.Fatalln(err)
 	}
 }
