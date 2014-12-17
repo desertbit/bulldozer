@@ -22,7 +22,7 @@ var (
 )
 
 func init() {
-	// Start the loops in annew goroutine
+	// Start the loops in an new goroutine
 	go cleanupRequestsCountLoop()
 	go releaseBlockedRemoteAddrLoop()
 }
