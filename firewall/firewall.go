@@ -34,7 +34,7 @@ func init() {
 // NewRequest tells the firewall, that a new request happened.
 // False is returned, if this request should be blocked,
 // because the IP is on the block list.
-// The remote address is always returned for loggin purpose.
+// The remote address is always returned for logging purpose.
 func NewRequest(req *http.Request) (bool, string) {
 	// Get the remote addresse of the request
 	remoteAddr, _ := utils.RemoteAddress(req)
