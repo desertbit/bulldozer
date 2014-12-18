@@ -7,6 +7,7 @@ package bulldozer
 
 import (
 	"bytes"
+	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"github.com/golang/glog"
 	"sync"
@@ -66,7 +67,7 @@ func Route(path string, f RouteFunc) {
 
 // execRoute executes the routes and returns the
 // status code with the body string.
-func execRoute(path string) (int, string, error) {
+func execRoute(s *sessions.Session, path string) (int, string, error) {
 	// This is a temporary fix
 	path = utils.ToPath(path)
 
@@ -96,7 +97,7 @@ func execRoute(path string) (int, string, error) {
 	// TODO!!!!!!!!!!!
 	// Execute the template
 	var b bytes.Buffer
-	err := pageTemplates.ExecuteTemplate(&b, p.TemplateName, data)
+	err := pageTemplates.ExecuteTemplate(s, &b, p.TemplateName, data, p.UID)
 	if err != nil {
 		// TODO
 		return 500, "Error executing template!", err

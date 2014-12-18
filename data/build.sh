@@ -33,7 +33,7 @@ appendData "$(cat ./javascript/loadingindicator.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/websocket.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/ajaxsocket.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/socket.js)" ./resources/js/bulldozer.js
-#appendData "$(cat ./javascript/core.js)" ./resources/js/bulldozer.js
+appendData "$(cat ./javascript/core.js)" ./resources/js/bulldozer.js
 #appendData "$(cat ./javascript/auth.js)" ./resources/js/bulldozer.js
 #appendData "$(cat ./javascript/render.js)" ./resources/js/bulldozer.js
 

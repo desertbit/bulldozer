@@ -20,6 +20,8 @@ import (
 )
 
 const (
+	escapedFragment = "_escaped_fragment_"
+
 	errorTemplateFilename            = "error" + settings.TemplateSuffix
 	notFoundTemplateFilename         = "notfound" + settings.TemplateSuffix
 	loadingIndicatorTemplateFilename = "loadingindicator" + settings.TemplateSuffix
@@ -29,26 +31,7 @@ const (
 
 var (
 	coreTemplate *template.Template
-	javaScripts  []string
-	styleSheets  []string
 )
-
-func init() {
-	// Set the required stylesheets
-	styleSheets = []string{
-		settings.UrlBulldozerResources + "css/bulldozer.css",
-	}
-
-	// Set the required scripts
-	javaScripts = []string{
-		settings.UrlBulldozerResources + "js/jquery.min.js",
-		settings.UrlBulldozerResources + "js/jquery.history.js",
-		settings.UrlBulldozerResources + "libs/kepler/js/vendors/fastclick/fastclick.min.js",
-		settings.UrlBulldozerResources + "libs/kepler/js/kepler.min.js",
-		settings.UrlBulldozerResources + "js/sha256.js",
-		settings.UrlBulldozerResources + "js/bulldozer.min.js",
-	}
-}
 
 //###############//
 //### Private ###//
@@ -186,6 +169,9 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Check if this is a webcrawler request
+	_, isWebCrawler := req.URL.Query()[escapedFragment]
+
 	var statusCode int
 	var body string
 
@@ -208,7 +194,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		}
 	} else {
 		// Execute the route
-		statusCode, body, err = execRoute(req.URL.Path)
+		statusCode, body, err = execRoute(session, req.URL.Path)
 		if err != nil {
 			// Log the error
 			glog.Errorf("failed to execute route: %v", err)
@@ -228,17 +214,19 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 
 	// Create the template data struct
 	data := struct {
-		SessionID   string
-		AccessToken string
-		Body        template.HTML
-		JSLibs      []string
-		Styles      []string
+		SessionID    string
+		AccessToken  string
+		Body         template.HTML
+		JSLibs       []string
+		Styles       []string
+		IsWebCrawler bool
 	}{
 		session.SessionID(),
 		accessToken,
 		template.HTML(body),
-		javaScripts,
-		styleSheets,
+		settings.Settings.StaticJavaScripts,
+		settings.Settings.StaticStyleSheets,
+		isWebCrawler,
 	}
 
 	// Set the http status code
@@ -267,7 +255,7 @@ const htmlBody = `
 	{{end}}
 </head>
 <body>
-	<noscript>{{template "` + noScriptTemplateFilename + `"}}</noscript>
+	{{if not .IsWebCrawler}}<noscript>{{template "` + noScriptTemplateFilename + `"}}</noscript>{{end}}
 	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplateFilename + `"}}</div>
 	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplateFilename + `"}}</div>
 	<div id="bulldozer-body">{{.Body}}</div>

@@ -12,10 +12,42 @@ import (
 	htmlTemplate "html/template"
 
 	"fmt"
-	"io"
 	"io/ioutil"
 	"path/filepath"
+	"sync"
 )
+
+//################################//
+//### Private namespace struct ###//
+//################################//
+
+// nameSpace is the data structure shared by all templates in an association.
+type nameSpace struct {
+	mutex sync.Mutex
+	set   map[string]*Template
+}
+
+func newNameSpace() *nameSpace {
+	return &nameSpace{set: make(map[string]*Template)}
+}
+
+func (ns *nameSpace) Set(t *Template) {
+	// Lock the mutex
+	ns.mutex.Lock()
+	defer ns.mutex.Unlock()
+
+	// Add the template to the map with the template name as key.
+	ns.set[t.Name()] = t
+}
+
+func (ns *nameSpace) Get(name string) *Template {
+	// Lock the mutex
+	ns.mutex.Lock()
+	defer ns.mutex.Unlock()
+
+	// Try to find the template
+	return ns.set[name]
+}
 
 //#######################//
 //### Template struct ###//
@@ -26,58 +58,54 @@ type Template struct {
 	// we need to keep our version of the name space and the underlying
 	// template's in sync.
 	template *htmlTemplate.Template
+
+	// The namespace
+	ns *nameSpace
+
+	// Delimiters
+	leftDelim, rightDelim string
+
+	// Style classes
+	styleClasses []string
 }
 
 // New allocates a new bulldozer template associated with the given one
 // and with the same delimiters. The association, which is transitive,
 // allows one template to invoke another with a {{template}} action.
 func (t *Template) New(name string) *Template {
-	return &Template{
-		template: t.template.New(name),
-	}
-}
-
-// Clone returns a duplicate of the template, including all associated
-// templates. The actual representation is not copied, but the name space of
-// associated templates is, so further calls to Parse in the copy will add
-// templates to the copy but not to the original. Clone can be used to prepare
-// common templates and use them with variant definitions for other templates
-// by adding the variants after the clone is made.
-//
-// It returns an error if t has already been executed.
-func (t *Template) Clone() (*Template, error) {
-	// Create a new template
-	clonedTemplate := &Template{}
-
-	// Clone the html template
-	clonedHtmlTemplate, err := t.template.Clone()
-	if err != nil {
-		return nil, err
+	tt := &Template{
+		template:   t.template.New(name),
+		leftDelim:  t.leftDelim,
+		rightDelim: t.rightDelim,
+		ns:         t.ns,
 	}
 
-	// Set the cloned html templates
-	clonedTemplate.template = clonedHtmlTemplate
+	// Set the functions
+	tt.Funcs(bulldozerFuncMap)
 
-	return clonedTemplate, nil
+	// Add the new template to the namespace
+	tt.ns.Set(tt)
+
+	return tt
 }
 
 // Lookup returns the template with the given name that is associated with t,
 // or nil if there is no such template.
 func (t *Template) Lookup(name string) *Template {
-	templ := t.template.Lookup(name)
-	if templ == nil {
-		return nil
-	}
-
-	// Return a bulldozer template
-	return &Template{
-		template: templ,
-	}
+	// Lookup the template in the namespace
+	return t.ns.Get(name)
 }
 
 // Name returns the name of the template.
 func (t *Template) Name() string {
 	return t.template.Name()
+}
+
+// AddStyleClass adds a style class to the template div.
+// The return value is the template, so calls can be chained.
+func (t *Template) AddStyleClass(styleClass string) *Template {
+	t.styleClasses = append(t.styleClasses, styleClass)
+	return t
 }
 
 // Delims sets the action delimiters to the specified strings, to be used in
@@ -86,6 +114,15 @@ func (t *Template) Name() string {
 // corresponding default: {{ or }}.
 // The return value is the template, so calls can be chained.
 func (t *Template) Delims(left, right string) *Template {
+	if left == "" {
+		left = "{{"
+	}
+	if right == "" {
+		right = "}}"
+	}
+
+	t.leftDelim = left
+	t.rightDelim = right
 	t.template.Delims(left, right)
 	return t
 }
@@ -108,42 +145,18 @@ func (t *Template) Funcs(funcMap FuncMap) *Template {
 	return t
 }
 
-// renderData holds the template context and the execution data.
-type renderData struct {
-	Context *Context
-	Data    interface{}
-}
+// Templates returns a slice of the templates associated with t, including t
+// itself.
+func (t *Template) Templates() []*Template {
+	t.ns.mutex.Lock()
+	defer t.ns.mutex.Unlock()
 
-// Execute applies a parsed template to the specified data object,
-// writing the output to wr.
-// If an error occurs executing the template or writing its output,
-// execution stops, but partial results may already have been written to
-// the output writer.
-// A template may be executed safely in parallel.
-func (t *Template) Execute(wr io.Writer, data interface{}) error {
-	// Create the render data
-	d := renderData{
-		Context: nil,
-		Data:    data,
+	// Return a slice so we don't expose the map.
+	m := make([]*Template, 0, len(t.ns.set))
+	for _, v := range t.ns.set {
+		m = append(m, v)
 	}
-
-	return t.template.Execute(wr, d)
-}
-
-// ExecuteTemplate applies the template associated with t that has the given
-// name to the specified data object and writes the output to wr.
-// If an error occurs executing the template or writing its output,
-// execution stops, but partial results may already have been written to
-// the output writer.
-// A template may be executed safely in parallel.
-func (t *Template) ExecuteTemplate(wr io.Writer, name string, data interface{}) error {
-	// Create the render data
-	d := renderData{
-		Context: nil,
-		Data:    data,
-	}
-
-	return t.template.ExecuteTemplate(wr, name, d)
+	return m
 }
 
 // Parse parses a string into a template. Nested template definitions
@@ -156,14 +169,46 @@ func (t *Template) ExecuteTemplate(wr io.Writer, name string, data interface{}) 
 // other than space, comments, and template definitions.)
 func (t *Template) Parse(src string) (*Template, error) {
 	// Call the custom bulldozer parse method
-	src, err := parse(src)
+	src, err := parse(t, src, 0)
 	if err != nil {
-		return t, err
+		return nil, err
 	}
 
 	// Call the html template parse method
-	_, err = t.template.Parse(src)
-	return t, err
+	ret, err := t.template.Parse(src)
+	if err != nil {
+		return nil, err
+	}
+
+	// In general, all the named templates might have changed underfoot.
+	// Regardless, some new ones may have been defined.
+	// The template.Template set has been updated; update ours.
+	t.ns.mutex.Lock()
+	defer t.ns.mutex.Unlock()
+
+	for _, v := range ret.Templates() {
+		name := v.Name()
+		tmpl := t.ns.set[name]
+
+		if tmpl != nil {
+			continue
+		}
+
+		tmpl = &Template{
+			template:   v,
+			leftDelim:  t.leftDelim,
+			rightDelim: t.rightDelim,
+			ns:         t.ns,
+		}
+
+		// Set the functions
+		tmpl.Funcs(bulldozerFuncMap)
+
+		// Add the template to the namespace
+		t.ns.set[name] = tmpl
+	}
+
+	return t, nil
 }
 
 // ParseFiles parses the named files and associates the resulting templates with
@@ -188,9 +233,20 @@ func (t *Template) ParseGlob(pattern string) (*Template, error) {
 
 // New allocates a new bulldozer template with the given name.
 func New(name string) *Template {
-	return &Template{
-		template: htmlTemplate.New(name),
+	t := &Template{
+		template:   htmlTemplate.New(name),
+		leftDelim:  "{{",
+		rightDelim: "}}",
+		ns:         newNameSpace(),
 	}
+
+	// Set the functions
+	t.Funcs(bulldozerFuncMap)
+
+	// Add the new template to the namespace
+	t.ns.Set(t)
+
+	return t
 }
 
 // Must is a helper that wraps a call to a function returning (*Template, error)

@@ -313,7 +313,9 @@ func cleanupDBSessions(skipExpiredSessions bool) {
 				// and check if the session is expired.
 				protoSession, err := getProtoSession(v)
 				if err != nil {
-					// Just remove the session with the invalid session data
+					// Just remove the session with the invalid session data.
+					// Log the error first.
+					glog.Errorf("session store: removing session from database with invalid value: %v", err)
 					isExpired = true
 				} else if protoSessionExpired(protoSession) {
 					isExpired = true

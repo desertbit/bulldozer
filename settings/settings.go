@@ -66,6 +66,21 @@ func init() {
 
 		FirewallMaxRequestsPerMinute: 100,
 		FirewallReleaseBlockAfter:    60 * 5, // 5 minutes
+
+		// Set the required stylesheets
+		StaticStyleSheets: []string{
+			UrlBulldozerResources + "css/bulldozer.css",
+		},
+
+		// Set the required scripts
+		StaticJavaScripts: []string{
+			UrlBulldozerResources + "js/jquery.min.js",
+			UrlBulldozerResources + "js/jquery.history.js",
+			UrlBulldozerResources + "libs/kepler/js/vendors/fastclick/fastclick.min.js",
+			UrlBulldozerResources + "libs/kepler/js/kepler.min.js",
+			UrlBulldozerResources + "js/sha256.js",
+			UrlBulldozerResources + "js/bulldozer.min.js",
+		},
 	}
 
 	// Set the temporary directory path
@@ -195,4 +210,10 @@ type settings struct {
 	FirewallMaxRequestsPerMinute int
 	// Release the blocked remote address after x seconds
 	FirewallReleaseBlockAfter int
+
+	// This are the static stylesheets and javascripts which
+	// will be always loaded.
+	// Don't manipulate this slices after Bulldozer initialization!
+	StaticJavaScripts []string
+	StaticStyleSheets []string
 }

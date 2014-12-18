@@ -19,6 +19,8 @@ var (
 //### Private ###//
 //###############//
 
+// TODO: Lock mutex?
+
 func parsePages() error {
 	// Create the pattern string
 	pattern := settings.Settings.PagesPath + "/" + "*" + settings.TemplateSuffix

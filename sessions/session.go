@@ -11,9 +11,12 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/sessions/stream"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"fmt"
 	"github.com/chuckpreslar/emission"
 	"github.com/gorilla/securecookie"
 	"net/http"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -23,9 +26,11 @@ const (
 
 	sessionIDLength         = 15
 	socketAccessTokenLength = 40
+	domEncryptionKeyLength  = 40
 
 	// Value keys
-	keyCookieToken = "bzrCookieToken"
+	keyCookieToken      = "bzrCookieToken"
+	keyDomEncryptionKey = "bzrDomEncryptionKey"
 
 	// Cache value keys
 	cacheKeyCookieToken = "bzrCookieToken"
@@ -72,6 +77,10 @@ type Session struct {
 	sessionID string
 	path      string
 
+	domEncryptionKey      string
+	uniqueDomIdCount      int64
+	uniqueDomIdCountMutex sync.Mutex
+
 	socketAccess *socketAccessGateway
 	emitter      *emission.Emitter
 	storeSession *store.Session
@@ -82,6 +91,12 @@ type Session struct {
 
 	isClosed   bool
 	closeMutex sync.Mutex
+
+	loadedJavaScripts      []string
+	loadedJavaScriptsMutex sync.Mutex
+
+	loadedStyleSheets      []string
+	loadedStyleSheetsMutex sync.Mutex
 }
 
 // SessionID returns the session ID
@@ -92,6 +107,27 @@ func (s *Session) SessionID() string {
 // Path returns the current URL path
 func (s *Session) Path() string {
 	return s.path
+}
+
+// DomEncryptionKey returns the unique secret DOM key
+func (s *Session) DomEncryptionKey() string {
+	return s.domEncryptionKey
+}
+
+// NewUniqueDomID returns a new unique DOM ID
+func (s *Session) NewUniqueDomID() string {
+	// Lock the mutex
+	s.uniqueDomIdCountMutex.Lock()
+	defer s.uniqueDomIdCountMutex.Unlock()
+
+	// Increment the unique count
+	s.uniqueDomIdCount++
+
+	// Get the uid as string
+	idStr := "uid_" + strconv.FormatInt(s.uniqueDomIdCount, 10)
+
+	// Calculate the unique DOM ID with the session key
+	return utils.EncryptDomId(s.domEncryptionKey, idStr)
 }
 
 // SendCommand sends a javascript command to the client
@@ -165,6 +201,137 @@ func (s *Session) CacheDelete(key interface{}) {
 	s.storeSession.CacheDelete(key)
 }
 
+func (s *Session) ShowLoadingIndicator() {
+	s.SendCommand("Bulldozer.loadingIndicator.show();")
+}
+
+func (s *Session) HideLoadingIndicator() {
+	s.SendCommand("Bulldozer.loadingIndicator.hide();")
+}
+
+// SetExitMessage sets the exit message which is shown during the page unload.
+func (s *Session) SetExitMessage(msg string) {
+	s.SendCommand("Bulldozer.core.setExitMessage('" + utils.EscapeJS(msg) + "');")
+}
+
+// ResetExitMessage resets the exit message.
+// This won't show any message on unload.
+func (s *Session) ResetExitMessage() {
+	s.SendCommand("Bulldozer.core.resetExitMessage();")
+}
+
+// IsJavaScriptLoaded returns a boolean if a javascript library is already loaded.
+func (s *Session) IsJavaScriptLoaded(url string) bool {
+	// Lock the mutex
+	s.loadedJavaScriptsMutex.Lock()
+	defer s.loadedJavaScriptsMutex.Unlock()
+
+	// Prepare the url
+	url = strings.TrimSpace(url)
+
+	// Check if the script has already been loaded
+	for _, s := range s.loadedJavaScripts {
+		if s == url {
+			return true
+		}
+	}
+
+	// Check if the javascript has been loaded statically
+	for _, s := range settings.Settings.StaticJavaScripts {
+		if s == url {
+			return true
+		}
+	}
+
+	// The javascript library is not loaded
+	return false
+}
+
+// LoadJavaScript loads a javascript file.
+// One optional argument is allowed, which is a javascript command.
+// This command is executed on a successfull load.
+func (s *Session) LoadJavaScript(url string, vars ...string) {
+	// Prepare the url.
+	url = strings.TrimSpace(url)
+
+	// Check if the javascript library is already loaded.
+	if s.IsJavaScriptLoaded(url) {
+		return
+	}
+
+	// Add the url to the loaded slice.
+	s.loadedJavaScriptsMutex.Lock()
+	s.loadedJavaScripts = append(s.loadedJavaScripts, url)
+	s.loadedJavaScriptsMutex.Unlock()
+
+	// Get the command string
+	var cmd string
+	if len(vars) > 0 {
+		// Prepare the cmd string by removing all new lines.
+		cmd = strings.TrimSpace(strings.Replace(vars[0], "\n", "", -1))
+	}
+
+	// Prepare the final command to send to the client.
+	o := "Bulldozer.core.loadScript('" + utils.EscapeJS(url) + "'"
+
+	// Only add the extra command if set.
+	if len(cmd) > 0 {
+		o += ",function(){" + cmd + "}"
+	}
+
+	// Ending
+	o += ");"
+
+	// Send the command
+	s.SendCommand(o)
+}
+
+// IsStyleSheetLoaded returns a boolean if a stylesheet is already loaded.
+func (s *Session) IsStyleSheetLoaded(url string) bool {
+	// Lock the mutex
+	s.loadedStyleSheetsMutex.Lock()
+	defer s.loadedStyleSheetsMutex.Unlock()
+
+	// Prepare the url
+	url = strings.TrimSpace(url)
+
+	// Check if the stylesheet has already been loaded
+	for _, s := range s.loadedStyleSheets {
+		if s == url {
+			return true
+		}
+	}
+
+	// Check if the stylesheet has been loaded statically
+	for _, s := range settings.Settings.StaticStyleSheets {
+		if s == url {
+			return true
+		}
+	}
+
+	// The stylesheet library is not loaded
+	return false
+}
+
+// LoadStyleSheet loads a stylesheet dynamically.
+func (s *Session) LoadStyleSheet(url string) {
+	// Prepare the url
+	url = strings.TrimSpace(url)
+
+	// Check if the stylesheet is already loaded
+	if s.IsStyleSheetLoaded(url) {
+		return
+	}
+
+	// Add the url to the loaded slice
+	s.loadedStyleSheetsMutex.Lock()
+	s.loadedStyleSheets = append(s.loadedStyleSheets, url)
+	s.loadedStyleSheetsMutex.Unlock()
+
+	// Send the command to load the stylesheet
+	s.SendCommand("Bulldozer.core.loadStyleSheet('" + utils.EscapeJS(url) + "');")
+}
+
 //##############//
 //### Public ###//
 //##############//
@@ -232,6 +399,18 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 	// Create a new emitter and set the recover function
 	s.emitter = emission.NewEmitter().
 		RecoverWith(recoverEmitter)
+
+	// Get or generate the DOM encryption key
+	domEncryptionKeyI, _ := storeSession.Get(keyDomEncryptionKey, func() interface{} {
+		return utils.RandomString(domEncryptionKeyLength)
+	})
+	var ok bool
+	s.domEncryptionKey, ok = domEncryptionKeyI.(string)
+	if !ok {
+		// Remove the lock for this store session again.
+		storeSession.Unlock()
+		return nil, "", fmt.Errorf("failed to assert DOM encryption key to string: %v", domEncryptionKeyI)
+	}
 
 	// Get the remote address and user agent
 	remoteAddr, _ := utils.RemoteAddress(req)
