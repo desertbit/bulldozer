@@ -11,13 +11,25 @@ import (
 	"fmt"
 )
 
+const (
+	pagesTemplatesUID = "pages"
+)
+
 var (
 	pageTemplates *template.Template
+
+	pagesEvents = new(PagesEvents)
 )
 
 //###############//
 //### Private ###//
 //###############//
+
+type PagesEvents struct{}
+
+func (p *PagesEvents) EventHallo(c *template.Context, arg1 string, arg2 int) {
+	fmt.Println(arg1, arg2, p, c)
+}
 
 // TODO: Lock mutex?
 
@@ -26,10 +38,12 @@ func parsePages() error {
 	pattern := settings.Settings.PagesPath + "/" + "*" + settings.TemplateSuffix
 
 	// Parse the templates files in the pages directory
-	templates, err := template.ParseGlob(pattern)
+	templates, err := template.ParseGlob(pagesTemplatesUID, pattern)
 	if err != nil {
 		return fmt.Errorf("failed to parse page templates: %v", err)
 	}
+
+	templates.RegisterEvents(pagesEvents)
 
 	// Set the pageTemplates pointer on success
 	pageTemplates = templates

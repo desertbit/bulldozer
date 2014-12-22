@@ -256,14 +256,14 @@ const htmlBody = `
 </head>
 <body>
 	{{if not .IsWebCrawler}}<noscript>{{template "` + noScriptTemplateFilename + `"}}</noscript>{{end}}
-	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplateFilename + `"}}</div>
-	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplateFilename + `"}}</div>
-	<div id="bulldozer-body">{{.Body}}</div>
 	<div id="bulldozer-script"><script>
 		$(document).ready(function() {
 			Bulldozer.socket.init("{{.SessionID}}","{{.AccessToken}}");
 			$("#bulldozer-script").remove();
 		});
 	</script></div>
+	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplateFilename + `"}}</div>
+	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplateFilename + `"}}</div>
+	<div id="bulldozer-body">{{.Body}}</div>
 </body>
 </html>`

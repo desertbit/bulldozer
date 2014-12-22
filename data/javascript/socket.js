@@ -31,6 +31,7 @@ Bulldozer.fn.socket = new function () {
      * Private Variables
      */
 
+    var documentReady = false;
     var socket;
     var sid, token;
     var connErrorLoadingIndShown = false;
@@ -240,6 +241,13 @@ Bulldozer.fn.socket = new function () {
             // Initialize the socket session
             if (!handleInitializeSession(data)) {
                 return;
+            }
+
+            // Trigger the custom bulldozer ready event if this
+            // is the first successfull socket connection.
+            if (!documentReady) {
+                documentReady = true;
+                $(document).triggerHandler('bulldozer.ready');
             }
 
             // On success update the callback which handles incomming messages

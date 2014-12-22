@@ -23,12 +23,15 @@ import (
 
 const (
 	expireAccessSocketTimeout = 25 * time.Second
+	maxInstancesPerSession    = 30
 
 	sessionIDLength         = 15
+	instanceIDLength        = 15
 	socketAccessTokenLength = 40
 	domEncryptionKeyLength  = 40
 
 	// Value keys
+	keyInstanceValues   = "bzrInstances"
 	keyCookieToken      = "bzrCookieToken"
 	keyDomEncryptionKey = "bzrDomEncryptionKey"
 
@@ -74,12 +77,15 @@ type socketAccessGateway struct {
 type Sessions map[string]*Session
 
 type Session struct {
-	sessionID string
-	path      string
+	sessionID  string
+	instanceID string
+	path       string
 
 	domEncryptionKey      string
 	uniqueDomIdCount      int64
 	uniqueDomIdCountMutex sync.Mutex
+
+	sessionInstance *instance
 
 	socketAccess *socketAccessGateway
 	emitter      *emission.Emitter
@@ -99,9 +105,20 @@ type Session struct {
 	loadedStyleSheetsMutex sync.Mutex
 }
 
-// SessionID returns the session ID
+// SessionID returns the session ID.
+// This session ID changes if the client loosed the connection
+// and a reconnect is perfomed.
+// Use this ID to access active sessions with GetSession or GetSessions.
 func (s *Session) SessionID() string {
 	return s.sessionID
+}
+
+// InstanceID returns the instance ID.
+// This ID does not change during reconnections.
+// This ID is unique for each browser tab session and is
+// valid as long as the browser tab is open.
+func (s *Session) InstanceID() string {
+	return s.instanceID
 }
 
 // Path returns the current URL path
@@ -155,50 +172,6 @@ func (s *Session) SocketType() socket.SocketType {
 // RemoteAddr returns the client remote address
 func (s *Session) RemoteAddr() string {
 	return s.socket.RemoteAddr()
-}
-
-// Get returns the session value for the given key.
-// A single variadic argument is accepted, and it is optional:
-// if a function is set, this function will be called if no value
-// exists for the given key.
-func (s *Session) Get(key string, vars ...func() interface{}) (interface{}, bool) {
-	return s.storeSession.Get(key, vars...)
-}
-
-// Set sets the value with the given key.
-func (s *Session) Set(key interface{}, value interface{}) {
-	s.storeSession.Set(key, value)
-}
-
-// Delete removes the value with the given key.
-func (s *Session) Delete(key interface{}) {
-	s.storeSession.Delete(key)
-}
-
-// Dirty sets the session values to an unsaved state,
-// which will trigger the save trigger handler.
-// Use this method, if you don't want to always call the
-// Set() method for pointer values.
-func (s *Session) Dirty() {
-	s.storeSession.Dirty()
-}
-
-// CacheGet obtains the cache value.
-// A single variadic argument is accepted, and it is optional:
-// if a function is set, this function will be called if no value
-// exists for the given key.
-func (s *Session) CacheGet(key interface{}, vars ...func() interface{}) (interface{}, bool) {
-	return s.storeSession.CacheGet(key, vars...)
-}
-
-// CacheSet sets the cache value with the given key.
-func (s *Session) CacheSet(key interface{}, value interface{}) {
-	s.storeSession.CacheSet(key, value)
-}
-
-// CacheDelete removes the cache value with the given key.
-func (s *Session) CacheDelete(key interface{}) {
-	s.storeSession.CacheDelete(key)
 }
 
 func (s *Session) ShowLoadingIndicator() {
@@ -332,6 +305,58 @@ func (s *Session) LoadStyleSheet(url string) {
 	s.SendCommand("Bulldozer.core.loadStyleSheet('" + utils.EscapeJS(url) + "');")
 }
 
+//######################//
+//### Session Values ###//
+//######################//
+
+// Get returns the session value for the given key.
+// A single variadic argument is accepted, and it is optional:
+// if a function is set, this function will be called if no value
+// exists for the given key.
+func (s *Session) Get(key interface{}, vars ...func() interface{}) (interface{}, bool) {
+	return s.storeSession.Get(key, vars...)
+}
+
+// Set sets the value with the given key.
+func (s *Session) Set(key interface{}, value interface{}) {
+	s.storeSession.Set(key, value)
+}
+
+// Delete removes the value with the given key.
+func (s *Session) Delete(key interface{}) {
+	s.storeSession.Delete(key)
+}
+
+// Dirty sets the session values to an unsaved state,
+// which will trigger the save trigger handler.
+// Use this method, if you don't want to always call the
+// Set() method for pointer values.
+func (s *Session) Dirty() {
+	// Update the session instance timestamp. Values might have changed...
+	s.sessionInstance.Timestamp = time.Now().Unix()
+
+	// Tell the store session to flag the session values as changed.
+	s.storeSession.Dirty()
+}
+
+// CacheGet obtains the cache value.
+// A single variadic argument is accepted, and it is optional:
+// if a function is set, this function will be called if no value
+// exists for the given key.
+func (s *Session) CacheGet(key interface{}, vars ...func() interface{}) (interface{}, bool) {
+	return s.storeSession.CacheGet(key, vars...)
+}
+
+// CacheSet sets the cache value with the given key.
+func (s *Session) CacheSet(key interface{}, value interface{}) {
+	s.storeSession.CacheSet(key, value)
+}
+
+// CacheDelete removes the cache value with the given key.
+func (s *Session) CacheDelete(key interface{}) {
+	s.storeSession.CacheDelete(key)
+}
+
 //##############//
 //### Public ###//
 //##############//
@@ -412,6 +437,13 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 		return nil, "", fmt.Errorf("failed to assert DOM encryption key to string: %v", domEncryptionKeyI)
 	}
 
+	// TODO: Get the instance key if already present on the client-side!
+	// Create a new unique instance ID.
+	s.instanceID = newUniqueInstanceID(s)
+
+	// Get the instance pointer. This will create a new instance if not present.
+	s.sessionInstance = getInstance(s)
+
 	// Get the remote address and user agent
 	remoteAddr, _ := utils.RemoteAddress(req)
 	userAgent := req.Header.Get("User-Agent")
@@ -441,7 +473,7 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 		// Get a new session ID
 		sid = utils.RandomString(sessionIDLength)
 
-		// Check if the session Id is already used.
+		// Check if the session ID is already present.
 		// This is very unlikely, but we have to check this!
 		_, ok := sessions[sid]
 		if !ok {

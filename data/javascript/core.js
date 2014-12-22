@@ -14,6 +14,7 @@ Bulldozer.fn.core = new function () {
      * Private Variables
      */
 
+    var documentReady = false;
     var scriptsToLoad = [];
     var pendingLoadJsTriggerIDs = [];
     var globalServerEvents = {};
@@ -24,6 +25,14 @@ Bulldozer.fn.core = new function () {
     /*
      * Private Events
      */
+
+    $(document).on('bulldozer.ready', function() {
+    	// Update the flag.
+    	documentReady = true;
+
+    	// Execute all js load functions.
+    	Bulldozer.core.execJsLoad();
+    });
 
     // Redirect all internal a href links to call the javascript loadPage method,
     // instead of redirecting to the page. This would kill the current socket session.
@@ -198,9 +207,9 @@ Bulldozer.fn.core = new function () {
     this.execJsLoad = function(id) {
         // Delay the execution for 10 ms to wait for other possible new calls on loadScript
         setTimeout(function () {
-            // Only trigger the event if no more script is loading.
-            // Otherwise the event is triggered after all scripts are loaded.
-            if (scriptsToLoad.length > 0) {
+            // Only trigger the event if no more script is loading and only if the HTML document is loaded already.
+            // Otherwise the event is triggered after all scripts are loaded or the document gets loaded.
+            if (scriptsToLoad.length > 0 || !documentReady) {
                 // Add the ID to the pending list
                 if (id) {
                     pendingLoadJsTriggerIDs.push(id.toString());

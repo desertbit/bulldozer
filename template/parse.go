@@ -21,10 +21,8 @@ var (
 type parseData struct {
 	t *Template
 
-	leftDelim     string
-	rightDelim    string
-	leftDelimLen  int
-	rightDelimLen int
+	leftDelim  string
+	rightDelim string
 
 	src       *string
 	final     *string
@@ -51,15 +49,15 @@ func parse(t *Template, src string, linesCountOffset int) (final string, err err
 
 	// Create a new parse data value.
 	parseData := &parseData{
-		t:             t,
-		leftDelim:     t.leftDelim,
-		leftDelimLen:  len(t.leftDelim),
-		rightDelim:    t.rightDelim,
-		rightDelimLen: len(t.rightDelim),
-		src:           &src,
-		final:         &final,
-		lineCount:     &lineCount,
+		t:          t,
+		leftDelim:  t.leftDelim,
+		rightDelim: t.rightDelim,
+		src:        &src,
+		final:      &final,
+		lineCount:  &lineCount,
 	}
+
+	leftDelimLen := len(parseData.leftDelim)
 
 	// Find each left delimiter and process it.
 	for pos := strings.Index(src, t.leftDelim); pos != -1; pos = strings.Index(src, t.leftDelim) {
@@ -70,24 +68,16 @@ func parse(t *Template, src string, linesCountOffset int) (final string, err err
 		final += src[0:pos]
 
 		// Remove first part including the left delimiters
-		src = src[pos+parseData.leftDelimLen:]
+		src = src[pos+leftDelimLen:]
 
-		// Find ending right delimiters
-		pos = strings.Index(src, parseData.rightDelim)
-
-		// If not found, throw and error and exit
-		if pos == -1 {
-			return "", fmt.Errorf("%d: Missing right delimiter: '%s'!", lineCount, parseData.rightDelim)
+		// Get the template token with nested template code.
+		token, err := getSectionBetweenDelim(parseData.leftDelim, parseData.rightDelim, &src)
+		if err != nil {
+			return "", fmt.Errorf("%d: '%s': %v", lineCount, parseData.leftDelim, err)
 		}
-
-		// Get content of '{{...}}'
-		token := strings.TrimSpace(src[0:pos])
 
 		// Save the template Code for error messages
 		templateCode := parseData.leftDelim + token + parseData.rightDelim
-
-		// Remove the template code including the right delimiter.
-		src = src[pos+parseData.rightDelimLen:]
 
 		// Define the type string variable
 		var typeStr string
@@ -151,10 +141,17 @@ func countLinesUntilPos(data string, pos int) (i int) {
 }
 
 func getSection(tag string, data *string, d *parseData) (string, error) {
+	// Create the tags
+	startTag := d.leftDelim + tag + " "
 	endTag := d.leftDelim + "end " + tag + d.rightDelim
 
+	// Get the section
+	return getSectionBetweenDelim(startTag, endTag, data)
+}
+
+func getSectionBetweenDelim(startTag string, endTag string, data *string) (string, error) {
 	// Remove all nested sections and update the final position
-	pos, err := removeNestedSections(tag, *data, d)
+	pos, err := removeNestedSections(startTag, endTag, *data)
 	if err != nil {
 		return "", err
 	}
@@ -168,9 +165,7 @@ func getSection(tag string, data *string, d *parseData) (string, error) {
 	return section, nil
 }
 
-func removeNestedSections(tag string, data string, d *parseData) (int, error) {
-	startTag := d.leftDelim + tag + " "
-	endTag := d.leftDelim + "end " + tag + d.rightDelim
+func removeNestedSections(startTag string, endTag string, data string) (int, error) {
 	startTagLen := len(startTag)
 	endTagLen := len(endTag)
 
@@ -193,7 +188,7 @@ func removeNestedSections(tag string, data string, d *parseData) (int, error) {
 			data = data[posStart+startTagLen:]
 
 			// Remove all nested sections and update the final position
-			pos, err := removeNestedSections(tag, data, d)
+			pos, err := removeNestedSections(startTag, endTag, data)
 			if err != nil {
 				return -1, err
 			}

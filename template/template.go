@@ -12,9 +12,15 @@ import (
 	htmlTemplate "html/template"
 
 	"fmt"
+	"github.com/golang/glog"
 	"io/ioutil"
 	"path/filepath"
 	"sync"
+)
+
+var (
+	nameSpaces      map[string]*nameSpace = make(map[string]*nameSpace)
+	nameSpacesMutex sync.Mutex
 )
 
 //################################//
@@ -23,12 +29,39 @@ import (
 
 // nameSpace is the data structure shared by all templates in an association.
 type nameSpace struct {
-	mutex sync.Mutex
+	// The UID is the unique ID of this template namespace.
+	uid string
+
+	// Templates map
 	set   map[string]*Template
+	mutex sync.Mutex
+
+	// Events
+	eventsMap      map[string]*events
+	eventsMapMutex sync.Mutex
 }
 
-func newNameSpace() *nameSpace {
-	return &nameSpace{set: make(map[string]*Template)}
+func newNameSpace(uid string) *nameSpace {
+	// Create a new namespace
+	ns := &nameSpace{
+		uid:       uid,
+		set:       make(map[string]*Template),
+		eventsMap: make(map[string]*events),
+	}
+
+	// Lock the mutex
+	nameSpacesMutex.Lock()
+	defer nameSpacesMutex.Unlock()
+
+	// Print a error message if the UID is not unique!
+	if _, ok := nameSpaces[uid]; ok {
+		glog.Errorf("template: the template UID '%s' is not unique! Overwriting already present namespace! The previous namespace is not more accessible through events,...", uid)
+	}
+
+	// Add the new namespace to the map
+	nameSpaces[uid] = ns
+
+	return ns
 }
 
 func (ns *nameSpace) Set(t *Template) {
@@ -99,6 +132,11 @@ func (t *Template) Lookup(name string) *Template {
 // Name returns the name of the template.
 func (t *Template) Name() string {
 	return t.template.Name()
+}
+
+// UID returns the unique ID of the template.
+func (t *Template) UID() string {
+	return t.ns.uid
 }
 
 // AddStyleClass adds a style class to the template div.
@@ -215,7 +253,7 @@ func (t *Template) Parse(src string) (*Template, error) {
 // t. If an error occurs, parsing stops and the returned template is nil;
 // otherwise it is t. There must be at least one file.
 func (t *Template) ParseFiles(filenames ...string) (*Template, error) {
-	return parseFiles(t, filenames...)
+	return parseFiles(t.ns.uid, t, filenames...)
 }
 
 // ParseGlob parses the template definitions in the files identified by the
@@ -224,20 +262,19 @@ func (t *Template) ParseFiles(filenames ...string) (*Template, error) {
 // equivalent to calling t.ParseFiles with the list of files matched by the
 // pattern.
 func (t *Template) ParseGlob(pattern string) (*Template, error) {
-	return parseGlob(t, pattern)
+	return parseGlob(t.ns.uid, t, pattern)
 }
 
-//##############//
-//### Public ###//
-//##############//
-
 // New allocates a new bulldozer template with the given name.
-func New(name string) *Template {
+// The uid has to be a unique ID for this new template set.
+// This uid is used to access templates over events even during
+// a bulldozer application restart...
+func New(uid string, name string) *Template {
 	t := &Template{
 		template:   htmlTemplate.New(name),
 		leftDelim:  "{{",
 		rightDelim: "}}",
-		ns:         newNameSpace(),
+		ns:         newNameSpace(uid),
 	}
 
 	// Set the functions
@@ -264,8 +301,8 @@ func Must(t *Template, err error) *Template {
 // the named files. The returned template's name will have the (base) name and
 // (parsed) contents of the first file. There must be at least one file.
 // If an error occurs, parsing stops and the returned *Template is nil.
-func ParseFiles(filenames ...string) (*Template, error) {
-	return parseFiles(nil, filenames...)
+func ParseFiles(uid string, filenames ...string) (*Template, error) {
+	return parseFiles(uid, nil, filenames...)
 }
 
 // ParseGlob creates a new Template and parses the template definitions from the
@@ -273,8 +310,8 @@ func ParseFiles(filenames ...string) (*Template, error) {
 // returned template will have the (base) name and (parsed) contents of the
 // first file matched by the pattern. ParseGlob is equivalent to calling
 // ParseFiles with the list of files matched by the pattern.
-func ParseGlob(pattern string) (*Template, error) {
-	return parseGlob(nil, pattern)
+func ParseGlob(uid string, pattern string) (*Template, error) {
+	return parseGlob(uid, nil, pattern)
 }
 
 //###############//
@@ -283,7 +320,7 @@ func ParseGlob(pattern string) (*Template, error) {
 
 // parseFiles is the helper for the method and function. If the argument
 // template is nil, it is created from the first file.
-func parseFiles(t *Template, filenames ...string) (*Template, error) {
+func parseFiles(uid string, t *Template, filenames ...string) (*Template, error) {
 	if len(filenames) == 0 {
 		// Not really a problem, but be consistent.
 		return nil, fmt.Errorf("bulldozer/template: no files named in call to ParseFiles")
@@ -303,7 +340,7 @@ func parseFiles(t *Template, filenames ...string) (*Template, error) {
 		// works. Otherwise we create a new template associated with t.
 		var tmpl *Template
 		if t == nil {
-			t = New(name)
+			t = New(uid, name)
 		}
 		if name == t.Name() {
 			tmpl = t
@@ -319,7 +356,7 @@ func parseFiles(t *Template, filenames ...string) (*Template, error) {
 }
 
 // parseGlob is the implementation of the function and method ParseGlob.
-func parseGlob(t *Template, pattern string) (*Template, error) {
+func parseGlob(uid string, t *Template, pattern string) (*Template, error) {
 	filenames, err := filepath.Glob(pattern)
 	if err != nil {
 		return nil, err
@@ -327,5 +364,16 @@ func parseGlob(t *Template, pattern string) (*Template, error) {
 	if len(filenames) == 0 {
 		return nil, fmt.Errorf("bulldozer/template: pattern matches no files: %#q", pattern)
 	}
-	return parseFiles(t, filenames...)
+	return parseFiles(uid, t, filenames...)
+}
+
+func getNameSpace(uid string) (ns *nameSpace, ok bool) {
+	// Lock the mutex
+	nameSpacesMutex.Lock()
+	defer nameSpacesMutex.Unlock()
+
+	// Try to obtain the namespace
+	ns, ok = nameSpaces[uid]
+
+	return
 }

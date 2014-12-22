@@ -1,5 +1,8 @@
 #!/bin/bash
 
+DEBUG_BUILD="$1"
+
+
 appendData() {
 	echo "" >> $2
 	echo "" >> $2
@@ -37,6 +40,12 @@ appendData "$(cat ./javascript/core.js)" ./resources/js/bulldozer.js
 #appendData "$(cat ./javascript/auth.js)" ./resources/js/bulldozer.js
 #appendData "$(cat ./javascript/render.js)" ./resources/js/bulldozer.js
 
-# Compress the bulldozer javascript file
-uglifyjs ./resources/js/bulldozer.js -c -m > ./resources/js/bulldozer.min.js
-rm ./resources/js/bulldozer.js
+if [ "$DEBUG_BUILD" == "debug" ]; then
+	# Just copy the uncompressed bulldozer file
+	mv ./resources/js/bulldozer.js ./resources/js/bulldozer.min.js
+else
+	# Compress the bulldozer javascript file
+	uglifyjs ./resources/js/bulldozer.js -c -m > ./resources/js/bulldozer.min.js
+	rm ./resources/js/bulldozer.js
+fi
+

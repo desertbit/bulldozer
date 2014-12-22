@@ -22,7 +22,7 @@ type RequestFunc func(s *Session, data map[string]string) error
 func Request(typeStr string, r RequestFunc) error {
 	// Check for valid input data
 	if len(typeStr) == 0 || r == nil {
-		return fmt.Errorf("register request: invalid or emtpy data passed!")
+		return fmt.Errorf("register request: invalid or empty data passed!")
 	}
 
 	// Add the request to the map

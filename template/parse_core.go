@@ -21,6 +21,8 @@ func init() {
 //### Private ###//
 //###############//
 
+// TODO. Create a new namespace "context in the template call if desired to -> global templates?
+
 // parseTemplate passes the templates context to the template pipeline.
 func parseTemplate(token string, d *parseData) error {
 	// Split the token between spaces

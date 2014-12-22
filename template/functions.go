@@ -12,6 +12,7 @@ import (
 var (
 	bulldozerFuncMap FuncMap = FuncMap{
 		"passValues": passValues,
+		"eventKey":   createEventAccessKey,
 	}
 )
 
