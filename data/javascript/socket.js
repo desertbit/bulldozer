@@ -33,7 +33,7 @@ Bulldozer.fn.socket = new function () {
 
     var documentReady = false;
     var socket;
-    var sid, token;
+    var sid, instanceID, token;
     var connErrorLoadingIndShown = false;
     var timeoutShowLoadingIndicator = false;
     var reconnectCount = 0;
@@ -122,15 +122,21 @@ Bulldozer.fn.socket = new function () {
         // Check if the server has send an invalid request notification
         if (data === SocketData.InvalidRequest) {
             console.log("The server replied with an invalid request notification! The previous request was invalid!");
-            // Show an error message box
-            Bulldozer.utils.showErrorMessageBox("Error",
-                "Failed to initialize socket session! Please reload this page and try again.",
-                "Error data: '" + data + "'");
             return false;
         }
 
-        // Save the received new token
-        token = data;
+        // Split the received data
+        var list = data.split('&');
+        
+        // Check if enough elements exist
+        if (list.length < 2) {
+            console.log("Failed to initialize socket session! Received list length is invalid: '" + data + "'");
+            return false;
+        }
+
+        // Save the instance ID and the new token.
+        instanceID = list[0];
+        token = list[1];
 
         // Reset the reconnect count again
         reconnectCount = 0;
@@ -227,6 +233,11 @@ Bulldozer.fn.socket = new function () {
             socket.send(prepareSendMsg(""));
         };
 
+
+
+// TODO: Don't reconnect with init! The session ID changes always... Use reconnect() instead...
+
+
         socket.onClose = function() {
             connectionError(isInitializing, sessionID, socketAccessToken);
         };
@@ -240,6 +251,11 @@ Bulldozer.fn.socket = new function () {
         socket.onMessage = function(data) {
             // Initialize the socket session
             if (!handleInitializeSession(data)) {
+                // Invalidate the close and error methods.
+                socket.onClose = socket.onError = null;
+
+                // Reconnect and reinitialize this session.
+                Bulldozer.socket.reconnect();
                 return;
             }
 
@@ -271,5 +287,37 @@ Bulldozer.fn.socket = new function () {
         }
 
         socket.send(prepareSendMsg(str));
+    };
+
+    this.reconnect = function() {
+// TODO: On error maybe a full webpage refresh?
+
+        $.ajax({
+            url: "/bulldozer/reconnect",
+            type: "POST",
+            data: {
+                id: instanceID
+            },
+            dataType: "text",
+            timeout: 7000,
+            success: function (data) {
+                // Split the received data
+                var list = data.split('&');
+                
+                // Check if enough elements exist
+                if (list.length < 2) {
+                    console.log("Failed to reconnect socket session! Received list length is invalid: '" + data + "'");
+                    // TODO
+                    return;
+                }
+
+                // Initialize the socket session.
+                Bulldozer.socket.init(list[0], list[1]);
+            },
+            error: function () {
+                console.log("failed to reconnect to server!");
+                // TODO
+            }
+        });
     };
 };

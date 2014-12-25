@@ -134,7 +134,7 @@ func release() {
 	// Just wait for a moment before exiting to be
 	// sure, all defers get called and the program
 	// makes a clean exit.
-	time.Sleep(time.Second / 2)
+	time.Sleep(150 * time.Millisecond)
 }
 
 // Create important folders if missing

@@ -387,7 +387,9 @@ func Release() {
 // If no cookie is set, a new one will be assigned.
 // A unique socket access token is returned.
 // Use this token to connect to the session socket.
-func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
+// One optional parameter can be passed, which set's the instance ID.
+// Otherwise a new instance ID is generated.
+func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, string, error) {
 	// Get the store session
 	var err error
 	var storeSession *store.Session
@@ -437,9 +439,14 @@ func New(rw http.ResponseWriter, req *http.Request) (*Session, string, error) {
 		return nil, "", fmt.Errorf("failed to assert DOM encryption key to string: %v", domEncryptionKeyI)
 	}
 
-	// TODO: Get the instance key if already present on the client-side!
-	// Create a new unique instance ID.
-	s.instanceID = newUniqueInstanceID(s)
+	// Set the instance ID if passed as optional parameter or
+	// create a new unique instance ID.
+	if len(vars) > 0 {
+		s.instanceID = vars[0]
+	}
+	if len(s.instanceID) != instanceIDLength {
+		s.instanceID = newUniqueInstanceID(s)
+	}
 
 	// Get the instance pointer. This will create a new instance if not present.
 	s.sessionInstance = getInstance(s)

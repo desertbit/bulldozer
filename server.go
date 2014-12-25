@@ -20,7 +20,9 @@ import (
 )
 
 const (
-	escapedFragment = "_escaped_fragment_"
+	escapedFragment        = "_escaped_fragment_"
+	postKeyInstanceID      = "id"
+	reconnectDataDelimiter = "&"
 
 	errorTemplateFilename            = "error" + settings.TemplateSuffix
 	notFoundTemplateFilename         = "notfound" + settings.TemplateSuffix
@@ -89,6 +91,7 @@ func createMissingCoreTemplates(pattern string) error {
 
 func serve() error {
 	// Create the default html handler
+	http.HandleFunc("/bulldozer/reconnect", reconnectSessionFunc)
 	http.HandleFunc("/", handleHtmlFunc)
 
 	// Serve the documents files in the document path if the settings value is set for it.
@@ -152,6 +155,44 @@ func execErrorTemplate(errorMessage string) (string, error) {
 	}
 
 	return b.String(), nil
+}
+
+func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
+	// Only allow POST requests
+	if req.Method != "POST" {
+		http.Error(rw, "Bad Request", 400)
+		return
+	}
+
+	// Block to many accesses from the same remote address
+	if allow, remoteAddr := firewall.NewRequest(req); !allow {
+		glog.Infof("blocked incomming request from remote address '%s': too many requests", remoteAddr)
+		http.Error(rw, "Too Many Requests", 429)
+		return
+	}
+
+	// Get the instance ID from the POST query
+	instanceID := req.PostFormValue(postKeyInstanceID)
+	if len(instanceID) == 0 {
+		http.Error(rw, "Bad Request", 400)
+		return
+	}
+
+	// Create a new session object, pass the instance ID and
+	// obtain the unique socket session token.
+	session, accessToken, err := sessions.New(rw, req, instanceID)
+	if err != nil {
+		// Log the error
+		glog.Errorf("reconnect session error: %v", err)
+
+		// Send an internal server error code.
+		http.Error(rw, "Internal Server Error", 500)
+		return
+	}
+
+	// Send the new session ID and the socket access token to the client.
+	responseData := session.SessionID() + reconnectDataDelimiter + accessToken
+	rw.Write([]byte(responseData))
 }
 
 func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {

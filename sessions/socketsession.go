@@ -22,7 +22,7 @@ const (
 
 	socketValueInvalidRequest = "invalid_request"
 
-	initTokenDelimiter = "#"
+	initTokenDelimiter = "&"
 
 	// Send pings to peer with this period
 	pingPeriod = 30 * time.Second
@@ -271,8 +271,8 @@ func (ss *socketSession) initSocketSession(m map[string]string, sid string, acce
 	// Set the socket to the session
 	s.socket = ss.socketConn
 
-	// Tell the client the token
-	ss.socketConn.Write(ss.token.get())
+	// Tell the client the instance ID and the new token
+	ss.socketConn.Write(s.instanceID + initTokenDelimiter + ss.token.get())
 
 	// Write all previous buffered stream data to the new stream
 	data := pStream.Read()
