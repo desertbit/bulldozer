@@ -9,6 +9,8 @@ import (
 	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"github.com/golang/glog"
+	"strconv"
 )
 
 //######################//
@@ -120,4 +122,30 @@ func (c *Context) Update(data interface{}) error {
 	c.s.SendCommand(`Bulldozer.render.updateTemplate("` + c.domID + `",'` + utils.EscapeJS(b.String()) + `');`)
 
 	return nil
+}
+
+// TriggerEvent triggers the event on the client side defined with the template event syntax.
+func (c *Context) TriggerEvent(eventName string, params ...interface{}) {
+	cmd := `Bulldozer.core.emitServerEvent("` + c.domID + `",'` + utils.EscapeJS(eventName) + `'`
+
+	// Append all the parameters
+	for i, param := range params {
+		// type assertion
+		switch v := param.(type) {
+		case int:
+			cmd += "," + strconv.Itoa(v)
+		case bool:
+			cmd += "," + strconv.FormatBool(v)
+		case string:
+			cmd += ",'" + utils.EscapeJS(v) + "'"
+		default:
+			glog.Errorf("context: trigger event: invalid type of function event parameter: %v : parameters: %v", i+1, params)
+			return
+		}
+	}
+
+	cmd += ");"
+
+	// Send the command to the client
+	c.s.SendCommand(cmd)
 }

@@ -1,5 +1,5 @@
-- Style the noscript tag in the body template
-- Webcrawler support
+- Don't load scripts and javascripts twice if already added to the HTML head!
+- Webcrawler support & sitemap....
 - Implement a complex router and replace it with the current temporary fix
 - Load a config in the Init() method if the file exists and the ENV is set
 - Store the ip location for each session and implement session cookie stealing prevention, by checking the country...

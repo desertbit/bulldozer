@@ -13,6 +13,8 @@ var (
 	bulldozerFuncMap FuncMap = FuncMap{
 		"passValues": passValues,
 		"eventKey":   createEventAccessKey,
+		"loadJS":     loadJavaScript,
+		"loadStyle":  loadStyleSheet,
 	}
 )
 
@@ -56,4 +58,18 @@ func passValues(r *renderData, values ...interface{}) (*renderData, error) {
 	data.Data = valuesMap
 
 	return data, nil
+}
+
+func loadJavaScript(c *Context, url string) error {
+	// Load the javascript
+	c.s.LoadJavaScript(url)
+
+	return nil
+}
+
+func loadStyleSheet(c *Context, url string) error {
+	// Load the javascript
+	c.s.LoadStyleSheet(url)
+
+	return nil
 }

@@ -15,6 +15,9 @@ func init() {
 	registerParseFunc("template", parseTemplate)
 	registerParseFunc("js", parseJS)
 	registerParseFunc("end", parseAddEndTag)
+	registerParseFunc("id", parseDomID)
+	registerParseFunc("require", parseRequire)
+	registerParseFunc("stylesheet", parseStylesheet)
 }
 
 //###############//
@@ -79,6 +82,9 @@ func parseAddEndTag(token string, d *parseData) error {
 	if token == "js" {
 		// Add the javascript end section
 		*d.final += "});</script>"
+	} else if token == "event" {
+		// Add the event end section
+		*d.final += "});"
 	} else {
 		// Nothing to do. Just add the tag as it is.
 		if len(token) > 0 {
@@ -87,6 +93,40 @@ func parseAddEndTag(token string, d *parseData) error {
 
 		*d.final += d.leftDelim + "end" + token + d.rightDelim
 	}
+
+	return nil
+}
+
+// This is the template equivalent function to context.GenDomID(...).
+func parseDomID(token string, d *parseData) error {
+	// Check the length of the arguments
+	if len(token) == 0 {
+		return fmt.Errorf("DOM ID: no ID passed to the template id function.\nSyntax: {{id \"$ID\"}}")
+	}
+
+	*d.final += `{{$.Context.GenDomID ` + token + `}}`
+
+	return nil
+}
+
+func parseRequire(token string, d *parseData) error {
+	// Check if the javascript url is set.
+	if len(token) == 0 {
+		return fmt.Errorf("no javascript URL set!\nSyntax: {{require \"$URL\"}}")
+	}
+
+	*d.final += `{{loadJS $.Context ` + token + `}}`
+
+	return nil
+}
+
+func parseStylesheet(token string, d *parseData) error {
+	// Check if the stylesheet url is set.
+	if len(token) == 0 {
+		return fmt.Errorf("no stylesheet URL set!\nSyntax: {{stylesheet \"$URL\"}}")
+	}
+
+	*d.final += `{{loadStyle $.Context ` + token + `}}`
 
 	return nil
 }

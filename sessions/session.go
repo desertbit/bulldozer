@@ -260,6 +260,16 @@ func (s *Session) LoadJavaScript(url string, vars ...string) {
 	s.SendCommand(o)
 }
 
+// JavaScripts returns a slice of all current loaded session javascripts.
+// Static settings javascripts are not included in this slice!
+func (s *Session) JavaScripts() []string {
+	// Lock the mutex
+	s.loadedJavaScriptsMutex.Lock()
+	defer s.loadedJavaScriptsMutex.Unlock()
+
+	return s.loadedJavaScripts
+}
+
 // IsStyleSheetLoaded returns a boolean if a stylesheet is already loaded.
 func (s *Session) IsStyleSheetLoaded(url string) bool {
 	// Lock the mutex
@@ -304,6 +314,16 @@ func (s *Session) LoadStyleSheet(url string) {
 
 	// Send the command to load the stylesheet
 	s.SendCommand("Bulldozer.core.loadStyleSheet('" + utils.EscapeJS(url) + "');")
+}
+
+// StyleSheets returns a slice of all current loaded session stylesheets.
+// Static settings stylesheets are not included in this slice!
+func (s *Session) StyleSheets() []string {
+	// Lock the mutex
+	s.loadedStyleSheetsMutex.Lock()
+	defer s.loadedStyleSheetsMutex.Unlock()
+
+	return s.loadedStyleSheets
 }
 
 //######################//

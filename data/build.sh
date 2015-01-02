@@ -38,7 +38,7 @@ appendData "$(cat ./javascript/ajaxsocket.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/socket.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/core.js)" ./resources/js/bulldozer.js
 #appendData "$(cat ./javascript/auth.js)" ./resources/js/bulldozer.js
-#appendData "$(cat ./javascript/render.js)" ./resources/js/bulldozer.js
+appendData "$(cat ./javascript/render.js)" ./resources/js/bulldozer.js
 
 if [ "$DEBUG_BUILD" == "debug" ]; then
 	# Just copy the uncompressed bulldozer file

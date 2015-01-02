@@ -29,11 +29,13 @@ type PagesEvents struct{}
 
 func (p *PagesEvents) EventHallo(c *template.Context, arg1 string, arg2 int) {
 	fmt.Println(arg1, arg2, p, c)
+	c.TriggerEvent("hallo", "1", 2)
 	c.Update(nil)
 }
 
 // TODO: Lock mutex?
 // TODO: template.ReleaseSessionEvents(c.Session())
+// TODO: Separate unique ID in sub or global Template
 
 func parsePages() error {
 	// Create the pattern string

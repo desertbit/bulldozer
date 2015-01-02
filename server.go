@@ -253,20 +253,26 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	// TODO: Don't load session scripts and javascripts twice if already added to the HTML head!
+
 	// Create the template data struct
 	data := struct {
-		SessionID    string
-		AccessToken  string
-		Body         template.HTML
-		JSLibs       []string
-		Styles       []string
-		IsWebCrawler bool
+		SessionID     string
+		AccessToken   string
+		Body          template.HTML
+		JSLibs        []string
+		Styles        []string
+		SessionJSLibs []string
+		SessionStyles []string
+		IsWebCrawler  bool
 	}{
 		session.SessionID(),
 		accessToken,
 		template.HTML(body),
 		settings.Settings.StaticJavaScripts,
 		settings.Settings.StaticStyleSheets,
+		session.JavaScripts(),
+		session.StyleSheets(),
 		isWebCrawler,
 	}
 
@@ -291,7 +297,13 @@ const htmlBody = `
 	{{range $style := .Styles}}
 		<link rel="stylesheet" type="text/css" href="{{$style}}">
 	{{end}}
+	{{range $style := .SessionStyles}}
+		<link rel="stylesheet" type="text/css" href="{{$style}}">
+	{{end}}
 	{{range $js := .JSLibs}}
+		<script src="{{$js}}"></script>
+	{{end}}
+	{{range $js := .SessionJSLibs}}
 		<script src="{{$js}}"></script>
 	{{end}}
 </head>
