@@ -24,6 +24,7 @@ import (
 const (
 	expireAccessSocketTimeout = 25 * time.Second
 	maxInstancesPerSession    = 30
+	cleanupInstancesCount     = maxInstancesPerSession / 1.5
 
 	sessionIDLength         = 15
 	instanceIDLength        = 15

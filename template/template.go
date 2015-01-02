@@ -12,6 +12,7 @@ import (
 	htmlTemplate "html/template"
 
 	"fmt"
+	"github.com/chuckpreslar/emission"
 	"github.com/golang/glog"
 	"io/ioutil"
 	"path/filepath"
@@ -100,6 +101,9 @@ type Template struct {
 
 	// Style classes
 	styleClasses []string
+
+	// Events emitter
+	emitter *emission.Emitter
 }
 
 // New allocates a new bulldozer template associated with the given one
@@ -113,8 +117,8 @@ func (t *Template) New(name string) *Template {
 		ns:         t.ns,
 	}
 
-	// Set the functions
-	tt.Funcs(bulldozerFuncMap)
+	// Initialize the template default values.
+	tt.initDefaults()
 
 	// Add the new template to the namespace
 	tt.ns.Set(tt)
@@ -239,8 +243,8 @@ func (t *Template) Parse(src string) (*Template, error) {
 			ns:         t.ns,
 		}
 
-		// Set the functions
-		tmpl.Funcs(bulldozerFuncMap)
+		// Initialize the template default values.
+		tmpl.initDefaults()
 
 		// Add the template to the namespace
 		t.ns.set[name] = tmpl
@@ -277,8 +281,8 @@ func New(uid string, name string) *Template {
 		ns:         newNameSpace(uid),
 	}
 
-	// Set the functions
-	t.Funcs(bulldozerFuncMap)
+	// Initialize the template default values.
+	t.initDefaults()
 
 	// Add the new template to the namespace
 	t.ns.Set(t)
@@ -317,6 +321,15 @@ func ParseGlob(uid string, pattern string) (*Template, error) {
 //###############//
 //### Private ###//
 //###############//
+
+func (t *Template) initDefaults() {
+	// Set the bulldozer template functions.
+	t.Funcs(bulldozerFuncMap)
+
+	// Create a new emitter and set the recover function
+	t.emitter = emission.NewEmitter().
+		RecoverWith(recoverEmitter)
+}
 
 // parseFiles is the helper for the method and function. If the argument
 // template is nil, it is created from the first file.

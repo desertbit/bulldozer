@@ -145,7 +145,7 @@ func getInstance(s *Session) *instance {
 	defer ii.mutex.Unlock()
 
 	// Cleanup expired instances if there exists a bunch of instances.
-	if len(ii.Set) >= maxInstancesPerSession/1.5 {
+	if len(ii.Set) >= cleanupInstancesCount {
 		cleanupExpiredInstances(s, ii)
 	}
 

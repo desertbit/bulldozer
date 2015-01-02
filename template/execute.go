@@ -78,6 +78,23 @@ func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, v
 		c.styleClasses = append(c.styleClasses, vars[1:]...)
 	}
 
+	return executeWithContext(c, wr, data)
+}
+
+func executeWithContext(c *Context, wr io.Writer, data interface{}) error {
+	// Get the template pointer.
+	t := c.t
+
+	// Remove all previously registered session events for the current DOM ID.
+	// They will be registered by the following template execution.
+	releaseSessionTemplateEvents(c.s, c.domID)
+
+	// Trigger the template execution event.
+	t.triggerOnTemplateExecution(c, data)
+
+	// Trigger the template execution finished event on exit.
+	defer t.triggerOnTemplateExecutionFinished(c, data)
+
 	// Create the render data
 	d := renderData{
 		Context: c,

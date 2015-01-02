@@ -212,9 +212,34 @@ type sessionEvent struct {
 	TemplateParentID string
 }
 
+//##############//
+//### Public ###//
+//##############//
+
+// ReleaseSessionEvents releases all registered session events.
+// All previously registered client event calls will be invalid.
+func ReleaseSessionEvents(s *sessions.Session) {
+	s.InstanceDelete(instanceKeyEvents)
+}
+
 //###############//
 //### Private ###//
 //###############//
+
+func releaseSessionTemplateEvents(s *sessions.Session, domID string) {
+	// Get the session events.
+	sEvents := getSessionEvents(s)
+
+	// Lock the mutex.
+	sEvents.mutex.Lock()
+	defer sEvents.mutex.Unlock()
+
+	// Remove the template session events from the map.
+	delete(sEvents.Events, domID)
+
+	// Mark the session as dirty, because template events were removed.
+	s.Dirty()
+}
 
 func parseEmit(token string, d *parseData) error {
 	// Try to find the '(' symbol
@@ -270,8 +295,6 @@ func parseEmit(token string, d *parseData) error {
 
 	return nil
 }
-
-// TODO: CLear events maps completly and partially...
 
 func createEventAccessKey(c *Context, namespace string, funcName string) (string, error) {
 	// Get the template namespace.
@@ -339,6 +362,10 @@ func createEventAccessKey(c *Context, namespace string, funcName string) (string
 
 	// Add the new event with the key to the template events map.
 	templateEvents[key] = event
+
+	// Mark the session as dirty, because template events
+	// were registered to the session instance values.
+	c.s.Dirty()
 
 	// Return the new event access key.
 	return key, nil

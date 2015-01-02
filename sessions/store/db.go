@@ -127,6 +127,11 @@ type dbSessionBuffer struct {
 
 // registerChangedSession notifies the daemon to save the sessions' changes
 func registerChangedSession(s *Session) {
+	// Check if aready registered as dirty.
+	if s.dirty {
+		return
+	}
+
 	// Start this in a new goroutine to not block the calling function...
 	go func() {
 		// Lock the mutex
@@ -135,6 +140,9 @@ func registerChangedSession(s *Session) {
 
 		// Add the session pointer to the map
 		changedSessions[s.id] = s
+
+		// Update the dirty flag
+		s.dirty = true
 	}()
 }
 
@@ -187,10 +195,13 @@ func saveUnsavedSessions() {
 
 		// Iterate over all changed session and save them to the database
 		for _, s := range changedSessions {
-			// Skip if this session if flagged as invalid
+			// Skip if this session is flagged as invalid
 			if !s.valid {
 				continue
 			}
+
+			// Update the dirty flag
+			s.dirty = false
 
 			// Prepare the session values data to be encoded
 			var buf bytes.Buffer
@@ -465,6 +476,7 @@ func getSessionFromDB(id string) (*Session, error) {
 	s := &Session{
 		id:          id,
 		valid:       true,
+		dirty:       false,
 		values:      values,
 		cacheValues: make(map[interface{}]interface{}),
 	}

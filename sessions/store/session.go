@@ -21,6 +21,7 @@ const (
 type Session struct {
 	id        string
 	valid     bool
+	dirty     bool
 	lockCount int
 
 	// Main value implementation. Values are stored to the database.

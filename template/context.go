@@ -6,6 +6,7 @@
 package template
 
 import (
+	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 )
@@ -97,4 +98,26 @@ func (c *Context) StylesString() (str string) {
 	}
 
 	return
+}
+
+// Release removes all session template events
+// and releases the current context.
+func (c *Context) Release() {
+	// Remove all registered session events for the current DOM ID.
+	releaseSessionTemplateEvents(c.s, c.domID)
+}
+
+// Update executes the template and updates the new DOM content
+func (c *Context) Update(data interface{}) error {
+	// Execute the template
+	var b bytes.Buffer
+	err := executeWithContext(c, &b, data)
+	if err != nil {
+		return err
+	}
+
+	// Update the current div wrapper of this template.
+	c.s.SendCommand(`Bulldozer.render.updateTemplate("` + c.domID + `",'` + utils.EscapeJS(b.String()) + `');`)
+
+	return nil
 }

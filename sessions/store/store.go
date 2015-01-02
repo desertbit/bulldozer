@@ -51,6 +51,7 @@ func New() (*Session, error) {
 	s := &Session{
 		id:          id,
 		valid:       true,
+		dirty:       false,
 		values:      make(map[interface{}]interface{}),
 		cacheValues: make(map[interface{}]interface{}),
 	}
