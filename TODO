@@ -28,6 +28,8 @@ Set cookie max age to settings.Settings.SessionMaxAge if authenticated
 
 - Implement better password hash encryption
 
+- Finish the must action in the template execute method call.
+
 
 
 Session Store

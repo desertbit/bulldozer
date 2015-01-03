@@ -61,16 +61,16 @@ func passValues(r *renderData, values ...interface{}) (*renderData, error) {
 	return data, nil
 }
 
-func loadJavaScript(c *Context, url string) error {
+func loadJavaScript(c *Context, url string) string {
 	// Load the javascript
 	c.s.LoadJavaScript(url)
 
-	return nil
+	return ""
 }
 
-func loadStyleSheet(c *Context, url string) error {
+func loadStyleSheet(c *Context, url string) string {
 	// Load the javascript
 	c.s.LoadStyleSheet(url)
 
-	return nil
+	return ""
 }

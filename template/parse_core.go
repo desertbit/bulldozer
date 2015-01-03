@@ -16,8 +16,9 @@ func init() {
 	registerParseFunc("js", parseJS)
 	registerParseFunc("end", parseAddEndTag)
 	registerParseFunc("id", parseDomID)
-	registerParseFunc("require", parseRequire)
-	registerParseFunc("stylesheet", parseStylesheet)
+	registerParseFunc("script", parseScript)
+	registerParseFunc("style", parseStyle)
+	registerParseFunc("must", parseMust)
 }
 
 //###############//
@@ -109,10 +110,10 @@ func parseDomID(typeStr string, token string, d *parseData) error {
 	return nil
 }
 
-func parseRequire(typeStr string, token string, d *parseData) error {
+func parseScript(typeStr string, token string, d *parseData) error {
 	// Check if the javascript url is set.
 	if len(token) == 0 {
-		return fmt.Errorf("no javascript URL set!\nSyntax: {{require \"$URL\"}}")
+		return fmt.Errorf("no javascript URL set!\nSyntax: {{script \"$URL\"}}")
 	}
 
 	*d.final += `{{loadJS $.Context ` + token + `}}`
@@ -120,13 +121,31 @@ func parseRequire(typeStr string, token string, d *parseData) error {
 	return nil
 }
 
-func parseStylesheet(typeStr string, token string, d *parseData) error {
+func parseStyle(typeStr string, token string, d *parseData) error {
 	// Check if the stylesheet url is set.
 	if len(token) == 0 {
-		return fmt.Errorf("no stylesheet URL set!\nSyntax: {{stylesheet \"$URL\"}}")
+		return fmt.Errorf("no stylesheet URL set!\nSyntax: {{style \"$URL\"}}")
 	}
 
 	*d.final += `{{loadStyle $.Context ` + token + `}}`
 
+	return nil
+}
+
+func parseMust(typeStr string, token string, d *parseData) error {
+	if len(token) == 0 {
+		return fmt.Errorf("invalid must call: must function name is empty!")
+	}
+
+	// Try to obtain the must function
+	m, ok := mustFuncs[token]
+	if !ok {
+		return fmt.Errorf("invalid must call: must function with name '%s' does not exists!", token)
+	}
+
+	// Add the must function to the template.
+	d.t.mustFuncs = append(d.t.mustFuncs, m)
+
+	// Don't add anything to the template text...
 	return nil
 }

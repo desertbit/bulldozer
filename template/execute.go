@@ -60,6 +60,13 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
 	// They will be registered by the following template execution.
 	releaseSessionTemplateEvents(c.s, c.domID)
 
+	// Call the must function.
+	action := t.callMustFuncs(c)
+	if action != nil && action.stopped {
+		// TODO: Finish this
+		return fmt.Errorf("TODO: Finish this action!")
+	}
+
 	// Trigger the template execution event.
 	t.triggerOnTemplateExecution(c, data)
 
@@ -70,6 +77,7 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
 	d := renderData{
 		Context: c,
 		Data:    data,
+		Pkg:     packages,
 	}
 
 	return t.template.Execute(wr, &d)
@@ -82,6 +90,7 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
 // renderData holds the template context and the execution data.
 type renderData struct {
 	Context *Context
+	Pkg     map[string]interface{}
 	Data    interface{}
 }
 

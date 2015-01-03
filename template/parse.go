@@ -76,6 +76,9 @@ func parse(t *Template, src string, linesCountOffset int) (final string, err err
 			return "", fmt.Errorf("%d: '%s': %v", lineCount, parseData.leftDelim, err)
 		}
 
+		// Replace the custom tags '#.' and '%.'
+		token = replaceCustomTags(token)
+
 		// Save the template Code for error messages
 		templateCode := parseData.leftDelim + token + parseData.rightDelim
 
@@ -211,4 +214,48 @@ func removeNestedSections(startTag string, endTag string, data string) (int, err
 	}
 
 	return posFinal, nil
+}
+
+func replaceCustomTags(src string) string {
+	var final []rune = make([]rune, 0)
+	escaped, skip, injectContext := false, false, false
+	l := len(src) - 1
+
+	// Iterate through the string characters.
+	for i, p := range src {
+		if escaped {
+			escaped = false
+			final = append(final, p)
+			continue
+		}
+
+		if p == '\\' {
+			escaped = true
+		} else if p == '"' {
+			skip = !skip
+		} else if injectContext && (p == ' ' || p == '}') {
+			injectContext = false
+			final = append(final, []rune(" $.Context")...)
+		} else if !skip && p == '#' {
+			final = append(final, []rune("$.Data")...)
+			continue
+		} else if !skip && p == '%' {
+			final = append(final, []rune("$.Pkg")...)
+
+			// Add the context as first function parameter if this is a package function call.
+			if i < l && src[i+1] == '.' {
+				injectContext = true
+			}
+
+			continue
+		}
+
+		final = append(final, p)
+	}
+
+	if injectContext {
+		final = append(final, []rune(" $.Context")...)
+	}
+
+	return string(final)
 }

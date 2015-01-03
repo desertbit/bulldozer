@@ -109,6 +109,9 @@ type Template struct {
 	pluginDataMap      pluginDataMap
 	pluginDataMapUID   int64
 	pluginDataMapMutex sync.Mutex
+
+	// Must functions
+	mustFuncs []*mustFunc
 }
 
 // New allocates a new bulldozer template associated with the given one
@@ -223,6 +226,9 @@ func (t *Template) Parse(src string) (*Template, error) {
 		t.pluginDataMapUID = 0
 		t.pluginDataMap = make(pluginDataMap)
 	}()
+
+	// Reset the must functions slice.
+	t.mustFuncs = nil
 
 	// Call the custom bulldozer parse method
 	src, err := parse(t, src, 0)
