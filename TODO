@@ -1,37 +1,38 @@
-- Don't load scripts and javascripts twice if already added to the HTML head!
-- Webcrawler support & sitemap....
-- Implement a complex router and replace it with the current temporary fix
-- Load a config in the Init() method if the file exists and the ENV is set
-- Store the ip location for each session and implement session cookie stealing prevention, by checking the country...
-- Set the secure cookie flag if the session is authenticated and if it is a https connection (Don't mix this up with nginx https)
-- bruteforce attack prevention from the same ip address (Session ID bruteforce attack...)
-- log an analyse clients connecting to a session. To many clients or from different IPs should be blocked...
-- nginx no sniff headers,...
-- Do some performance testing to check for bottlenecks (session store?)
-- Only show the utils.errorBox error code if the user is authenticated as developer.
+===========================
+=== Bulldozer TODO List ===
+===========================
+ 
+
+IMPORTANT
+=========
+* Webcrawler support & sitemaps.
+* Finish the must action in the template execute method call.
+* Don't load scripts and javascripts twice if already added to the HTML head!
+* Only show the utils.errorBox error code if the user is authenticated as developer.
+
+* Load a config in the Init() method if the file exists and the ENV is set.
+* Implement a complex router and replace it with the current temporary fix.
 
 
-Burteforce prevention for socket requests. detect flooding
-
-Rotate sessions frrequently to new ones and replace the old once (Delete session store?)
-Set Cookie Path to restricted area
-Make the cookie non persistant!
-Change session IDs on authentication. Also use strict auth mode bind to the socket.
-Don't allow different socket types for the same session
-
-Add session level based timeouts
-Update store timeouts of session after a frequent time if the session is still connected
-
-
-Set cookie max age to settings.Settings.SessionMaxAge if authenticated
-
-
-- Implement better password hash encryption
-
-- Finish the must action in the template execute method call.
-
+SECURITY
+========
+* Nginx no sniff headers in configuration.
+* Implement better database password hash encryption.
+* Set cookie max age to settings.Settings.SessionMaxAge if authenticated.
+* Burteforce prevention for socket requests. Detect flooding...
+* Clients with the same session cookie from different IPs and countries should be blocked!
+* Set the secure cookie flag if the session is authenticated and if it is a https connection (Don't mix this up with nginx https)
+* Make the cookie non persistant.
+* Change session IDs on authentication.
+* [Optional] Rotate sessions frequently to new ones and replace the old once (Delete session store?)
+* [Optional] Set Cookie Path to restricted area
 
 
 Session Store
 =============
-* Implement Flash messages
+* Implement Flash messages (Do we need this feature?).
+
+
+General
+=======
+* Do some performance testing to check for bottlenecks (session store?)
