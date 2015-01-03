@@ -47,6 +47,34 @@ func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name strin
 	return execute(tt, s, wr, data, vars...)
 }
 
+//##############//
+//### Public ###//
+//##############//
+
+// ExecuteContext executes the template context.
+func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
+	// Get the template pointer.
+	t := c.t
+
+	// Remove all previously registered session events for the current DOM ID.
+	// They will be registered by the following template execution.
+	releaseSessionTemplateEvents(c.s, c.domID)
+
+	// Trigger the template execution event.
+	t.triggerOnTemplateExecution(c, data)
+
+	// Trigger the template execution finished event on exit.
+	defer t.triggerOnTemplateExecutionFinished(c, data)
+
+	// Create the render data
+	d := renderData{
+		Context: c,
+		Data:    data,
+	}
+
+	return t.template.Execute(wr, &d)
+}
+
 //###############//
 //### Private ###//
 //###############//
@@ -71,35 +99,12 @@ func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, v
 
 	// Create a new context with the unique ID. The parent ID is the current ID,
 	// because this is the executing template.
-	c := newContext(s, t, id, id)
+	c := NewContext(s, t, id, id)
 
 	// Add additional style classes if present
 	if varsLen > 1 {
 		c.styleClasses = append(c.styleClasses, vars[1:]...)
 	}
 
-	return executeWithContext(c, wr, data)
-}
-
-func executeWithContext(c *Context, wr io.Writer, data interface{}) error {
-	// Get the template pointer.
-	t := c.t
-
-	// Remove all previously registered session events for the current DOM ID.
-	// They will be registered by the following template execution.
-	releaseSessionTemplateEvents(c.s, c.domID)
-
-	// Trigger the template execution event.
-	t.triggerOnTemplateExecution(c, data)
-
-	// Trigger the template execution finished event on exit.
-	defer t.triggerOnTemplateExecutionFinished(c, data)
-
-	// Create the render data
-	d := renderData{
-		Context: c,
-		Data:    data,
-	}
-
-	return t.template.Execute(wr, &d)
+	return ExecuteContext(c, wr, data)
 }

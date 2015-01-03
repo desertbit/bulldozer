@@ -85,8 +85,8 @@ func EscapeJS(data string) string {
 // This error code is only shown to the user if the sessions is authenticated
 // as developer.
 func ErrorBox(err string, vars ...interface{}) template.HTML {
-	body := "<div class=\"kepler alert-box warning icon\">" +
-		"<h1>" + html.EscapeString(err) + "</h1>"
+	body := `<div class="kepler panel warning icon">` +
+		`<h3 class="headline">` + html.EscapeString(err) + `</h3>`
 
 	// TODO: Only show this if the user is authenticated as developer.
 	if len(vars) >= 1 {

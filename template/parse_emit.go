@@ -118,7 +118,7 @@ func (t *Template) RegisterEvents(i interface{}, vars ...string) {
 	}
 
 	if noMethods {
-		glog.Errorf("template: RegisterEvents: registered interface event methods, but no event methods where found!")
+		glog.Warningf("template: RegisterEvents: registered interface event methods, but no event methods where found!")
 	}
 }
 
@@ -482,7 +482,7 @@ func sessionRequestEmit(s *sessions.Session, data map[string]string) error {
 	}
 
 	// Create the template context.
-	c := newContext(s, tmpl, sEvent.TemplateID, sEvent.TemplateParentID)
+	c := NewContext(s, tmpl, sEvent.TemplateID, sEvent.TemplateParentID)
 
 	// Get the number of parameters.
 	funcNumIn := t.NumIn()

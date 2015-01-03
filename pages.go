@@ -37,6 +37,7 @@ func (p *PagesEvents) EventHallo(c *template.Context, arg1 string, arg2 int) {
 // TODO: template.ReleaseSessionEvents(c.Session())
 // TODO: Separate unique ID in sub or global Template
 // TODO: Catch template execution error and show detailed error messages if the session is authenticated.
+// TODO: Run kepler.init()
 
 func parsePages() error {
 	// Create the pattern string

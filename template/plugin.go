@@ -22,9 +22,9 @@ var (
 //####################//
 
 type Plugin interface {
-	Type() string              // The plugin type.
-	HasSection() bool          // If the plugin requires a template section.
-	Prepare(s *PluginSettings) // Prepare is called for each plugin context. Settings should be parsed...
+	Type() string                    // The plugin type.
+	HasSection() bool                // If the plugin requires a template section.
+	Prepare(s *PluginSettings) error // Prepare is called for each plugin context. Settings should be parsed...
 	Render(c *Context, s *PluginSettings) (interface{}, error)
 }
 
@@ -109,7 +109,10 @@ func parsePlugin(typeStr string, token string, d *parseData) (err error) {
 	}
 
 	// Prepare the plugin settings
-	plugin.Prepare(data.settings)
+	err = plugin.Prepare(data.settings)
+	if err != nil {
+		return fmt.Errorf("failed to prepare plugin '%s': %v", typeStr, err)
+	}
 
 	// Get the template pointer.
 	t := d.t

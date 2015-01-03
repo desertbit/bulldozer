@@ -24,6 +24,20 @@ body {
     background-color: $bg-color;
 }
 
+code {
+    display: block;
+    padding: 7px;
+    margin: 8px 0;
+    background-color: #F1F1F1;
+    border: 1px solid #D4D4D4;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    font-family: Consolas, "courier new";
+    font-size: 14px;
+    color: #505050;
+}
+
 #bulldozer-script {
 	display: none;
 }

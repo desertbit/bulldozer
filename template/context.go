@@ -27,7 +27,9 @@ type Context struct {
 	t *Template
 }
 
-func newContext(s *sessions.Session, t *Template, id string, parentID string) *Context {
+// NewContext creates a new context.
+// One optional argument can be passed, which defines additional style classes.
+func NewContext(s *sessions.Session, t *Template, id string, parentID string, vars ...[]string) *Context {
 	// Create a new context
 	c := &Context{
 		id:       id,
@@ -38,6 +40,11 @@ func newContext(s *sessions.Session, t *Template, id string, parentID string) *C
 
 	// Calculate and set the unique DOM ID with the session encryption key
 	c.domID = utils.EncryptDomId(c.s.DomEncryptionKey(), "i_"+c.id)
+
+	// Add the additional style classes if present.
+	if len(vars) >= 1 {
+		c.styleClasses = vars[0]
+	}
 
 	return c
 }
@@ -113,7 +120,7 @@ func (c *Context) Release() {
 func (c *Context) Update(data interface{}) error {
 	// Execute the template
 	var b bytes.Buffer
-	err := executeWithContext(c, &b, data)
+	err := ExecuteContext(c, &b, data)
 	if err != nil {
 		return err
 	}
