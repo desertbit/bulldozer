@@ -162,9 +162,10 @@ func renderPlugin(c *Context, uid int64) (r interface{}) {
 		return
 	}
 
+	// Call the plugin render method.
 	r, err = data.plugin.Render(c, data.settings)
 	if err != nil {
-		err = fmt.Errorf("plugin: failed to render plugin of type '%v'", data.plugin.Type())
+		err = fmt.Errorf("plugin: failed to render plugin of type '%v': %v", data.plugin.Type(), err)
 		glog.Error(err)
 		return utils.ErrorBox(tr.S("blz.template.plugin.error"), err)
 	}
