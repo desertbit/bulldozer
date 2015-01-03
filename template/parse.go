@@ -29,7 +29,7 @@ type parseData struct {
 	lineCount *int
 }
 
-type parseFunc func(token string, d *parseData) error
+type parseFunc func(typeStr string, token string, d *parseData) error
 
 // This has to be called during initialization. THis is not thread-safe.
 func registerParseFunc(typeStr string, f parseFunc) {
@@ -100,7 +100,7 @@ func parse(t *Template, src string, linesCountOffset int) (final string, err err
 		f, ok := parseFuncs[typeStr]
 		if ok {
 			// Call the function
-			err = f(token, parseData)
+			err = f(typeStr, token, parseData)
 			if err != nil {
 				return "", fmt.Errorf("%d: '%s': %v", lineCount, templateCode, err)
 			}

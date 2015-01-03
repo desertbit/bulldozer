@@ -110,6 +110,7 @@ func init() {
 	Settings.PagesPath = Settings.WorkingPath + "pages"
 	Settings.TemplatesPath = Settings.WorkingPath + "templates"
 	Settings.CoreTemplatesPath = Settings.TemplatesPath + "/core"
+	Settings.TranslationPath = Settings.WorkingPath + "translations"
 
 	Settings.BulldozerSourcePath = Settings.GoPath + bulldozerGoPath
 	Settings.BulldozerCoreTemplatesPath = Settings.BulldozerSourcePath + "/data/templates"
@@ -189,6 +190,7 @@ type settings struct {
 	PagesPath         string
 	TemplatesPath     string
 	CoreTemplatesPath string
+	TranslationPath   string
 
 	BulldozerSourcePath        string
 	BulldozerCoreTemplatesPath string

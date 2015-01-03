@@ -241,7 +241,7 @@ func releaseSessionTemplateEvents(s *sessions.Session, domID string) {
 	s.Dirty()
 }
 
-func parseEmit(token string, d *parseData) error {
+func parseEmit(typeStr string, token string, d *parseData) error {
 	// Try to find the '(' symbol
 	pos := strings.Index(token, "(")
 

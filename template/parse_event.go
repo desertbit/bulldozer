@@ -58,7 +58,7 @@ func TriggerGlobalEvent(s *sessions.Session, eventName string, params ...interfa
 //    {{event FuncName($arg1, $arg2, $arg3 ...)}} ... {{end event}}
 // Global server event syntax:
 //    {{event global FuncName($arg1, $arg2, $arg3 ...)}} ... {{end event}}
-func parseEvent(token string, d *parseData) error {
+func parseEvent(typeStr string, token string, d *parseData) error {
 	// Create a copy of the data string.
 	// Otherwise the following method would remove the section...
 	src := *d.src

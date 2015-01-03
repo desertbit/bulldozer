@@ -11,8 +11,9 @@ import (
 
 var (
 	bulldozerFuncMap FuncMap = FuncMap{
-		"passValues": passValues,
+		"plugin":     renderPlugin,
 		"eventKey":   createEventAccessKey,
+		"passValues": passValues,
 		"loadJS":     loadJavaScript,
 		"loadStyle":  loadStyleSheet,
 	}

@@ -10,6 +10,8 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
+	"html"
 	"html/template"
 	"math/big"
 	"strings"
@@ -78,9 +80,20 @@ func EscapeJS(data string) string {
 	return string(final)
 }
 
-// ErrorBox returns a styled div error box
-func ErrorBox(err string) template.HTML {
-	return template.HTML("<div class=\"kepler alert-box warning icon\">" + err + "</div>")
+// ErrorBox returns a styled div error box.
+// One optional argument can be passed to show a detailed error code.
+// This error code is only shown to the user if the sessions is authenticated
+// as developer.
+func ErrorBox(err string, vars ...interface{}) template.HTML {
+	body := "<div class=\"kepler alert-box warning icon\">" +
+		"<h1>" + html.EscapeString(err) + "</h1>"
+
+	// TODO: Only show this if the user is authenticated as developer.
+	if len(vars) >= 1 {
+		body += "<code>" + html.EscapeString(fmt.Sprint(vars[0])) + "</code></div>"
+	}
+
+	return template.HTML(body)
 }
 
 func Sha256Sum(s string) string {

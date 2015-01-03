@@ -8,6 +8,7 @@ package bulldozer
 import (
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"flag"
 	"fmt"
@@ -75,6 +76,11 @@ func Init() {
 		glog.Fatalln(err)
 	}
 
+	// Add the translation paths and load all translation files.
+	tr.Add(settings.Settings.BulldozerTranslationPath)
+	tr.Add(settings.Settings.TranslationPath)
+	tr.Load()
+
 	// Load the core templates
 	if err = loadCoreTemplates(); err != nil {
 		glog.Fatalln(err)
@@ -127,6 +133,7 @@ func release() {
 
 	// Release the bulldozer sub packages
 	sessions.Release()
+	tr.Release()
 
 	// Flush all pending log I/O on exit
 	glog.Flush()
@@ -146,6 +153,7 @@ func createDirectories() (err error) {
 		settings.Settings.PagesPath,
 		settings.Settings.TemplatesPath,
 		settings.Settings.CoreTemplatesPath,
+		settings.Settings.TranslationPath,
 	}
 
 	// Create the directories

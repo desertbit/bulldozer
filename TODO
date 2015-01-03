@@ -8,6 +8,7 @@
 - log an analyse clients connecting to a session. To many clients or from different IPs should be blocked...
 - nginx no sniff headers,...
 - Do some performance testing to check for bottlenecks (session store?)
+- Only show the utils.errorBox error code if the user is authenticated as developer.
 
 
 Burteforce prevention for socket requests. detect flooding

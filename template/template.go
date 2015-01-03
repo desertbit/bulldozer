@@ -104,6 +104,11 @@ type Template struct {
 
 	// Events emitter
 	emitter *emission.Emitter
+
+	// Plugins
+	pluginDataMap      pluginDataMap
+	pluginDataMapUID   int64
+	pluginDataMapMutex sync.Mutex
 }
 
 // New allocates a new bulldozer template associated with the given one
@@ -210,6 +215,15 @@ func (t *Template) Templates() []*Template {
 // with the same receiver template, only one call can contain text
 // other than space, comments, and template definitions.)
 func (t *Template) Parse(src string) (*Template, error) {
+	// Reset the plugin data.
+	func() {
+		t.pluginDataMapMutex.Lock()
+		defer t.pluginDataMapMutex.Unlock()
+
+		t.pluginDataMapUID = 0
+		t.pluginDataMap = make(pluginDataMap)
+	}()
+
 	// Call the custom bulldozer parse method
 	src, err := parse(t, src, 0)
 	if err != nil {
@@ -323,6 +337,9 @@ func ParseGlob(uid string, pattern string) (*Template, error) {
 //###############//
 
 func (t *Template) initDefaults() {
+	// Create the map.
+	t.pluginDataMap = make(pluginDataMap)
+
 	// Set the bulldozer template functions.
 	t.Funcs(bulldozerFuncMap)
 
@@ -338,6 +355,7 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 		// Not really a problem, but be consistent.
 		return nil, fmt.Errorf("bulldozer/template: no files named in call to ParseFiles")
 	}
+
 	for _, filename := range filenames {
 		b, err := ioutil.ReadFile(filename)
 		if err != nil {

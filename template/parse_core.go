@@ -27,7 +27,7 @@ func init() {
 // TODO. Create a new namespace "context in the template call if desired to -> global templates?
 
 // parseTemplate passes the templates context to the template pipeline.
-func parseTemplate(token string, d *parseData) error {
+func parseTemplate(typeStr string, token string, d *parseData) error {
 	// Split the token between spaces
 	fields := strings.Fields(token)
 	fieldsLen := len(fields)
@@ -51,7 +51,7 @@ func parseTemplate(token string, d *parseData) error {
 // JS Event syntax:
 //		{{{js load}}} ... {{{end js}}}
 //		{{{js unload}}} ... {{{end js}}}
-func parseJS(token string, d *parseData) error {
+func parseJS(typeStr string, token string, d *parseData) error {
 	// Create a copy of the data string.
 	// Otherwise the following method would remove the section...
 	src := *d.src
@@ -78,7 +78,7 @@ func parseJS(token string, d *parseData) error {
 	return nil
 }
 
-func parseAddEndTag(token string, d *parseData) error {
+func parseAddEndTag(typeStr string, token string, d *parseData) error {
 	if token == "js" {
 		// Add the javascript end section
 		*d.final += "});</script>"
@@ -98,7 +98,7 @@ func parseAddEndTag(token string, d *parseData) error {
 }
 
 // This is the template equivalent function to context.GenDomID(...).
-func parseDomID(token string, d *parseData) error {
+func parseDomID(typeStr string, token string, d *parseData) error {
 	// Check the length of the arguments
 	if len(token) == 0 {
 		return fmt.Errorf("DOM ID: no ID passed to the template id function.\nSyntax: {{id \"$ID\"}}")
@@ -109,7 +109,7 @@ func parseDomID(token string, d *parseData) error {
 	return nil
 }
 
-func parseRequire(token string, d *parseData) error {
+func parseRequire(typeStr string, token string, d *parseData) error {
 	// Check if the javascript url is set.
 	if len(token) == 0 {
 		return fmt.Errorf("no javascript URL set!\nSyntax: {{require \"$URL\"}}")
@@ -120,7 +120,7 @@ func parseRequire(token string, d *parseData) error {
 	return nil
 }
 
-func parseStylesheet(token string, d *parseData) error {
+func parseStylesheet(typeStr string, token string, d *parseData) error {
 	// Check if the stylesheet url is set.
 	if len(token) == 0 {
 		return fmt.Errorf("no stylesheet URL set!\nSyntax: {{stylesheet \"$URL\"}}")
