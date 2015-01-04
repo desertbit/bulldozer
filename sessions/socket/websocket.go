@@ -7,7 +7,7 @@ package socket
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"github.com/gorilla/websocket"
 	"io"
 	"net/http"
@@ -115,7 +115,7 @@ func (w *WebSocket) IsClosed() bool {
 func (w *WebSocket) Write(data string) {
 	err := w.write(websocket.TextMessage, []byte(data))
 	if err != nil {
-		glog.Warningf("failed to write to websocket with remote address %s: %s", w.RemoteAddr(), err.Error())
+		log.L.Warning("failed to write to websocket with remote address %s: %s", w.RemoteAddr(), err.Error())
 
 		// Close the websocket on error
 		w.Close()
@@ -161,7 +161,7 @@ func (w *WebSocket) readLoop() {
 		_, data, err := w.ws.ReadMessage()
 		if err != nil {
 			if err != io.EOF {
-				glog.Warningf("failed to read data from websocket with remote address %s: %s", w.RemoteAddr(), err.Error())
+				log.L.Warning("failed to read data from websocket with remote address %s: %s", w.RemoteAddr(), err.Error())
 			}
 			return
 		}
@@ -187,7 +187,7 @@ func handleWebSocket(rw http.ResponseWriter, req *http.Request) {
 	// Upgrade to websocket
 	ws, err := upgrader.Upgrade(rw, req, nil)
 	if err != nil {
-		glog.Infof("failed to upgrade to websocket layer: %s", err.Error())
+		log.L.Info("failed to upgrade to websocket layer: %s", err.Error())
 		http.Error(rw, "Bad Request", 400)
 		return
 	}

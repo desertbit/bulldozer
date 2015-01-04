@@ -6,9 +6,9 @@
 package settings
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
-	"github.com/golang/glog"
 	"os"
 	"strings"
 )
@@ -93,13 +93,13 @@ func init() {
 	var err error
 	Settings.WorkingPath, err = os.Getwd()
 	if err != nil {
-		glog.Fatalf("failed to obtain current working directory path: %v", err)
+		log.L.Fatalf("failed to obtain current work directory path: %v", err)
 	}
 
 	// Set the GOPATH
 	Settings.GoPath = os.Getenv("GOPATH")
 	if len(Settings.GoPath) == 0 {
-		glog.Fatalf("GOPATH is not set!")
+		log.L.Fatalf("GOPATH is not set!")
 	}
 
 	// Append a trailing slash if not already present
@@ -159,15 +159,15 @@ func Check() error {
 
 	// Print a warning if the default cookie keys are set
 	if string(Settings.CookieHashKey) == defaultCookieHashKey {
-		glog.Warningf("[WARNING] settings: the default cookie hash key is set! You should replace this with a secret key!")
+		log.L.Warning("[WARNING] settings: the default cookie hash key is set! You should replace this with a secret key!")
 	}
 	if string(Settings.CookieBlockKey) == defaultCookieBlockKey {
-		glog.Warningf("[WARNING] settings: the default cookie block key is set! You should replace this with a secret key!")
+		log.L.Warning("[WARNING] settings: the default cookie block key is set! You should replace this with a secret key!")
 	}
 
 	// Print a warning if the SecureHttpsAccess flag is false
 	if !Settings.SecureHttpsAccess {
-		glog.Warningf("[WARNING] settings: the secure https access flag is false! You should provide a secure https access!")
+		log.L.Warning("[WARNING] settings: the secure https access flag is false! You should provide a secure https access!")
 	}
 
 	// Remove leading / from the site url

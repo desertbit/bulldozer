@@ -10,7 +10,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"strings"
 	"time"
 )
@@ -34,7 +34,7 @@ func init() {
 //###############//
 
 func parseTemplates() {
-	glog.Infof("Loading templates...")
+	log.L.Info("Loading templates...")
 
 	// Create the pattern strings.
 	patternPages := settings.Settings.PagesPath + "/" + "*" + settings.TemplateSuffix
@@ -44,7 +44,7 @@ func parseTemplates() {
 	tmpls, err := template.ParseGlob(templatesUID, patternPages)
 	if err != nil {
 		// Just log this error.
-		glog.Errorf("failed to parse page templates: %v", err)
+		log.L.Error("failed to parse page templates: %v", err)
 	}
 
 	// Parse the template files in the templates directory.
@@ -55,7 +55,7 @@ func parseTemplates() {
 	}
 	if err != nil {
 		// Just log this error.
-		glog.Errorf("failed to parse templates: %v", err)
+		log.L.Error("failed to parse templates: %v", err)
 	}
 
 	// Finally set the templates pointer.
@@ -71,7 +71,7 @@ func watchTemplates() {
 	var err error
 	templateFileWatcher, err = filewatcher.New()
 	if err != nil {
-		glog.Fatalf("failed to create templates filewatcher: %v", err)
+		log.L.Fatalf("failed to create templates filewatcher: %v", err)
 	}
 
 	// Set the event function.

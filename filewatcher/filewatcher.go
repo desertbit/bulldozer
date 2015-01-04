@@ -7,7 +7,7 @@ package filewatcher
 
 import (
 	"fmt"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"gopkg.in/fsnotify.v1"
 	"os"
 	"path/filepath"
@@ -143,7 +143,7 @@ func New() (*FileWatcher, error) {
 					// Recover panics and log the error
 					defer func() {
 						if e := recover(); e != nil {
-							glog.Errorf("filewatcher callback panic: %v", e)
+							log.L.Error("filewatcher callback panic: %v", e)
 						}
 					}()
 
@@ -156,7 +156,7 @@ func New() (*FileWatcher, error) {
 						if stat, err := os.Stat(e.Path); err == nil && stat.IsDir() {
 							err = f.Add(e.Path)
 							if err != nil {
-								glog.Errorf("filewatcher: failed to add recursive directory: %v", err)
+								log.L.Error("filewatcher: failed to add recursive directory: %v", err)
 							}
 						}
 					}()
@@ -165,7 +165,7 @@ func New() (*FileWatcher, error) {
 				// We don't have to remove deleted directories from the watcher,
 				// because they are removed automatically...
 			case err := <-watcher.Errors:
-				glog.Errorf("a file watcher error occurred: %s", err.Error())
+				log.L.Error("a file watcher error occurred: %s", err.Error())
 			case <-f.triggerClose:
 				// Just exit the loop
 				return

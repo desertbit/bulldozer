@@ -10,7 +10,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
 	"fmt"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -43,7 +43,7 @@ func init() {
 	// Register the emit server request
 	err := sessions.Request(requestTypeEmit, sessionRequestEmit)
 	if err != nil {
-		glog.Fatalf("failed to register session emit request: %v", err)
+		log.L.Fatalf("failed to register session emit request: %v", err)
 	}
 }
 
@@ -110,7 +110,7 @@ func (t *Template) RegisterEvents(i interface{}, vars ...string) {
 		// Add the method to the events
 		if overwritten := events.Set(name, e); overwritten {
 			// Print a warning message.
-			glog.Errorf("template: RegisterEvents: overwritting event function: '%s.%s'!", namespace, name)
+			log.L.Error("template: RegisterEvents: overwritting event function: '%s.%s'!", namespace, name)
 		}
 
 		// Set the flag
@@ -118,7 +118,7 @@ func (t *Template) RegisterEvents(i interface{}, vars ...string) {
 	}
 
 	if noMethods {
-		glog.Warningf("template: RegisterEvents: registered interface event methods, but no event methods where found!")
+		log.L.Warning("template: RegisterEvents: registered interface event methods, but no event methods where found!")
 	}
 }
 
@@ -381,7 +381,7 @@ func getSessionEvents(s *sessions.Session) *sessionEvents {
 	events, ok := eventsI.(*sessionEvents)
 	if !ok {
 		// Log the error
-		glog.Errorf("template emit: failed to assert value to session events value!")
+		log.L.Error("template emit: failed to assert value to session events value!")
 
 		// Just create a new one and set it to the instance values.
 		events = newSessionEvents()
@@ -397,7 +397,7 @@ func sessionRequestEmit(s *sessions.Session, data map[string]string) error {
 	// Recover panics and log the error message.
 	defer func() {
 		if e := recover(); e != nil {
-			glog.Errorf("bulldozer template emit panic: %v", e)
+			log.L.Error("bulldozer template emit panic: %v", e)
 		}
 	}()
 

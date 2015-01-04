@@ -7,7 +7,7 @@ package socket
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -128,7 +128,7 @@ func handleAjaxSocket(w http.ResponseWriter, req *http.Request) {
 
 	// Check for bad requests
 	if err != nil || req.Method != "POST" {
-		glog.Warningf("client tried to access the ajax interface with an invalid http method: %s", req.Method)
+		log.L.Warning("client tried to access the ajax interface with an invalid http method: %s", req.Method)
 		http.Error(w, "Bad Request", 400)
 		return
 	}
@@ -185,7 +185,7 @@ func handleAjaxSocket(w http.ResponseWriter, req *http.Request) {
 	// Get the uid from the data string
 	i := strings.Index(data, "&")
 	if i <= 0 {
-		glog.Warningf("client didn't send the ajax uid: data: %s", data)
+		log.L.Warning("client didn't send the ajax uid: data: %s", data)
 		http.Error(w, "Bad Request", 400)
 		return
 	}
@@ -195,7 +195,7 @@ func handleAjaxSocket(w http.ResponseWriter, req *http.Request) {
 	// Remove the uid from the data string
 	data = data[i+1:]
 	if len(data) == 0 {
-		glog.Warningf("client send empty data")
+		log.L.Warning("client send empty data")
 		http.Error(w, "Bad Request", 400)
 		return
 	}
@@ -209,7 +209,7 @@ func handleAjaxSocket(w http.ResponseWriter, req *http.Request) {
 		// Unlock the mutex again
 		ajaxMutex.Unlock()
 
-		glog.Warningf("client requested an invalid ajax socket: uid is invalid")
+		log.L.Warning("client requested an invalid ajax socket: uid is invalid")
 		http.Error(w, "Bad Request", 400)
 		return
 	}
@@ -232,7 +232,7 @@ func handleAjaxSocketPoll(w http.ResponseWriter, req *http.Request) {
 
 	// Check for bad requests
 	if err != nil || req.Method != "POST" {
-		glog.Warningf("client tried to access the ajax interface with an invalid http method: %s", req.Method)
+		log.L.Warning("client tried to access the ajax interface with an invalid http method: %s", req.Method)
 		http.Error(w, "Bad Request", 400)
 		return
 	}
@@ -242,7 +242,7 @@ func handleAjaxSocketPoll(w http.ResponseWriter, req *http.Request) {
 	// Get the uid from the data string
 	i := strings.Index(data, "&")
 	if i <= 0 {
-		glog.Warningf("client didn't send the ajax uid: data: %s", data)
+		log.L.Warning("client didn't send the ajax uid: data: %s", data)
 		http.Error(w, "Bad Request", 400)
 		return
 	}
@@ -252,7 +252,7 @@ func handleAjaxSocketPoll(w http.ResponseWriter, req *http.Request) {
 	// Remove the uid from the data string
 	data = data[i+1:]
 	if len(data) == 0 {
-		glog.Warningf("client send empty token")
+		log.L.Warning("client send empty token")
 		http.Error(w, "Bad Request", 400)
 		return
 	}
@@ -266,7 +266,7 @@ func handleAjaxSocketPoll(w http.ResponseWriter, req *http.Request) {
 		// Unlock the mutex again
 		ajaxMutex.Unlock()
 
-		glog.Warningf("client requested an invalid ajax socket: uid is invalid")
+		log.L.Warning("client requested an invalid ajax socket: uid is invalid")
 		http.Error(w, "Bad Request", 400)
 		return
 	}
@@ -276,7 +276,7 @@ func handleAjaxSocketPoll(w http.ResponseWriter, req *http.Request) {
 
 	// Check if the poll token matches
 	if a.pollToken != data {
-		glog.Warningf("client has send an invalid poll token!")
+		log.L.Warning("client has send an invalid poll token!")
 		http.Error(w, "Bad Request", 400)
 		return
 	}

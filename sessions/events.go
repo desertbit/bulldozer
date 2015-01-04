@@ -7,7 +7,7 @@ package sessions
 
 import (
 	"github.com/chuckpreslar/emission"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 )
 
 const (
@@ -55,7 +55,7 @@ func OffCloseSession(f func(s *Session)) {
 //###############//
 
 func recoverEmitter(event interface{}, listener interface{}, err error) {
-	glog.Errorf("session events error: emitter event: %v: listener: %v: %v", event, listener, err)
+	log.L.Error("session events error: emitter event: %v: listener: %v: %v", event, listener, err)
 }
 
 func triggerOnNewSession(s *Session) {

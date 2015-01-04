@@ -9,7 +9,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"strconv"
 	"strings"
 )
@@ -38,7 +38,7 @@ func TriggerGlobalEvent(s *sessions.Session, eventName string, params ...interfa
 		case string:
 			cmd += ",'" + utils.EscapeJS(v) + "'"
 		default:
-			glog.Errorf("context: trigger global event: invalid type of function event parameter: %v : parameters: %v", i+1, params)
+			log.L.Error("context: trigger global event: invalid type of function event parameter: %v : parameters: %v", i+1, params)
 			return
 		}
 	}

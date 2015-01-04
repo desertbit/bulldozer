@@ -7,7 +7,7 @@ package tr
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/filewatcher"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"strings"
 )
 
@@ -20,7 +20,7 @@ func init() {
 	var err error
 	fileWatcher, err = filewatcher.New()
 	if err != nil {
-		glog.Fatalf("failed to create translate filewatcher: %v", err)
+		log.L.Fatalf("failed to create translate filewatcher: %v", err)
 	}
 
 	// Set the event function
@@ -30,7 +30,7 @@ func init() {
 func onFileChange(event *filewatcher.Event) {
 	ok, err := dirExists(event.Path)
 	if err != nil {
-		glog.Errorln(err)
+		log.L.Error(err.Error())
 		return
 	}
 

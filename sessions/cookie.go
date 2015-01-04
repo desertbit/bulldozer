@@ -10,7 +10,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"net/http"
 	"time"
 )
@@ -60,7 +60,7 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 		if err != nil {
 			// This is not a fatal error. Just log it and create a new session.
 			// The new session is created automatically, if cookie session ID is emtpy or invalid.
-			glog.Errorf("failed to decode session cookie: %v", err)
+			log.L.Error("failed to decode session cookie: %v", err)
 		}
 	} else if err != http.ErrNoCookie {
 		// Return the error if this is not the not found cookie error
@@ -94,7 +94,7 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 					if cValue.LastToken == "" || cValue.LastToken != sCookie.Token {
 						// Log
 						addr, _ := utils.RemoteAddress(req)
-						glog.Warningf("invalid client session cookie token '%s' from client: %s", sCookie.Token, addr)
+						log.L.Warning("invalid client session cookie token '%s' from client: %s", sCookie.Token, addr)
 
 						// Reset the storeSession pointer to nil, so a new session is createdd.
 						storeSession = nil

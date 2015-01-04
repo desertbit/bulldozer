@@ -6,10 +6,10 @@
 package template
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
-	"github.com/golang/glog"
 	"strconv"
 )
 
@@ -58,7 +58,7 @@ func RegisterPlugin(p Plugin) {
 	// Print a warning if a previous plugin is overwritten.
 	_, ok := plugins[typeStr]
 	if ok {
-		glog.Errorf("bulldozer template: plugin: overwritting already set plugin '%s'!", typeStr)
+		log.L.Error("bulldozer template: plugin: overwritting already set plugin '%s'!", typeStr)
 	}
 
 	// Add the plugin interface to the map.
@@ -137,7 +137,7 @@ func renderPlugin(c *Context, uid int64) (r interface{}) {
 	// Recover panics and log the error
 	defer func() {
 		if e := recover(); e != nil {
-			glog.Errorf("render plugin panic: %v", e)
+			log.L.Error("render plugin panic: %v", e)
 			r = utils.ErrorBox(tr.S("blz.template.plugin.error"), e)
 		}
 	}()
@@ -156,7 +156,7 @@ func renderPlugin(c *Context, uid int64) (r interface{}) {
 		data, ok = t.pluginDataMap[uid]
 		if !ok {
 			err = fmt.Errorf("plugin: no plugin data exists with uid '%v'", uid)
-			glog.Error(err)
+			log.L.Error(err.Error())
 			r = utils.ErrorBox(tr.S("blz.template.plugin.error"), err)
 		}
 		return
@@ -169,7 +169,7 @@ func renderPlugin(c *Context, uid int64) (r interface{}) {
 	r, err = data.plugin.Render(c, data.settings)
 	if err != nil {
 		err = fmt.Errorf("plugin: failed to render plugin of type '%v': %v", data.plugin.Type(), err)
-		glog.Error(err)
+		log.L.Error(err.Error())
 		return utils.ErrorBox(tr.S("blz.template.plugin.error"), err)
 	}
 

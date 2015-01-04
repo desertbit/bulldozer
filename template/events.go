@@ -6,7 +6,7 @@
 package template
 
 import (
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 )
 
 const (
@@ -63,5 +63,5 @@ func (t *Template) triggerOnTemplateExecutionFinished(c *Context, data interface
 //###############//
 
 func recoverEmitter(event interface{}, listener interface{}, err error) {
-	glog.Errorf("bulldozer template events error: emitter event: %v: listener: %v: %v", event, listener, err)
+	log.L.Error("bulldozer template events error: emitter event: %v: listener: %v: %v", event, listener, err)
 }

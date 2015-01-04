@@ -8,7 +8,7 @@ package sessions
 import (
 	"code.desertbit.com/bulldozer/bulldozer/sessions/socket"
 	"code.desertbit.com/bulldozer/bulldozer/sessions/stream"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"time"
 )
 
@@ -91,7 +91,7 @@ func (ss *socketSession) writeLoop() {
 			// Create a new token
 			t, ok := ss.token.new()
 			if !ok {
-				glog.Warningf("Closing session %s with remote address '%s' due to flooding attack!", ss.session.SessionID(), ss.socketConn.RemoteAddr())
+				log.L.Warning("Closing session %s with remote address '%s' due to flooding attack!", ss.session.SessionID(), ss.socketConn.RemoteAddr())
 				// Immediately close the session. The client tries to flood the server...
 				ss.socketConn.Close()
 				return
@@ -113,7 +113,7 @@ func (ss *socketSession) writeLoop() {
 			// Create a new token
 			t, ok := ss.token.new()
 			if !ok {
-				glog.Warningf("Closing session %s with remote address '%s' due to flooding attack!", ss.session.SessionID(), ss.socketConn.RemoteAddr())
+				log.L.Warning("Closing session %s with remote address '%s' due to flooding attack!", ss.session.SessionID(), ss.socketConn.RemoteAddr())
 				// Immediately close the session. The client tries to flood the server...
 				ss.socketConn.Close()
 				return
@@ -157,7 +157,7 @@ func (ss *socketSession) onRead(data string) {
 	// Try to obtain the session Id
 	sid, ok := m[socketKeySessionID]
 	if !ok {
-		glog.Warningf("received an invalid session ID from the client")
+		log.L.Warning("received an invalid session ID from the client")
 		ss.receivedInvalidRequest(true)
 		return
 	}
@@ -165,7 +165,7 @@ func (ss *socketSession) onRead(data string) {
 	// Try to obtain the temporary token
 	token, ok := m[socketKeyToken]
 	if !ok {
-		glog.Warningf("missing temporary token in client request")
+		log.L.Warning("missing temporary token in client request")
 		ss.receivedInvalidRequest(true)
 		return
 	}
@@ -178,7 +178,7 @@ func (ss *socketSession) onRead(data string) {
 
 	// Check if the session matches and if the token is valid
 	if ss.session.sessionID != sid || !ss.token.isTokenValid(token) {
-		glog.Warningf("socket session: the session ID or session token is invalid!")
+		log.L.Warning("socket session: the session ID or session token is invalid!")
 		ss.receivedInvalidRequest(true)
 		return
 	}
@@ -189,7 +189,7 @@ func (ss *socketSession) onRead(data string) {
 	// Try to obtain the task
 	task, ok := m[socketKeyTask]
 	if !ok {
-		glog.Warningf("missing task in client request")
+		log.L.Warning("missing task in client request")
 		ss.receivedInvalidRequest(true)
 		return
 	}
@@ -203,7 +203,7 @@ func (ss *socketSession) onRead(data string) {
 	// Get the request with the task string as type
 	request, ok := requests[task]
 	if !ok {
-		glog.Warningf("session request for task type '%s' not found!", task)
+		log.L.Warning("session request for task type '%s' not found!", task)
 		ss.receivedInvalidRequest(false)
 		return
 	}
@@ -211,7 +211,7 @@ func (ss *socketSession) onRead(data string) {
 	// Call the request function
 	err := request(ss.session, m)
 	if err != nil {
-		glog.Warningf("session request '%s': error: %v", task, err)
+		log.L.Warning("session request '%s': error: %v", task, err)
 		ss.receivedInvalidRequest(false)
 		return
 	}
@@ -219,7 +219,7 @@ func (ss *socketSession) onRead(data string) {
 
 func (ss *socketSession) initSocketSession(m map[string]string, sid string, accessToken string) {
 	if sid == "" || accessToken == "" {
-		glog.Warningf("invalid session ID '%s' or access token '%s' in client request!", sid, accessToken)
+		log.L.Warning("invalid session ID '%s' or access token '%s' in client request!", sid, accessToken)
 		ss.receivedInvalidRequest(true)
 		return
 	}
@@ -227,7 +227,7 @@ func (ss *socketSession) initSocketSession(m map[string]string, sid string, acce
 	// Try to get the session with the session ID
 	s, ok := GetSession(sid)
 	if !ok {
-		glog.Warningf("invalid session ID in client request: session with ID '%s' not found!", sid)
+		log.L.Warning("invalid session ID in client request: session with ID '%s' not found!", sid)
 		ss.receivedInvalidRequest(true)
 		return
 	}
@@ -237,7 +237,7 @@ func (ss *socketSession) initSocketSession(m map[string]string, sid string, acce
 		s.socketAccess.Token != accessToken ||
 		s.socketAccess.RemoteAddr != ss.socketConn.RemoteAddr() ||
 		s.socketAccess.UserAgent != ss.socketConn.UserAgent() {
-		glog.Warningf("invalid socket access: token, remote address or user agent don't match!")
+		log.L.Warning("invalid socket access: token, remote address or user agent don't match!")
 		ss.receivedInvalidRequest(true)
 		return
 	}
@@ -253,7 +253,7 @@ func (ss *socketSession) initSocketSession(m map[string]string, sid string, acce
 	})
 	socketType, ok := socketTypeI.(socket.SocketType)
 	if !ok || socketType != ss.socketConn.Type() {
-		glog.Errorf("session socket connected with a different socket type than the other active socket sessions: remote address: %s", ss.socketConn.RemoteAddr())
+		log.L.Error("session socket connected with a different socket type than the other active socket sessions: remote address: %s", ss.socketConn.RemoteAddr())
 		ss.receivedInvalidRequest(true)
 		return
 	}

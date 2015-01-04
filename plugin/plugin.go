@@ -9,9 +9,9 @@ import (
 	htemplate "html/template"
 
 	"bytes"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"fmt"
-	"github.com/golang/glog"
 	"strings"
 )
 
@@ -146,7 +146,7 @@ func (tp *templatePlugin) Render(c *template.Context, s *template.PluginSettings
 // Must will log the error and exit the application.
 func Must(err error) {
 	if err != nil {
-		glog.Fatalln(err)
+		log.L.Fatal(err.Error())
 	}
 }
 

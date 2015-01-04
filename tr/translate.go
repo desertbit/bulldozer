@@ -9,7 +9,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"io"
 	"io/ioutil"
 	"os"
@@ -109,7 +109,7 @@ func S(id string, args ...interface{}) string {
 	s, ok := getMessage(id)
 
 	if !ok {
-		glog.Warningf("no translated string found for ID '%s'", id)
+		log.L.Warning("no translated string found for ID '%s'", id)
 		return "???" + id + "???"
 	}
 
@@ -140,7 +140,7 @@ func Add(dirPath string) {
 	// Add the new path to the filewatcher
 	err := fileWatcher.Add(dirPath)
 	if err != nil {
-		glog.Errorf("translation: failed to add path '%s' to file watcher: %v", dirPath, err)
+		log.L.Error("translation: failed to add path '%s' to file watcher: %v", dirPath, err)
 	}
 
 	// Reload the translation messages
@@ -203,7 +203,7 @@ func _reload() {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	glog.Infof("translation: reloading translation files")
+	log.L.Info("translation: reloading translation files")
 
 	// Empty the current messages map
 	messages = make(map[string]string)
@@ -213,7 +213,7 @@ func _reload() {
 		// Skip if the base translation directory is empty
 		entries, err := ioutil.ReadDir(d)
 		if err != nil {
-			glog.Errorf("failed to obtain entry list of directory '%s': %v", d, err)
+			log.L.Error("failed to obtain entry list of directory '%s': %v", d, err)
 			continue
 		} else if len(entries) == 0 {
 			continue
@@ -224,31 +224,31 @@ func _reload() {
 		// Check if the current locale translation folder exists
 		ok, err := dirExists(dirPath)
 		if err != nil {
-			glog.Errorf("translate reload error: %v", err)
+			log.L.Error("translate reload error: %v", err)
 			continue
 		}
 
 		// If not try to load the default locale
 		if !ok {
-			glog.Warningf("translation: missing translation files '%s' for current locale '%s'", d, currentLocale)
+			log.L.Warning("translation: missing translation files '%s' for current locale '%s'", d, currentLocale)
 
 			dirPath = d + "/" + defaultLocale
 
 			// Check if the default locale translation folder exists
 			ok, err := dirExists(dirPath)
 			if err != nil {
-				glog.Errorf("translate reload error: %v", err)
+				log.L.Error("translate reload error: %v", err)
 				continue
 			}
 			if !ok {
-				glog.Errorf("translation: missing translation files '%s' for default locale '%s'", d, defaultLocale)
+				log.L.Error("translation: missing translation files '%s' for default locale '%s'", d, defaultLocale)
 				continue
 			}
 		}
 
 		err = filepath.Walk(dirPath, loadFile)
 		if err != nil {
-			glog.Errorf("translation: filepath walk error: %v", err)
+			log.L.Error("translation: filepath walk error: %v", err)
 		}
 	}
 }
@@ -270,7 +270,7 @@ func dirExists(path string) (bool, error) {
 
 func loadFile(path string, f os.FileInfo, err error) error {
 	if f == nil {
-		glog.Errorf("filepath walk: file info object is nil!")
+		log.L.Error("filepath walk: file info object is nil!")
 		return nil
 	}
 
@@ -286,7 +286,7 @@ func loadFile(path string, f os.FileInfo, err error) error {
 	// Open the file
 	file, err := os.Open(path)
 	if err != nil {
-		glog.Errorf("failed to open translation file '%s': %v", path, err)
+		log.L.Error("failed to open translation file '%s': %v", path, err)
 		return nil
 	}
 	defer file.Close()
@@ -299,14 +299,14 @@ func loadFile(path string, f os.FileInfo, err error) error {
 		if err = dec.Decode(&m); err == io.EOF {
 			break
 		} else if err != nil {
-			glog.Errorf("failed to parse translation file '%s': %v", path, err)
+			log.L.Error("failed to parse translation file '%s': %v", path, err)
 			return nil
 		}
 
 		// Check if overwriting the value
 		_, ok = messages[m.ID]
 		if ok {
-			glog.Warningf("%s: overwriting duplicate translation message with ID '%s'!", path, m.ID)
+			log.L.Warning("%s: overwriting duplicate translation message with ID '%s'!", path, m.ID)
 		}
 
 		// Add the text to the message map

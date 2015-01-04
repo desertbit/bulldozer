@@ -14,7 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"sync"
 	"time"
 )
@@ -61,7 +61,7 @@ func Init() {
 	var err error
 	db, err = bolt.Open(settings.Settings.SessionsDatabasePath, 0600, nil)
 	if err != nil {
-		glog.Fatalf("failed to open sessions database '%s': %v", settings.Settings.SessionsDatabasePath, err)
+		log.L.Fatalf("failed to open sessions database '%s': %v", settings.Settings.SessionsDatabasePath, err)
 	}
 
 	// Create the bucket if not already exists
@@ -70,7 +70,7 @@ func Init() {
 		return err
 	})
 	if err != nil {
-		glog.Fatalf("failed to create the sessions database bucket: %v", err)
+		log.L.Fatalf("failed to create the sessions database bucket: %v", err)
 	}
 
 	// Start the loops in a new goroutine
@@ -264,7 +264,7 @@ func saveUnsavedSessions() {
 	}()
 
 	if err != nil {
-		glog.Errorf("sessions database save error: %v", err)
+		log.L.Error("sessions database save error: %v", err)
 	}
 }
 
@@ -326,7 +326,7 @@ func cleanupDBSessions(skipExpiredSessions bool) {
 				if err != nil {
 					// Just remove the session with the invalid session data.
 					// Log the error first.
-					glog.Errorf("session store: removing session from database with invalid value: %v", err)
+					log.L.Error("session store: removing session from database with invalid value: %v", err)
 					isExpired = true
 				} else if protoSessionExpired(protoSession) {
 					isExpired = true
@@ -356,7 +356,7 @@ func cleanupDBSessions(skipExpiredSessions bool) {
 		})
 
 		if err != nil {
-			glog.Errorf("sessions database: obtain expired sessions error: %v", err)
+			log.L.Error("sessions database: obtain expired sessions error: %v", err)
 		}
 	}
 
@@ -399,7 +399,7 @@ func cleanupDBSessions(skipExpiredSessions bool) {
 		})
 
 		if err != nil {
-			glog.Errorf("sessions database: remove expired sessions error: %v", err)
+			log.L.Error("sessions database: remove expired sessions error: %v", err)
 		}
 	}
 }

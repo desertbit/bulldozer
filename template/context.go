@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"strconv"
 )
 
@@ -146,7 +146,7 @@ func (c *Context) TriggerEvent(eventName string, params ...interface{}) {
 		case string:
 			cmd += ",'" + utils.EscapeJS(v) + "'"
 		default:
-			glog.Errorf("context: trigger event: invalid type of function event parameter: %v : parameters: %v", i+1, params)
+			log.L.Error("context: trigger event: invalid type of function event parameter: %v : parameters: %v", i+1, params)
 			return
 		}
 	}

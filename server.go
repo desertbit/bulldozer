@@ -12,7 +12,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"html/template"
 	"net"
 	"net/http"
@@ -101,7 +101,7 @@ func serve() error {
 		http.Handle(settings.UrlPublic, http.StripPrefix(settings.UrlPublic, http.FileServer(http.Dir(settings.Settings.PublicPath))))
 	}
 
-	glog.Infof("Bulldozer server listening on '%s'", settings.Settings.ListenAddress)
+	log.L.Info("Bulldozer server listening on '%s'", settings.Settings.ListenAddress)
 
 	if settings.Settings.SocketType == settings.TypeUnixSocket {
 		// Listen on the unix socket
@@ -166,7 +166,7 @@ func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
 
 	// Block to many accesses from the same remote address
 	if allow, remoteAddr := firewall.NewRequest(req); !allow {
-		glog.Infof("blocked incomming request from remote address '%s': too many requests", remoteAddr)
+		log.L.Info("blocked incomming request from remote address '%s': too many requests", remoteAddr)
 		http.Error(rw, "Too Many Requests", 429)
 		return
 	}
@@ -183,7 +183,7 @@ func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
 	session, accessToken, err := sessions.New(rw, req, instanceID)
 	if err != nil {
 		// Log the error
-		glog.Errorf("reconnect session error: %v", err)
+		log.L.Error("reconnect session error: %v", err)
 
 		// Send an internal server error code.
 		http.Error(rw, "Internal Server Error", 500)
@@ -199,13 +199,13 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	// Recover panics and log the error
 	defer func() {
 		if e := recover(); e != nil {
-			glog.Errorf("http handle panic: %v", e)
+			log.L.Error("http handle panic: %v", e)
 		}
 	}()
 
 	// Block to many accesses from the same remote address
 	if allow, remoteAddr := firewall.NewRequest(req); !allow {
-		glog.Infof("blocked incomming request from remote address '%s': too many requests", remoteAddr)
+		log.L.Info("blocked incomming request from remote address '%s': too many requests", remoteAddr)
 		http.Error(rw, "Too Many Requests", 429)
 		return
 	}
@@ -221,7 +221,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	session, accessToken, err := sessions.New(rw, req)
 	if err != nil {
 		// Log the error
-		glog.Errorf("new session error: %v", err)
+		log.L.Error("new session error: %v", err)
 
 		// Set the error status code and the error body
 		statusCode = 500
@@ -229,7 +229,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		// Execute the error template
 		body, err = execErrorTemplate("Internal Server Error")
 		if err != nil {
-			glog.Errorf("failed to execute error core template: %v", err)
+			log.L.Error("failed to execute error core template: %v", err)
 			http.Error(rw, "Internal Server Error", 500)
 			return
 		}
@@ -238,7 +238,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		statusCode, body, err = execRoute(session, req.URL.Path)
 		if err != nil {
 			// Log the error
-			glog.Errorf("failed to execute route: %v", err)
+			log.L.Error("failed to execute route: %v", err)
 
 			// Set the error status code and the error body
 			statusCode = 500
@@ -246,7 +246,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 			// Execute the error template
 			body, err = execErrorTemplate("Internal Server Error")
 			if err != nil {
-				glog.Errorf("failed to execute error core template: %v", err)
+				log.L.Error("failed to execute error core template: %v", err)
 				http.Error(rw, "Internal Server Error", 500)
 				return
 			}
@@ -282,7 +282,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	// Execute the body template
 	err = coreTemplate.Execute(rw, data)
 	if err != nil {
-		glog.Errorf("core template execution error: %v", err)
+		log.L.Error("core template execution error: %v", err)
 	}
 }
 

@@ -7,7 +7,7 @@ package template
 
 import (
 	"fmt"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"strings"
 )
 
@@ -157,7 +157,7 @@ func parseGlobal(typeStr string, token string, d *parseData) error {
 	}
 
 	if len(d.t.globalContextID) > 0 {
-		glog.Warningf("template '%s': overwriting global ID: '%s'", d.t.Name(), d.t.globalContextID)
+		log.L.Warning("template '%s': overwriting global ID: '%s'", d.t.Name(), d.t.globalContextID)
 	}
 
 	// Set the template global context ID.

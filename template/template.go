@@ -13,7 +13,7 @@ import (
 
 	"fmt"
 	"github.com/chuckpreslar/emission"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"io/ioutil"
 	"path/filepath"
 	"sync"
@@ -56,7 +56,7 @@ func newNameSpace(uid string) *nameSpace {
 
 	// Print a error message if the UID is not unique!
 	if _, ok := nameSpaces[uid]; ok {
-		glog.Warningf("template: the template UID '%s' is not unique! Overwriting already present namespace! The previous namespace is not more accessible through events,...", uid)
+		log.L.Warning("template: the template UID '%s' is not unique! Overwriting already present namespace! The previous namespace is not more accessible through events,...", uid)
 	}
 
 	// Add the new namespace to the map

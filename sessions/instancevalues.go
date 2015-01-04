@@ -9,7 +9,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"sync"
 	"time"
 )
@@ -176,7 +176,7 @@ func getInstances(s *Session) *instances {
 	ii, ok := i.(*instances)
 	if !ok {
 		// Log the error
-		glog.Errorf("session instance values: failed to assert value to instances map!")
+		log.L.Error("session instance values: failed to assert value to instances map!")
 
 		// Just create a new one and set it to the session.
 		ii = newInstances()

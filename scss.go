@@ -9,7 +9,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/filewatcher"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"os/exec"
 	"strings"
 	"time"
@@ -30,7 +30,7 @@ func init() {
 
 // TODO: Log scss build errors to a gui page....
 func buildScss() {
-	glog.Infof("Building SCSS files...")
+	log.L.Info("Building SCSS files...")
 
 	// Create the CSS directory if not present.
 	utils.MkDirIfNotExists(settings.Settings.CssPath)
@@ -39,7 +39,7 @@ func buildScss() {
 	cmd := exec.Command(settings.Settings.ScssCmd, settings.Settings.ScssArgs...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		glog.Errorf("scss build error: %v\n==================\n=== SCSS OUPUT ===\n==================\n%s\n==================\n==================\n",
+		log.L.Error("scss build error: %v\n==================\n=== SCSS OUPUT ===\n==================\n%s\n==================\n==================\n",
 			err, strings.Trim(strings.TrimSpace(string(output)), "\n"))
 	}
 }
@@ -53,7 +53,7 @@ func watchScss() {
 	var err error
 	scssFileWatcher, err = filewatcher.New()
 	if err != nil {
-		glog.Fatalf("failed to create scss filewatcher: %v", err)
+		log.L.Fatalf("failed to create scss filewatcher: %v", err)
 	}
 
 	// Set the event function.

@@ -6,7 +6,7 @@
 package template
 
 import (
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"reflect"
 	"strings"
 )
@@ -59,7 +59,7 @@ func RegisterPackage(name string, i interface{}) {
 	// Log an error message if a package is overwritten,
 	_, ok := packages[name]
 	if ok {
-		glog.Errorf("template: RegisterPackage: overwritting already present package: '%s'", name)
+		log.L.Error("template: RegisterPackage: overwritting already present package: '%s'", name)
 	}
 
 	// Add the package to the packages map.
@@ -95,7 +95,7 @@ func RegisterPackage(name string, i interface{}) {
 			reflect.TypeOf(i) != t.In(0) ||
 			reflect.TypeOf(dummyAction) != t.In(1) ||
 			reflect.TypeOf(dummyContext) != t.In(2) {
-			glog.Errorf("must function '%s': invalid function parameters! The first two parameters have to be an Action and Context pointer.", key)
+			log.L.Error("must function '%s': invalid function parameters! The first two parameters have to be an Action and Context pointer.", key)
 			continue
 		}
 

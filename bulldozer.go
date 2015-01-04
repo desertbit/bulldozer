@@ -6,18 +6,22 @@
 package bulldozer
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"flag"
 	"fmt"
-	"github.com/golang/glog"
 	"os"
 	"os/signal"
 	"runtime"
 	"sync"
 	"time"
+)
+
+const (
+	InterruptExitCode = 5
 )
 
 var (
@@ -61,19 +65,19 @@ func Init() {
 			release()
 
 			// Exit the application
-			os.Exit(1)
+			os.Exit(InterruptExitCode)
 		}()
 	}
 
 	// Check if the settings are valid
 	err := settings.Check()
 	if err != nil {
-		glog.Fatalln(err)
+		log.L.Fatal(err)
 	}
 
 	// Create the important directories if they don't exist
 	if err = createDirectories(); err != nil {
-		glog.Fatalln(err)
+		log.L.Fatal(err)
 	}
 
 	// Add the translation paths and load all translation files.
@@ -83,7 +87,7 @@ func Init() {
 
 	// Load the core templates
 	if err = loadCoreTemplates(); err != nil {
-		glog.Fatalln(err)
+		log.L.Fatal(err)
 	}
 
 	// Load the templates
@@ -106,7 +110,7 @@ func Bulldoze() {
 
 	// Check if the Init() method was called. This is a must!
 	if !isInitialized {
-		glog.Fatalf("failed to bulldoze: bulldozer is not initialized! It is required to call the bulldoze.Init method before bulldozing!")
+		log.L.Fatalf("failed to bulldoze: bulldozer is not initialized! It is required to call the bulldoze.Init method before bulldozing!")
 	}
 
 	// Initialize the bulldozer sub packages
@@ -115,7 +119,7 @@ func Bulldoze() {
 	// Start the server
 	err := serve()
 	if err != nil {
-		glog.Fatalln(err)
+		log.L.Fatal(err)
 	}
 }
 
@@ -143,9 +147,6 @@ func release() {
 	// Release the bulldozer sub packages
 	sessions.Release()
 	tr.Release()
-
-	// Flush all pending log I/O on exit
-	glog.Flush()
 
 	// Just wait for a moment before exiting to be
 	// sure, all defers get called and the program

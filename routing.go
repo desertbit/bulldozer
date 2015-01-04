@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"github.com/golang/glog"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"sync"
 )
 
@@ -46,7 +46,7 @@ func RoutePage(path string, pageTemplate string, UID string) {
 
 	// Print a warning if a previous route is set
 	if _, ok := pageRoutes[path]; ok {
-		glog.Warningf("overwriting previously set page route: '%s'", path)
+		log.L.Warning("overwriting previously set page route: '%s'", path)
 	}
 
 	// Set the new route
