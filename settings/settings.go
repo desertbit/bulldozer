@@ -19,6 +19,7 @@ const (
 	 */
 
 	TemplateSuffix = ".tmpl"
+	ScssSuffix     = ".scss"
 
 	// The socket types
 	TypeTcpSocket  SocketType = 1 << iota
@@ -81,6 +82,8 @@ func init() {
 			UrlBulldozerResources + "js/sha256.js",
 			UrlBulldozerResources + "js/bulldozer.min.js",
 		},
+
+		ScssCmd: "scss",
 	}
 
 	// Set the temporary directory path
@@ -111,6 +114,19 @@ func init() {
 	Settings.TemplatesPath = Settings.WorkingPath + "templates"
 	Settings.CoreTemplatesPath = Settings.TemplatesPath + "/core"
 	Settings.TranslationPath = Settings.WorkingPath + "translations"
+	Settings.DataPath = Settings.WorkingPath + "data"
+	Settings.ScssPath = Settings.DataPath + "/scss"
+	Settings.CssPath = Settings.PublicPath + "/css"
+
+	Settings.ScssArgs = []string{
+		"--unix-newlines",
+		"--no-cache",
+		"--sourcemap=none",
+		"-t",
+		"compressed",
+		"--update",
+		Settings.ScssPath + ":" + Settings.CssPath,
+	}
 
 	Settings.BulldozerSourcePath = Settings.GoPath + bulldozerGoPath
 	Settings.BulldozerCoreTemplatesPath = Settings.BulldozerSourcePath + "/data/templates"
@@ -191,6 +207,13 @@ type settings struct {
 	TemplatesPath     string
 	CoreTemplatesPath string
 	TranslationPath   string
+	DataPath          string
+
+	ScssPath string
+	CssPath  string
+
+	ScssCmd  string
+	ScssArgs []string
 
 	BulldozerSourcePath        string
 	BulldozerCoreTemplatesPath string

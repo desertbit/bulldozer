@@ -91,6 +91,12 @@ func Init() {
 
 	// Watch the template files and reload them on changes,
 	watchTemplates()
+
+	// Build the scss files.
+	buildScss()
+
+	// Watch the scss files and rebuild them on changes.
+	watchScss()
 }
 
 // Bulldoze starts the Bulldozer server
@@ -132,6 +138,7 @@ func release() {
 
 	// Stop the filewatcher
 	templateFileWatcher.Close()
+	scssFileWatcher.Close()
 
 	// Release the bulldozer sub packages
 	sessions.Release()
@@ -156,6 +163,8 @@ func createDirectories() (err error) {
 		settings.Settings.TemplatesPath,
 		settings.Settings.CoreTemplatesPath,
 		settings.Settings.TranslationPath,
+		settings.Settings.DataPath,
+		settings.Settings.ScssPath,
 	}
 
 	// Create the directories

@@ -35,4 +35,5 @@ Session Store
 
 General
 =======
+* Log sass build errors to a gui page...
 * Do some performance testing to check for bottlenecks (session store?)
