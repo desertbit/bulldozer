@@ -87,17 +87,10 @@ func execRoute(s *sessions.Session, path string) (int, string, error) {
 		return 404, out, nil
 	}
 
-	// Create the template data struct
-	data := struct {
-		Hallo string
-	}{
-		"Hallo Welt :D",
-	}
-
 	// TODO!!!!!!!!!!!
 	// Execute the template
 	var b bytes.Buffer
-	err := pageTemplates.ExecuteTemplate(s, &b, p.TemplateName, data, p.UID)
+	err := templates.ExecuteTemplate(s, &b, p.TemplateName, nil, p.UID)
 	if err != nil {
 		// TODO
 		return 500, "Error executing template!", err

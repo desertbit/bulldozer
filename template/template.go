@@ -56,7 +56,7 @@ func newNameSpace(uid string) *nameSpace {
 
 	// Print a error message if the UID is not unique!
 	if _, ok := nameSpaces[uid]; ok {
-		glog.Errorf("template: the template UID '%s' is not unique! Overwriting already present namespace! The previous namespace is not more accessible through events,...", uid)
+		glog.Warningf("template: the template UID '%s' is not unique! Overwriting already present namespace! The previous namespace is not more accessible through events,...", uid)
 	}
 
 	// Add the new namespace to the map
@@ -112,6 +112,8 @@ type Template struct {
 
 	// Must functions
 	mustFuncs []*mustFunc
+
+	globalContextID string
 }
 
 // New allocates a new bulldozer template associated with the given one
@@ -362,10 +364,15 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 		return nil, fmt.Errorf("bulldozer/template: no files named in call to ParseFiles")
 	}
 
+	var errorMessage string
+
 	for _, filename := range filenames {
 		b, err := ioutil.ReadFile(filename)
 		if err != nil {
-			return nil, err
+			// Don't exit on error, because the other templates should be loaded anyway.
+			// Just add the error and return it at the end.
+			errorMessage += fmt.Sprint(err) + "\n"
+			continue
 		}
 		s := string(b)
 		name := filepath.Base(filename)
@@ -386,9 +393,18 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 		}
 		_, err = tmpl.Parse(s)
 		if err != nil {
-			return nil, err
+			// Don't exit on error, because the other templates should be loaded anyway.
+			// Just add the error and return it at the end.
+			errorMessage += fmt.Sprint(err) + "\n"
+			continue
 		}
 	}
+
+	// Return the error if present.
+	if len(errorMessage) > 0 {
+		return nil, fmt.Errorf(errorMessage)
+	}
+
 	return t, nil
 }
 

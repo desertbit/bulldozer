@@ -7,6 +7,7 @@ package template
 
 import (
 	"fmt"
+	"github.com/golang/glog"
 	"strings"
 )
 
@@ -19,13 +20,12 @@ func init() {
 	registerParseFunc("script", parseScript)
 	registerParseFunc("style", parseStyle)
 	registerParseFunc("must", parseMust)
+	registerParseFunc("global", parseGlobal)
 }
 
 //###############//
 //### Private ###//
 //###############//
-
-// TODO. Create a new namespace "context in the template call if desired to -> global templates?
 
 // parseTemplate passes the templates context to the template pipeline.
 func parseTemplate(typeStr string, token string, d *parseData) error {
@@ -35,15 +35,13 @@ func parseTemplate(typeStr string, token string, d *parseData) error {
 
 	if fieldsLen == 0 {
 		return fmt.Errorf("no template name specified!")
-	} else if fieldsLen == 1 {
-		*d.final += d.leftDelim + "template " + fields[0] + " $" + d.rightDelim
-	} else {
-		*d.final += d.leftDelim + "template " + fields[0] + " passValues $ "
-		for i := 1; i < fieldsLen; i++ {
-			*d.final += fields[i] + " "
-		}
-		*d.final += d.rightDelim
 	}
+
+	*d.final += d.leftDelim + "template " + fields[0] + " tmplC " + fields[0] + " $ "
+	for i := 1; i < fieldsLen; i++ {
+		*d.final += fields[i] + " "
+	}
+	*d.final += d.rightDelim
 
 	return nil
 }
@@ -145,6 +143,25 @@ func parseMust(typeStr string, token string, d *parseData) error {
 
 	// Add the must function to the template.
 	d.t.mustFuncs = append(d.t.mustFuncs, m)
+
+	// Don't add anything to the template text...
+	return nil
+}
+
+func parseGlobal(typeStr string, token string, d *parseData) error {
+	// Remove leadiing and following quotes.
+	token = strings.TrimPrefix(strings.TrimSuffix(token, "\""), "\"")
+
+	if len(token) == 0 {
+		return fmt.Errorf("invalid global call: global ID is empty!")
+	}
+
+	if len(d.t.globalContextID) > 0 {
+		glog.Warningf("template '%s': overwriting global ID: '%s'", d.t.Name(), d.t.globalContextID)
+	}
+
+	// Set the template global context ID.
+	d.t.globalContextID = token
 
 	// Don't add anything to the template text...
 	return nil

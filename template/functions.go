@@ -6,7 +6,7 @@
 package template
 
 import (
-	"errors"
+	"fmt"
 )
 
 var (
@@ -14,6 +14,7 @@ var (
 		"plugin":     renderPlugin,
 		"eventKey":   createEventAccessKey,
 		"passValues": passValues,
+		"tmplC":      templateContext,
 		"loadJS":     loadJavaScript,
 		"loadStyle":  loadStyleSheet,
 	}
@@ -22,6 +23,36 @@ var (
 //##################################//
 //### Private template functions ###//
 //##################################//
+
+func templateContext(templateName string, r *renderData, values ...interface{}) (*renderData, error) {
+	// Get the context.
+	c := r.Context
+
+	// Get the right sub template.
+	t := c.t.Lookup(templateName)
+	if t == nil {
+		return nil, fmt.Errorf("no template found with name: '%s'", templateName)
+	}
+
+	// Create the unique sub template ID.
+	id := c.id + "_" + templateName
+
+	// Create the template context.
+	if len(t.globalContextID) == 0 {
+		c = NewContext(c.s, t, id, c.parentID)
+	} else {
+		c = NewContext(c.s, t, t.globalContextID, t.globalContextID)
+	}
+
+	// Create a new render data for the sub template.
+	subR := &renderData{
+		Context: c,
+		Data:    r.Data,
+		Pkg:     r.Pkg,
+	}
+
+	return passValues(subR, values...)
+}
 
 // passValues passes multiple values to a pipe. This requires as first argument the template render data.
 func passValues(r *renderData, values ...interface{}) (*renderData, error) {
@@ -41,7 +72,7 @@ func passValues(r *renderData, values ...interface{}) (*renderData, error) {
 
 	// Values have to be passed with keys.
 	if valuesLen%2 != 0 {
-		return nil, errors.New("invalid passValues call: values must have a key")
+		return nil, fmt.Errorf("invalid passValues call: values must have a key")
 	}
 
 	// Create a new values map
@@ -50,7 +81,7 @@ func passValues(r *renderData, values ...interface{}) (*renderData, error) {
 	for i := 0; i < valuesLen; i += 2 {
 		key, ok := values[i].(string)
 		if !ok {
-			return nil, errors.New("passValues keys must be of type string")
+			return nil, fmt.Errorf("passValues keys must be of type string")
 		}
 		valuesMap[key] = values[i+1]
 	}

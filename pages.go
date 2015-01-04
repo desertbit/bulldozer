@@ -5,11 +5,13 @@
 
 package bulldozer
 
+/*
 import (
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"fmt"
 )
+
 
 const (
 	pagesTemplatesUID = "pages"
@@ -39,6 +41,7 @@ func (p *PagesEvents) EventHallo(c *template.Context, arg1 string, arg2 int) {
 // TODO: Catch template execution error and show detailed error messages if the session is authenticated.
 // TODO: Run kepler.init()
 // TODO: Add optional arg to template.Glob to load recursive templates.
+// TODO: Implement reload current page.
 
 func parsePages() error {
 	// Create the pattern string
@@ -57,3 +60,4 @@ func parsePages() error {
 
 	return nil
 }
+*/

@@ -119,11 +119,10 @@ func (tp *templatePlugin) Render(c *template.Context, s *template.PluginSettings
 	data := s.Value.(*Data)
 
 	// Create the unique plugin template ID.
-	parentID := c.ID()
-	id := parentID + "~" + data.id
+	id := c.ID() + "~" + data.id
 
 	// Create the plugin template context.
-	pContext := template.NewContext(c.Session(), tp.t, id, parentID, data.additionalStyleClasses)
+	pContext := template.NewContext(c.Session(), tp.t, id, c.ParentID(), data.additionalStyleClasses)
 
 	// Get the render data for the template.
 	renderData := tp.plugin.Render(pContext, data)

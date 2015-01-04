@@ -108,7 +108,13 @@ func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, v
 
 	// Create a new context with the unique ID. The parent ID is the current ID,
 	// because this is the executing template.
-	c := NewContext(s, t, id, id)
+	// If the global context ID is set, then use this as ID.
+	var c *Context
+	if len(t.globalContextID) == 0 {
+		c = NewContext(s, t, id, id)
+	} else {
+		c = NewContext(s, t, t.globalContextID, t.globalContextID)
+	}
 
 	// Add additional style classes if present
 	if varsLen > 1 {

@@ -86,12 +86,11 @@ func Init() {
 		glog.Fatalln(err)
 	}
 
-	// TODO: Don't fatal on pages templates parse error!!!!!!!!!!!!!!!!!
+	// Load the templates
+	parseTemplates()
 
-	// Load the pages templates
-	if err = parsePages(); err != nil {
-		glog.Fatalln(err)
-	}
+	// Watch the template files and reload them on changes,
+	watchTemplates()
 }
 
 // Bulldoze starts the Bulldozer server
@@ -130,6 +129,9 @@ func release() {
 
 	// Set the flag
 	isReleased = true
+
+	// Stop the filewatcher
+	templateFileWatcher.Close()
 
 	// Release the bulldozer sub packages
 	sessions.Release()

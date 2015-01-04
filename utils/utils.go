@@ -15,6 +15,7 @@ import (
 	"html/template"
 	"math/big"
 	"strings"
+	"time"
 )
 
 func AddTrailingSlashToPath(path string) string {
@@ -144,4 +145,17 @@ func EncryptDomId(key string, s string) (hash string) {
 	// Remove the following Base64 equals if present
 	hash = strings.TrimSuffix(strings.TrimSuffix(hash, "="), "=")
 	return
+}
+
+// Debounce executes a function when it stops being invoked for the delay.
+func Debounce(delay time.Duration, f func()) func() {
+	// Create the timer.
+	timer := time.AfterFunc(delay, f)
+	timer.Stop()
+
+	// Return the lazy function.
+	return func() {
+		// Reset the timer.
+		timer.Reset(delay)
+	}
 }
