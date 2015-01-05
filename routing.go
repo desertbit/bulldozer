@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/router"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
+	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
 )
@@ -54,6 +55,9 @@ func Route(path string, f RouteFunc) {
 
 // execRoute executes the routes and returns the status code with the body string.
 func execRoute(s *sessions.Session, path string) (int, string, error) {
+	// Release the previous temmplate session events.
+	template.ReleaseSessionEvents(s)
+
 	// Transform the path to a valid path.
 	path = utils.ToPath(path)
 
