@@ -7,10 +7,10 @@ package bulldozer
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/filewatcher"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"strings"
 	"time"
 )

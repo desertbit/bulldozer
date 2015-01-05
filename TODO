@@ -9,9 +9,7 @@ IMPORTANT
 * Finish the must action in the template execute method call.
 * Don't load scripts and javascripts twice if already added to the HTML head!
 * Only show the utils.errorBox error code if the user is authenticated as developer.
-
 * Load a config in the Init() method if the file exists and the ENV is set.
-* Implement a complex router and replace it with the current temporary fix.
 
 
 SECURITY
@@ -35,5 +33,6 @@ Session Store
 
 General
 =======
+* Watch for core template changes and reload them also.
 * Log sass build errors to a gui page...
 * Do some performance testing to check for bottlenecks (session store?)

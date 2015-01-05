@@ -7,22 +7,21 @@ package bulldozer
 
 import (
 	"bytes"
+	"code.desertbit.com/bulldozer/bulldozer/router"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"sync"
+	"fmt"
 )
-
-// TODO: Implement a complex router and replace it with the current temporary fix
 
 var (
-	pageRoutes      map[string]*pageRoute = make(map[string]*pageRoute)
-	pageRoutesMutex sync.Mutex
+	mainRouter *router.Router = router.New()
 )
 
-//#####################//
-//### Private types ###//
-//#####################//
+//#############//
+//### Types ###//
+//#############//
+
+type RouteFunc func(*sessions.Session, *router.Data) (string, error)
 
 type pageRoute struct {
 	UID          string
@@ -34,50 +33,33 @@ type pageRoute struct {
 //##############//
 
 func RoutePage(path string, pageTemplate string, UID string) {
-	// Lock the mutex
-	pageRoutesMutex.Lock()
-	defer pageRoutesMutex.Unlock()
-
-	// Create a new page route object
+	// Create a new page route value.
 	p := &pageRoute{
 		UID:          UID,
 		TemplateName: pageTemplate,
 	}
 
-	// Print a warning if a previous route is set
-	if _, ok := pageRoutes[path]; ok {
-		log.L.Warning("overwriting previously set page route: '%s'", path)
-	}
-
-	// Set the new route
-	pageRoutes[path] = p
+	// Add the value to the router.
+	mainRouter.Route(path, p)
 }
-
-/* TODO
-type RouteFunc func(*Context)
 
 func Route(path string, f RouteFunc) {
+	// Add the callback to the router.
 	mainRouter.Route(path, f)
 }
-*/
 
 //###############//
 //### Private ###//
 //###############//
 
-// execRoute executes the routes and returns the
-// status code with the body string.
+// execRoute executes the routes and returns the status code with the body string.
 func execRoute(s *sessions.Session, path string) (int, string, error) {
-	// This is a temporary fix
+	// Transform the path to a valid path.
 	path = utils.ToPath(path)
 
-	// Lock the mutex
-	pageRoutesMutex.Lock()
-	defer pageRoutesMutex.Unlock()
-
-	// Try to obtain the page route if present
-	p, ok := pageRoutes[path]
-	if !ok {
+	// Execute the route.
+	data := mainRouter.Match(path)
+	if data == nil {
 		// Execute the not found page
 		out, err := execNotFoundTemplate()
 		if err != nil {
@@ -87,14 +69,27 @@ func execRoute(s *sessions.Session, path string) (int, string, error) {
 		return 404, out, nil
 	}
 
-	// TODO!!!!!!!!!!!
-	// Execute the template
-	var b bytes.Buffer
-	err := templates.ExecuteTemplate(s, &b, p.TemplateName, nil, p.UID)
-	if err != nil {
-		// TODO
-		return 500, "Error executing template!", err
-	}
+	switch v := data.Value.(type) {
+	case RouteFunc:
+		o, err := v(s, data)
+		if err != nil {
+			// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			return 500, "Error executing route!", err
+		}
 
-	return 200, b.String(), nil
+		return 200, o, nil
+	case *pageRoute:
+		// Execute the template
+		var b bytes.Buffer
+		err := templates.ExecuteTemplate(s, &b, v.TemplateName, nil, v.UID)
+		if err != nil {
+			// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			return 500, "Error executing template!", err
+		}
+
+		return 200, b.String(), nil
+	default:
+		// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		return 500, "Error executing template!", fmt.Errorf("failed to execute route: '%s': unkown value type!", path)
+	}
 }
