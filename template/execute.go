@@ -9,6 +9,7 @@
 package template
 
 import (
+	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"fmt"
 	"io"
@@ -36,15 +37,38 @@ func (t *Template) Execute(s *sessions.Session, wr io.Writer, data interface{}, 
 // execution stops, but partial results may already have been written to
 // the output writer.
 // A template may be executed safely in parallel.
+// A boolean is returned, defining if the template exists...
 // First optional string is an ID string, which is added to the unique context ID.
 // All further optional strings are additional template style classes.
-func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name string, data interface{}, vars ...string) error {
+func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name string, data interface{}, vars ...string) (bool, error) {
 	tt := t.Lookup(name)
 	if tt == nil {
-		return fmt.Errorf("failed to execute template: template not found with name '%s'", name)
+		return false, fmt.Errorf("failed to execute template: template not found with name '%s'", name)
 	}
 
-	return execute(tt, s, wr, data, vars...)
+	return true, execute(tt, s, wr, data, vars...)
+}
+
+// ExecuteToString does the same as Execute, but instead writes the output to a string.
+func (t *Template) ExecuteToString(s *sessions.Session, data interface{}, vars ...string) (string, error) {
+	var b bytes.Buffer
+	err := t.Execute(s, &b, data)
+	if err != nil {
+		return "", err
+	}
+
+	return b.String(), err
+}
+
+// ExecuteTemplateToString does the same as ExecuteTemplate, but instead writes the output to a string.
+func (t *Template) ExecuteTemplateToString(s *sessions.Session, name string, data interface{}, vars ...string) (string, bool, error) {
+	var b bytes.Buffer
+	found, err := t.ExecuteTemplate(s, &b, name, data)
+	if err != nil {
+		return "", found, err
+	}
+
+	return b.String(), found, err
 }
 
 //##############//

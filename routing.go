@@ -6,7 +6,7 @@
 package bulldozer
 
 import (
-	"bytes"
+	"code.desertbit.com/bulldozer/bulldozer/global"
 	"code.desertbit.com/bulldozer/bulldozer/router"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/template"
@@ -49,12 +49,14 @@ func Route(path string, f RouteFunc) {
 	mainRouter.Route(path, f)
 }
 
+// TODO: route requests...
+
 //###############//
 //### Private ###//
 //###############//
 
 // execRoute executes the routes and returns the status code with the body string.
-func execRoute(s *sessions.Session, path string) (int, string, error) {
+func execRoute(s *sessions.Session, path string) (int, string) {
 	// Release the previous temmplate session events.
 	template.ReleaseSessionEvents(s)
 
@@ -64,36 +66,35 @@ func execRoute(s *sessions.Session, path string) (int, string, error) {
 	// Execute the route.
 	data := mainRouter.Match(path)
 	if data == nil {
-		// Execute the not found page
-		out, err := execNotFoundTemplate()
-		if err != nil {
-			return 500, "", err
-		}
-
-		return 404, out, nil
+		// Execute the not found template.
+		return global.ExecNotFoundTemplate(s)
 	}
 
 	switch v := data.Value.(type) {
 	case RouteFunc:
 		o, err := v(s, data)
 		if err != nil {
-			// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			return 500, "Error executing route!", err
+			// Execute the error template.
+			return global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': %v", path, err))
 		}
 
-		return 200, o, nil
+		return 200, o
 	case *pageRoute:
 		// Execute the template
-		var b bytes.Buffer
-		err := templates.ExecuteTemplate(s, &b, v.TemplateName, nil, v.UID)
+		o, found, err := global.TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, v.UID)
 		if err != nil {
-			// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			return 500, "Error executing template!", err
+			if found {
+				// Execute the error template.
+				return global.ExecErrorTemplate(s, fmt.Sprintf("page '%s': '%s': %v", v.TemplateName, path, err))
+			} else {
+				// Execute the not found template.
+				return global.ExecNotFoundTemplate(s)
+			}
 		}
 
-		return 200, b.String(), nil
+		return 200, o
 	default:
-		// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		return 500, "Error executing template!", fmt.Errorf("failed to execute route: '%s': unkown value type!", path)
+		// Execute the error template.
+		return global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': unkown value type!", path))
 	}
 }

@@ -13,6 +13,17 @@ import (
 	"os"
 )
 
+func IsDir(path string) (bool, error) {
+	// Check if the dir exist.
+	d, err := os.Stat(path)
+	if err != nil {
+		return false, err
+	}
+
+	// Check if the path is a directory.
+	return d.IsDir(), nil
+}
+
 // Exists returns whether the given file or directory exists or not
 func Exists(path string) (bool, error) {
 	_, err := os.Stat(path)

@@ -6,88 +6,46 @@
 package bulldozer
 
 import (
-	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/firewall"
+	"code.desertbit.com/bulldozer/bulldozer/global"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"html/template"
 	"net"
 	"net/http"
-	"path/filepath"
 )
 
 const (
 	escapedFragment        = "_escaped_fragment_"
 	postKeyInstanceID      = "id"
 	reconnectDataDelimiter = "&"
-
-	errorTemplateFilename            = "error" + settings.TemplateSuffix
-	notFoundTemplateFilename         = "notfound" + settings.TemplateSuffix
-	loadingIndicatorTemplateFilename = "loadingindicator" + settings.TemplateSuffix
-	connectionLostTemplateFilename   = "connectionlost" + settings.TemplateSuffix
-	noScriptTemplateFilename         = "noscript" + settings.TemplateSuffix
 )
 
 var (
-	coreTemplate *template.Template
+	mainTemplate *template.Template
 )
+
+func init() {
+	// Create the main template.
+	mainTemplate = template.New("main")
+
+	// Set the custom template functions.
+	mainTemplate.Funcs(template.FuncMap{
+		"coreTemplate": templateCoreTemplateFunc,
+	})
+
+	// Parse the main template
+	_, err := mainTemplate.Parse(htmlBody)
+	if err != nil {
+		log.L.Fatalf("main template parsing error: %v", err)
+	}
+}
 
 //###############//
 //### Private ###//
 //###############//
-
-func loadCoreTemplates() (err error) {
-	// Create the pattern string
-	pattern := "*" + settings.TemplateSuffix
-
-	// Create missing core templates in the working path
-	if err = createMissingCoreTemplates(pattern); err != nil {
-		return err
-	}
-
-	pattern = settings.Settings.CoreTemplatesPath + "/" + pattern
-
-	// Create and parse the core template
-	coreTemplate, err = template.New("core").Parse(htmlBody)
-	if err != nil {
-		return fmt.Errorf("core template parsing error: %v", err)
-	}
-
-	// Parse the templates files in the core templates directory
-	coreTemplate, err = coreTemplate.ParseGlob(pattern)
-	if err != nil {
-		return fmt.Errorf("core templates parsing error: %v", err)
-	}
-
-	return nil
-}
-
-func createMissingCoreTemplates(pattern string) error {
-	// Get all filenames of the bulldozer core templates
-	coreFilenames, err := filepath.Glob(settings.Settings.BulldozerCoreTemplatesPath + "/" + pattern)
-	if err != nil {
-		return err
-	}
-	if len(coreFilenames) == 0 {
-		return nil
-	}
-
-	// Create missing template files
-	for _, src := range coreFilenames {
-		// Create the destination path
-		dest := settings.Settings.CoreTemplatesPath + "/" + filepath.Base(src)
-
-		// Copy the file if it doesn't exists
-		if err = utils.CopyFileIfNotExists(src, dest); err != nil {
-			return fmt.Errorf("failed to copy core template '%s' to '%s': %v", src, dest, err)
-		}
-	}
-
-	return nil
-}
 
 func serve() error {
 	// Create the default html handler
@@ -126,35 +84,6 @@ func serve() error {
 	}
 
 	return nil
-}
-
-func execNotFoundTemplate() (string, error) {
-	// Execute the template
-	var b bytes.Buffer
-	err := coreTemplate.ExecuteTemplate(&b, notFoundTemplateFilename, nil)
-	if err != nil {
-		return "", err
-	}
-
-	return b.String(), nil
-}
-
-func execErrorTemplate(errorMessage string) (string, error) {
-	// Create the template data struct
-	data := struct {
-		ErrorMessage string
-	}{
-		errorMessage,
-	}
-
-	// Execute the template
-	var b bytes.Buffer
-	err := coreTemplate.ExecuteTemplate(&b, errorTemplateFilename, data)
-	if err != nil {
-		return "", err
-	}
-
-	return b.String(), nil
 }
 
 func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
@@ -220,44 +149,19 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	// obtain the unique socket session token.
 	session, accessToken, err := sessions.New(rw, req)
 	if err != nil {
-		// Log the error
 		log.L.Error("new session error: %v", err)
-
-		// Set the error status code and the error body
-		statusCode = 500
-
-		// Execute the error template
-		body, err = execErrorTemplate("Internal Server Error")
-		if err != nil {
-			log.L.Error("failed to execute error core template: %v", err)
-			http.Error(rw, "Internal Server Error", 500)
-			return
-		}
-	} else {
-		// Execute the route
-		statusCode, body, err = execRoute(session, req.URL.Path)
-		if err != nil {
-			// Log the error
-			log.L.Error("failed to execute route: %v", err)
-
-			// Set the error status code and the error body
-			statusCode = 500
-
-			// Execute the error template
-			body, err = execErrorTemplate("Internal Server Error")
-			if err != nil {
-				log.L.Error("failed to execute error core template: %v", err)
-				http.Error(rw, "Internal Server Error", 500)
-				return
-			}
-		}
+		http.Error(rw, "Internal Server Error", 500)
+		return
 	}
+
+	// Execute the route
+	statusCode, body = execRoute(session, req.URL.Path)
 
 	// TODO: Don't load session scripts and javascripts twice if already added to the HTML head!
 
 	// Create the template data struct
 	data := struct {
-		SessionID     string
+		Session       *sessions.Session
 		AccessToken   string
 		Body          template.HTML
 		JSLibs        []string
@@ -266,7 +170,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		SessionStyles []string
 		IsWebCrawler  bool
 	}{
-		session.SessionID(),
+		session,
 		accessToken,
 		template.HTML(body),
 		settings.Settings.StaticJavaScripts,
@@ -279,11 +183,16 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	// Set the http status code
 	rw.WriteHeader(statusCode)
 
-	// Execute the body template
-	err = coreTemplate.Execute(rw, data)
+	// Execute the main body template
+	err = mainTemplate.Execute(rw, data)
 	if err != nil {
-		log.L.Error("core template execution error: %v", err)
+		log.L.Error("main template execution error: %v", err)
 	}
+}
+
+func templateCoreTemplateFunc(s *sessions.Session, name string) (template.HTML, error) {
+	out, _, err := global.CoreTemplatesStore.Templates.ExecuteTemplateToString(s, name, nil)
+	return template.HTML(out), err
 }
 
 // This is the static html template body loaded only on session initialization
@@ -308,15 +217,15 @@ const htmlBody = `
 	{{end}}
 </head>
 <body>
-	{{if not .IsWebCrawler}}<noscript>{{template "` + noScriptTemplateFilename + `"}}</noscript>{{end}}
+	{{if not .IsWebCrawler}}<noscript>{{coreTemplate .Session "` + global.NoScriptTemplate + `"}}</noscript>{{end}}
 	<div id="bulldozer-script"><script>
 		$(document).ready(function() {
-			Bulldozer.socket.init("{{.SessionID}}","{{.AccessToken}}");
+			Bulldozer.socket.init("{{.Session.SessionID}}","{{.AccessToken}}");
 			$("#bulldozer-script").remove();
 		});
 	</script></div>
-	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplateFilename + `"}}</div>
-	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplateFilename + `"}}</div>
+	<div id="bulldozer-loading-indicator">{{coreTemplate .Session "` + global.LoadingIndicatorTemplate + `"}}</div>
+	<div id="bulldozer-connection-lost">{{coreTemplate .Session "` + global.ConnectionLostTemplate + `"}}</div>
 	<div id="bulldozer-body">{{.Body}}</div>
 </body>
 </html>`

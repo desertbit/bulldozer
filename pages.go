@@ -35,7 +35,7 @@ func (p *PagesEvents) EventHallo(c *template.Context, arg1 string, arg2 int) {
 	c.Update(nil)
 }
 
-// TODO: Lock mutex?
+// TODO: Bulldozer create main.go if not present! and config with static stylesheets....
 // TODO: template.ReleaseSessionEvents(c.Session())
 // TODO: Separate unique ID in sub or global Template
 // TODO: Catch template execution error and show detailed error messages if the session is authenticated.

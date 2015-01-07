@@ -6,15 +6,18 @@
 package bulldozer
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/global"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"code.desertbit.com/bulldozer/bulldozer/template/store"
 	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"flag"
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
@@ -85,16 +88,18 @@ func Init() {
 	tr.Add(settings.Settings.TranslationPath)
 	tr.Load()
 
-	// Load the core templates
-	if err = loadCoreTemplates(); err != nil {
+	// Create missing core templates in the working path.
+	if err = createMissingCoreTemplates(); err != nil {
 		log.L.Fatal(err)
 	}
 
-	// Load the templates
-	parseTemplates()
+	// Initialize the global package.
+	if err = global.Init(); err != nil {
+		log.L.Fatal(err)
+	}
 
-	// Watch the template files and reload them on changes,
-	watchTemplates()
+	// Watch the store template files and reload them on changes,
+	store.Watch()
 
 	// Build the scss files.
 	buildScss()
@@ -140,8 +145,8 @@ func release() {
 	// Set the flag
 	isReleased = true
 
-	// Stop the filewatcher
-	templateFileWatcher.Close()
+	// Stop the filewatchers
+	store.Release()
 	scssFileWatcher.Close()
 
 	// Release the bulldozer sub packages
@@ -173,6 +178,30 @@ func createDirectories() (err error) {
 		err = utils.MkDirIfNotExists(dir)
 		if err != nil {
 			return fmt.Errorf("failed to create directory: '%s': %v", dir, err)
+		}
+	}
+
+	return nil
+}
+
+func createMissingCoreTemplates() error {
+	// Get all filenames of the bulldozer core templates
+	coreFilenames, err := filepath.Glob(settings.Settings.BulldozerCoreTemplatesPath + "/*" + settings.TemplateSuffix)
+	if err != nil {
+		return err
+	}
+	if len(coreFilenames) == 0 {
+		return nil
+	}
+
+	// Create missing template files
+	for _, src := range coreFilenames {
+		// Create the destination path
+		dest := settings.Settings.CoreTemplatesPath + "/" + filepath.Base(src)
+
+		// Copy the file if it doesn't exists
+		if err = utils.CopyFileIfNotExists(src, dest); err != nil {
+			return fmt.Errorf("failed to copy core template '%s' to '%s': %v", src, dest, err)
 		}
 	}
 
