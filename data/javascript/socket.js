@@ -34,9 +34,9 @@ Bulldozer.fn.socket = new function () {
     var documentReady = false;
     var socket;
     var sid, instanceID, token;
-    var connErrorLoadingIndShown = false;
-    var timeoutShowLoadingIndicator = false;
+    var timeoutConnectionLost = false;
     var reconnectCount = 0;
+
 
 
 
@@ -48,34 +48,28 @@ Bulldozer.fn.socket = new function () {
         return "sid=" + sid + "&tok=" + token + "&" + data;
     };
 
-    var resetShowLoadingIndicatorTimeout = function() {
+    var resetConnectionLostTimeout = function() {
         // Stop the timeout timer
-        if (timeoutShowLoadingIndicator !== false) {
-            clearTimeout(timeoutShowLoadingIndicator);
+        if (timeoutConnectionLost !== false) {
+            clearTimeout(timeoutConnectionLost);
         }
         
-        // Start the timer again
-        timeoutShowLoadingIndicator = setTimeout(function () {
-            timeoutShowLoadingIndicator = false;
+        // Hide the connection lost widget.
+        Bulldozer.connectionLost.hide();
 
-            // Show the loading indicator and set the flag
-            connErrorLoadingIndShown = true;
-// TODO
-            //Bulldozer.loadingIndicator.show();
+        // Start the timer again.
+        // A Ping message should arrive each 30 seconds from the server.
+        // If nothing happens for 40 seconds, then show the connection lost widget.
+        timeoutConnectionLost = setTimeout(function () {
+            // Update the flag.
+            timeoutConnectionLost = false;
+
+            // Show the connection lost widget.
+            Bulldozer.connectionLost.show();
         }, 40000);
     };
 
     var handleReceivedData = function(data) {
-        // Reset the timeout timer
-        resetShowLoadingIndicatorTimeout();
-
-        // Hide the loading indicator if shown by a connection error
-        if (connErrorLoadingIndShown) {
-            connErrorLoadingIndShown = false;
-// TODO
-            // Bulldozer.loadingIndicator.hide();
-        }
-
         // Check if data is not empty
         if (data) {
             // Check if the server has send an invalid request notification
@@ -90,7 +84,7 @@ Bulldozer.fn.socket = new function () {
             if (i < 0) {
                 // Show an error message box
                 Bulldozer.utils.showErrorMessageBox("Error",
-                    "Warning! Invalid data received from server! Try to reload your browser and notify the site administrator!",
+                    "Warning! Invalid data received from server! Please reload this webpage and notify the site administrator!",
                     "Error data: '" + data + "'");
                 return;
             }
@@ -101,7 +95,11 @@ Bulldozer.fn.socket = new function () {
 
             // Check if the server requests a pong reply
             if (data === SocketData.Ping) {
+                // Send the pong message.
                 socket.send(prepareSendMsg(SocketKey.Task + "=" + SocketData.Pong + "&"));
+
+                // Reset the timeout timer
+                resetConnectionLostTimeout();
                 return;
             }
 
@@ -114,8 +112,7 @@ Bulldozer.fn.socket = new function () {
 
     var handleInitializeSession = function(data) {
         if (!data) {
-            // Show an error message box
-            Bulldozer.utils.showErrorMessageBox("Error", "Failed to initialize socket session! Received data is emtpy!");
+            console.log("Failed to initialize socket session! Received emtpy data from server!");
             return false;
         }
 
@@ -138,39 +135,51 @@ Bulldozer.fn.socket = new function () {
         instanceID = list[0];
         token = list[1];
 
-        // Reset the reconnect count again
+        // Reset the reconnect count.
         reconnectCount = 0;
+
+        // Notify, that the reconnect was successfully.
+        Bulldozer.connectionLost.reconnectSuccess();
+
+        // Hide the connection lost widget.
+        Bulldozer.connectionLost.hide();
 
         return true;
     };
 
-    var connectionError = function(whileInitialization, sessionID, socketAccessToken) {
-        // Fallback to the ajax socket
-        if (whileInitialization && socket.type() !== Bulldozer.AjaxSocket.type()) {
+    // The callback function for connection errors.
+    var connectionError = function() {
+        // Show the connection lost widget.
+        Bulldozer.connectionLost.show();
+
+        // Notify, that the connection failed.
+        Bulldozer.connectionLost.reconnectFailed();
+
+        // Force fallback flag.
+        var fallback = false;
+
+        // Increment the count.
+        reconnectCount += 1;
+
+        // Fallback to the ajax socket if this is the last attempt.
+        if (reconnectCount == reconnectAttempts
+            && socket.type() !== Bulldozer.AjaxSocket.type()) {
             // Reconnect with the ajax socket
             console.log("falling back to ajax socket...");
-            Bulldozer.socket.init(sessionID, socketAccessToken, true);
-            return;
+            fallback = true;
         }
 
-        // Set the flag
-        connErrorLoadingIndShown = true;
-
-        // Show the loading indicator
-// TODO
-        //Bulldozer.loadingIndicator.show();
-
-        if (reconnectCount > reconnectAttempts) {
-            // TODO: Show this in the loading indicator
-            // Show an error message box
-            Bulldozer.utils.showErrorMessageBox("Error",
-                "Failed to establish a connection to the server. Please reload this page and try again.");
-        }
-        else {
+        if (reconnectCount <= reconnectAttempts) {
             // Try to reconnect
             setTimeout(function() {
-                Bulldozer.socket.init(sessionID, socketAccessToken);
-            }, 5000);
+                Bulldozer.socket.reconnect(fallback);
+            }, 1500);
+        }
+        else {
+            console.log("giving up...");
+
+            // Show the connection lost widget.
+            Bulldozer.connectionLost.show();
         }
     };
 
@@ -180,14 +189,7 @@ Bulldozer.fn.socket = new function () {
      * Public Methods
      */
 
-    this.sessionID = function() {
-        return sid;
-    };
-
     this.init = function (sessionID, socketAccessToken, forceFallback) {
-        // Flags
-        var isInitializing = true;
-
         if (!sessionID || !socketAccessToken) {
             console.log("empty session ID or socket access token!");
             return;
@@ -197,13 +199,6 @@ Bulldozer.fn.socket = new function () {
         sid = sessionID;
         token = socketAccessToken;
 
-        // Show the loading indicator
-// TODO
-        //Bulldozer.loadingIndicator.show();
-
-        // Increment the reconnect count
-        reconnectCount += 1;
-
         // Reset the previous socket if set
         if (socket) {
             socket.onOpen = undefined;
@@ -211,9 +206,7 @@ Bulldozer.fn.socket = new function () {
             socket.onMessage = undefined;
             socket.onError = undefined;
 
-            if (socket.reset) {
-                socket.reset();
-            }
+            socket.reset();
         }
 
         // Choose the socket layer depending on the browser support
@@ -226,36 +219,24 @@ Bulldozer.fn.socket = new function () {
 
         // Set the socket events
         socket.onOpen = function() {
-            // Update the flags
-            isInitializing = false;
-
             // Initialize the connection
             socket.send(prepareSendMsg(""));
         };
 
-
-
-// TODO: Don't reconnect with init! The session ID changes always... Use reconnect() instead...
-
-
         socket.onClose = function() {
-            connectionError(isInitializing, sessionID, socketAccessToken);
+            connectionError();
         };
 
         socket.onError = function() {
             console.log(socket.type() + ": a connection error occurred!");
-
-            connectionError(isInitializing, sessionID, socketAccessToken);
+            connectionError();
         };
 
         socket.onMessage = function(data) {
             // Initialize the socket session
             if (!handleInitializeSession(data)) {
-                // Invalidate the close and error methods.
-                socket.onClose = socket.onError = null;
-
-                // Reconnect and reinitialize this session.
-                Bulldozer.socket.reconnect();
+                // Show an error message box
+                Bulldozer.utils.showErrorMessageBox("Error", "Failed to initialize web session! Please reload this webpage and try again...");
                 return;
             }
 
@@ -277,8 +258,15 @@ Bulldozer.fn.socket = new function () {
         socket.open();
     };
 
-    // Send the data object to the server. The data object is converted into a string...
+    // Send the data object to the server. The data object is converted into a string.
+    // A boolean is returned, indicating if the data has been send to the server.
     this.send = function(type, data) {
+        // Reconnect the socket session if the connection is lost.
+        if (Bulldozer.connectionLost.connectionLost()) {
+            Bulldozer.socket.reconnect();
+            return false;
+        }
+
         var str = SocketKey.Task + '=' + String(type) + '&';
         for (var p in data) {
             if (data.hasOwnProperty(p)) {
@@ -287,11 +275,10 @@ Bulldozer.fn.socket = new function () {
         }
 
         socket.send(prepareSendMsg(str));
+        return true;
     };
 
-    this.reconnect = function() {
-// TODO: On error maybe a full webpage refresh?
-
+    this.reconnect = function(forceFallback) {
         $.ajax({
             url: "/bulldozer/reconnect",
             type: "POST",
@@ -307,16 +294,17 @@ Bulldozer.fn.socket = new function () {
                 // Check if enough elements exist
                 if (list.length < 2) {
                     console.log("Failed to reconnect socket session! Received list length is invalid: '" + data + "'");
-                    // TODO
+                    // Show an error message box
+                    Bulldozer.utils.showErrorMessageBox("Error", "Failed to reconnect to server! Please reload this webpage and try again...");
                     return;
                 }
 
                 // Initialize the socket session.
-                Bulldozer.socket.init(list[0], list[1]);
+                Bulldozer.socket.init(list[0], list[1], forceFallback);
             },
             error: function () {
                 console.log("failed to reconnect to server!");
-                // TODO
+                connectionError();
             }
         });
     };

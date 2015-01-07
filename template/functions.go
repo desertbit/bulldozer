@@ -6,11 +6,13 @@
 package template
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"fmt"
 )
 
 var (
 	bulldozerFuncMap FuncMap = FuncMap{
+		"tr":         tr.S,
 		"plugin":     renderPlugin,
 		"eventKey":   createEventAccessKey,
 		"passValues": passValues,

@@ -9,6 +9,19 @@ Bulldozer.fn.loadingIndicator = new function () {
      */
 
 	var timeLoadingInd = false;
+    var visible = false;
+
+
+    /*
+     * Private Methods
+     */
+
+    var stopTimeout = function() {
+        if (timeLoadingInd !== false) {
+            clearTimeout(timeLoadingInd);
+            timeLoadingInd = false;
+        }
+    };
 
 
 
@@ -17,27 +30,40 @@ Bulldozer.fn.loadingIndicator = new function () {
      */
 
     this.show = function () {
-        // Show the loading indicator and make it visible after 1 second
         var e = $("#bulldozer-loading-indicator");
-        if (!e.is(":visible")) {
-            e.css('opacity', '0').show();
-            timeLoadingInd = setTimeout(function () {
-                timeLoadingInd = false;
-                e.stop().fadeTo(300, 1);
-            }, 1000);
+        if (visible) {
+            return;
         }
+        visible = true;
+
+        // Stop the timeout
+        stopTimeout();
+
+        // Show the loading indicator and make it visible after 1 second
+        e.css('opacity', '0').show();
+        timeLoadingInd = setTimeout(function () {
+            timeLoadingInd = false;
+            e.css('opacity', '1').addClass('show');
+        }, 1000);
     };
 
     this.hide = function () {
-        // Stop the timeout
-        if (timeLoadingInd !== false) {
-            clearTimeout(timeLoadingInd);
-        }
-
-        // Hide the loading indicator
         var e = $("#bulldozer-loading-indicator");
-        if (e.is(":visible")) {
-            e.stop().fadeOut(300);
+        if (!visible) {
+            return;
         }
+        visible = false;
+
+        // Stop the timeout
+        stopTimeout();
+
+        // Remove the show class again.
+        e.removeClass('show');
+
+         // Hide the loading indicator after 2 seconds.
+        timeLoadingInd = setTimeout(function () {
+            timeLoadingInd = false;
+            e.hide();
+        }, 2000);
     };
 };

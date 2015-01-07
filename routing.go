@@ -22,11 +22,13 @@ var (
 //### Types ###//
 //#############//
 
-type RouteFunc func(*sessions.Session, *router.Data) (string, error)
+// RouteFunc returns the body output, a title and an error if present.
+type RouteFunc func(*sessions.Session, *router.Data) (string, string, error)
 
 type pageRoute struct {
 	UID          string
 	TemplateName string
+	Title        string
 }
 
 //##############//
@@ -55,8 +57,8 @@ func Route(path string, f RouteFunc) {
 //### Private ###//
 //###############//
 
-// execRoute executes the routes and returns the status code with the body string.
-func execRoute(s *sessions.Session, path string) (int, string) {
+// execRoute executes the routes and returns the status code with the body string and title.
+func execRoute(s *sessions.Session, path string) (int, string, string) {
 	// Release the previous temmplate session events.
 	template.ReleaseSessionEvents(s)
 
@@ -72,13 +74,13 @@ func execRoute(s *sessions.Session, path string) (int, string) {
 
 	switch v := data.Value.(type) {
 	case RouteFunc:
-		o, err := v(s, data)
+		o, title, err := v(s, data)
 		if err != nil {
 			// Execute the error template.
 			return global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': %v", path, err))
 		}
 
-		return 200, o
+		return 200, o, title
 	case *pageRoute:
 		// Execute the template
 		o, found, err := global.TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, v.UID)
@@ -92,7 +94,7 @@ func execRoute(s *sessions.Session, path string) (int, string) {
 			}
 		}
 
-		return 200, o
+		return 200, o, v.Title
 	default:
 		// Execute the error template.
 		return global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': unkown value type!", path))

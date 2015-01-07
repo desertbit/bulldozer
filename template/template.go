@@ -99,7 +99,8 @@ type Template struct {
 	// Delimiters
 	leftDelim, rightDelim string
 
-	// Style classes
+	// DOM specific stuff
+	staticDomID  string
 	styleClasses []string
 
 	// Events emitter
@@ -151,6 +152,13 @@ func (t *Template) Name() string {
 // UID returns the unique ID of the template.
 func (t *Template) UID() string {
 	return t.ns.uid
+}
+
+// SetStaticDomID sets a static DOM ID instead of using an automatic generated one.
+// The return value is the template, so calls can be chained.
+func (t *Template) SetStaticDomID(id string) *Template {
+	t.staticDomID = id
+	return t
 }
 
 // AddStyleClass adds a style class to the template div.

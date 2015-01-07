@@ -3,6 +3,17 @@
 ===========================
  
 
+
+
+* Load the title from the page template!!!!!
+* create a new main.go in the project folder if not present.
+* create settings file...
+* Handle socket.send return false
+* Hide the loading indicator after 10 seconds and show an error message!
+* If the main session ID is invalid, then perform a complete page reload!
+
+
+
 IMPORTANT
 =========
 * Webcrawler support & sitemaps.
@@ -10,6 +21,14 @@ IMPORTANT
 * Don't load scripts and javascripts twice if already added to the HTML head!
 * Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer.
 * Load a config in the Init() method if the file exists and the ENV is set.
+
+
+STYLE
+=====
+* Fix the overflow in the loading indicator.
+* Style the not found and error core template pages.
+* Implement the unused errorbox.
+* Add the description links to the noscript template: <a class="button">How to enable JS?</a><a class="button">What is JS?</a>
 
 
 SECURITY
@@ -33,6 +52,7 @@ Session Store
 
 General
 =======
+* Maybe remove the core templates from the bulldozer templates and readd them to the mainTemplate. This could be less overhead...
 * Watch for core template changes and reload them also.
 * Log sass build errors to a gui page...
 * Do some performance testing to check for bottlenecks (session store?)

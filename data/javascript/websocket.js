@@ -20,10 +20,6 @@ Bulldozer.fn.WebSocket = new function () {
     this.onMessage;
     this.onError;
 
-    this.reset = function() {
-        ws = undefined;
-    };
-
     this.type = function () {
         return "websocket";
     };
@@ -70,5 +66,14 @@ Bulldozer.fn.WebSocket = new function () {
     this.send = function (data) {
         // Send the data to the server
         ws.send(data);     
+    };
+
+    this.reset = function() {
+        // Close the websocket if defined.
+        if (ws) {
+            ws.close();
+        }
+
+        ws = undefined;
     };
 };

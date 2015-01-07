@@ -142,9 +142,6 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	// Check if this is a webcrawler request
 	_, isWebCrawler := req.URL.Query()[escapedFragment]
 
-	var statusCode int
-	var body string
-
 	// Create a new session object and
 	// obtain the unique socket session token.
 	session, accessToken, err := sessions.New(rw, req)
@@ -155,7 +152,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Execute the route
-	statusCode, body = execRoute(session, req.URL.Path)
+	statusCode, body, title := execRoute(session, req.URL.Path)
 
 	// TODO: Don't load session scripts and javascripts twice if already added to the HTML head!
 
@@ -163,6 +160,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	data := struct {
 		Session       *sessions.Session
 		AccessToken   string
+		Title         string
 		Body          template.HTML
 		JSLibs        []string
 		Styles        []string
@@ -172,6 +170,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	}{
 		session,
 		accessToken,
+		title,
 		template.HTML(body),
 		settings.Settings.StaticJavaScripts,
 		settings.Settings.StaticStyleSheets,
@@ -203,6 +202,7 @@ const htmlBody = `
 	<meta charset="utf-8">
 	<meta name="fragment" content="!">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{.Title}}</title>
 	{{range $style := .Styles}}
 		<link rel="stylesheet" type="text/css" href="{{$style}}">
 	{{end}}
@@ -224,8 +224,8 @@ const htmlBody = `
 			$("#bulldozer-script").remove();
 		});
 	</script></div>
-	<div id="bulldozer-loading-indicator">{{coreTemplate .Session "` + global.LoadingIndicatorTemplate + `"}}</div>
-	<div id="bulldozer-connection-lost">{{coreTemplate .Session "` + global.ConnectionLostTemplate + `"}}</div>
+	{{coreTemplate .Session "` + global.LoadingIndicatorTemplate + `"}}
+	{{coreTemplate .Session "` + global.ConnectionLostTemplate + `"}}
 	<div id="bulldozer-body">{{.Body}}</div>
 </body>
 </html>`

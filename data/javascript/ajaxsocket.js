@@ -23,7 +23,7 @@ Bulldozer.fn.AjaxSocket = new function () {
      * Private Methods
      */
 
-    var triggerError = function() {
+    var stopRequests = function() {
         // Kill the ajax requests
         if (pollXhr) {
             pollXhr.abort();
@@ -31,6 +31,11 @@ Bulldozer.fn.AjaxSocket = new function () {
         if (sendXhr) {
             sendXhr.abort();
         }
+    };
+
+    var triggerError = function() {
+        // Stop the ajax requests.
+        stopRequests();
 
         // Trigger the event
         Bulldozer.AjaxSocket.onError();
@@ -134,5 +139,10 @@ Bulldozer.fn.AjaxSocket = new function () {
     this.send = function (data) {
         // Always prepend the uid to the data
         send(uid + "&" + data);
+    };
+
+    this.reset = function() {
+        // Stop the ajax requests.
+        stopRequests();
     };
 };

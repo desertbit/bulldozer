@@ -7,9 +7,9 @@ package template
 
 import (
 	"bytes"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"strconv"
 )
 
@@ -38,8 +38,14 @@ func NewContext(s *sessions.Session, t *Template, id string, parentID string, va
 		t:        t,
 	}
 
-	// Calculate and set the unique DOM ID with the session encryption key
-	c.domID = utils.EncryptDomId(c.s.DomEncryptionKey(), "i_"+c.id)
+	// Set the DOM ID
+	if len(t.staticDomID) == 0 {
+		// Calculate and set the unique DOM ID with the session encryption key
+		c.domID = utils.EncryptDomId(c.s.DomEncryptionKey(), "i_"+c.id)
+	} else {
+		// Use the static DOM ID.
+		c.domID = t.staticDomID
+	}
 
 	// Add the additional style classes if present.
 	if len(vars) >= 1 {

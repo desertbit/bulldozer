@@ -1,0 +1,161 @@
+/*
+ * Loading Indicator
+ */
+
+// Color variables
+$overlay-color: #FFF;
+
+//Spinner colors
+$loading-main-color: #e5791d;
+$loading-secondary-color: #eee;
+
+#bulldozer-loading-indicator {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+
+    // Overlay
+    .overlay {
+        overflow: hidden;
+        pointer-events: all;
+        position: fixed;
+        top: 0;
+        bottom: 110%;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: 10000;
+        background-color: $overlay-color;
+        
+                
+        // Transitions
+        -webkit-transition: transform 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+        -moz-transition:-moz-transform 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+        transition: transform 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+        
+        // Slide from below animation
+        -webkit-transform: translateY(30%);
+        -moz-transform: translateY(30%);
+        -ms-transform: translateY(30%);
+        transform: translateY(30%);
+        opacity: 0.0;
+        
+    
+        // Loading spinner 
+        .loading {
+            position: absolute;
+            margin-left: -63px;
+            margin-top:  -63px;
+            border-bottom: 6px solid $loading-secondary-color;
+            border-left: 6px solid $loading-secondary-color;
+            border-right: 6px solid $loading-main-color;
+            border-top: 6px solid $loading-main-color;
+            border-radius: 100%;
+            top: 50%;
+            left: 50%;
+            height: 125px;
+            width: 125px;
+            -webkit-animation: 0;
+            -moz-animation: 0;
+            -ms-animation: 0;
+            -o-animation: 0;
+            animation: 0;
+        }
+
+
+        // Spinning animation declaration
+        @keyframes "spin" {
+         from {
+            -webkit-transform: rotate(0deg);
+            -moz-transform: rotate(0deg);
+            -o-transform: rotate(0deg);
+            -ms-transform: rotate(0deg);
+            transform: rotate(0deg);
+         }
+         to {
+            -webkit-transform: rotate(559deg);
+            -moz-transform: rotate(559deg);
+            -o-transform: rotate(559deg);
+            -ms-transform: rotate(559deg);
+            transform: rotate(559deg);
+         }
+        }
+
+        @-moz-keyframes spin {
+         from {
+           -moz-transform: rotate(0deg);
+           transform: rotate(0deg);
+         }
+         to {
+           -moz-transform: rotate(559deg);
+           transform: rotate(559deg);
+         }
+        }
+
+        @-webkit-keyframes "spin" {
+         from {
+           -webkit-transform: rotate(0deg);
+           transform: rotate(0deg);
+         }
+         to {
+           -webkit-transform: rotate(559deg);
+           transform: rotate(559deg);
+         }
+        }
+
+        @-ms-keyframes "spin" {
+         from {
+           -ms-transform: rotate(0deg);
+           transform: rotate(0deg);
+         }
+         to {
+           -ms-transform: rotate(559deg);
+           transform: rotate(559deg);
+         }
+        }
+
+        @-o-keyframes "spin" {
+         from {
+           -o-transform: rotate(0deg);
+           transform: rotate(0deg);
+         }
+         to {
+           -o-transform: rotate(559deg);
+           transform: rotate(559deg);
+         }
+        }
+    }
+
+    // Set this class for the overflow to be visible
+    &.show .overlay {
+        -webkit-transform: translateY(0%);
+        -moz-transform: translateY(0%);
+        -ms-transform: translateY(0%);
+        transform: translateY(0%);
+        opacity: 1;
+        bottom: 0%;
+        
+        // Transitions
+        -webkit-transition: transform 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+        -moz-transition:-moz-transform 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+        transition: transform 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.5s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+   
+        .loading {
+            -webkit-animation: spin 1s infinite ease-in-out;
+            -moz-animation: spin 1s infinite ease-in-out;
+            -ms-animation: spin 1s infinite ease-in-out;
+            -o-animation: spin 1s infinite ease-in-out;
+            animation: spin 1s infinite ease-in-out;
+        }
+    }
+}

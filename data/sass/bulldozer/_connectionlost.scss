@@ -1,0 +1,104 @@
+/*
+ * Connection Lost
+ */
+
+#bulldozer-connection-lost {
+    display: none;
+    position: fixed;
+    z-index: 10001;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+
+    .connection-lost {
+        position: fixed;
+        display: table;
+        pointer-events: none;
+        width: 96%;
+        right: 2%;
+        top: 30px;
+        cursor: pointer;
+        
+        // Display different size for larger screens
+        @media screen and (min-width: 500px) {
+            right: 20px;
+            top: 50px;
+            max-width: 400px;
+            min-width: 300px;
+        }
+        
+        -webkit-box-shadow: 0 0px 12px rgba(0,0,0,.1);
+        box-shadow: 0 0px 12px rgba(0,0,0,.1);
+        background-color: #458ce3;
+        
+        -webkit-transition: transform 0.3s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.3s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+        -moz-transition: -moz-transform 0.3s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.3s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+        transition: transform 0.3s cubic-bezier(0.25, 0.5, 0.5, 0.9), opacity 0.3s cubic-bezier(0.25, 0.5, 0.5, 0.9);
+        
+        -webkit-transform: translateX(20%);
+        -moz-transform: translateX(20%);
+        -ms-transform: translateX(20%);
+        transform: translateX(20%);
+        opacity: 0;
+        
+        i, span {
+            display: table-cell;
+            vertical-align: middle;
+            padding: 15px;
+            color: white;
+        }
+        
+        i {
+            background-color: lighten(#458ce3, 8%);
+            color: #458ce3;
+            width: 30px;
+        }
+
+        p, small {
+            color: white;
+        }
+
+        &.connecting {
+            cursor: default;
+            background-color: #E38545;
+
+            i {
+                background-color: lighten(#E38545, 8%);
+                color: #E38545;
+            }
+        }
+
+        &.fail {
+            background-color: #FB4111;
+
+            i {
+                background-color: lighten(#FB4111, 8%);
+                color: #FB4111;
+            }
+        }
+
+        &.success {
+            background-color: #51B557;
+
+            i {
+                background-color: lighten(#51B557, 8%);
+                color: #51B557;
+            }
+        }
+    }
+
+    &.show .connection-lost {
+        -webkit-transform: translateX(0);
+        -moz-transform: translateX(0);
+        -ms-transform: translateX(0);
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: all;
+    }
+}

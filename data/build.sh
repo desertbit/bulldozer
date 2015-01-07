@@ -33,6 +33,7 @@ echo "#> Building and compressing bulldozer.js"
 cat ./javascript/bulldozer.js > ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/utils.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/loadingindicator.js)" ./resources/js/bulldozer.js
+appendData "$(cat ./javascript/connectionlost.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/websocket.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/ajaxsocket.js)" ./resources/js/bulldozer.js
 appendData "$(cat ./javascript/socket.js)" ./resources/js/bulldozer.js

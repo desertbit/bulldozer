@@ -38,112 +38,13 @@ code {
     color: #505050;
 }
 
-#bulldozer-script {
-	display: none;
-}
-
-// TODO: Remove old stuff when ported...
-
-#goji-body,
-#goji-pages-body,
-.goji-page {
+#bulldozer-body,
+.bulldozer-page {
 	position: relative;
 	width: 100%;
 	height: 100%;
 }
 
-
-
-/*
- * Connection Lost
- */
-
-#bulldozer-connection-lost {
+#bulldozer-script {
 	display: none;
-	position: fixed;
-	z-index: 10001;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	right: 0;
-	left: 0;
-	bottom: 0;
-	margin: 0;
-	padding: 0;
-}
-
-
-/*
- * Loading Indicator
- */
-
- #bulldozer-loading-indicator
-{
-	display: none;
-	position: fixed;
-	z-index: 10000;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	right: 0;
-	left: 0;
-	bottom: 0;
-	margin: 0;
-	padding: 0;
-	background-color: rgba(0, 0, 0, 0.3);
-}
-
-#bulldozer-loading-indicator .spinner
-{
-	position: absolute;
-	top: 0;
-	right: 0;
-	width: 60px;
-	height: 60px;
-	margin: 25px 25px 0 0;
-	padding: 0;
-	background-color: #FF5400;
-	color: #F5F5F5;
-	text-align: center;
-	vertical-align: middle;
-	font-size: 40px;
-	line-height: 60px;
-	-webkit-border-radius: 7px;
-	-moz-border-radius: 7px;
-	border-radius: 7px;
-}
-
-/* Mobile Mode */
-
-@media all and (max-width:750px)
-{
-	#bulldozer-loading-indicator .spinner
-	{
-		top:0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		margin: auto;
-	}
-}
-
-
-/*
- * Goji Error Page
- */
-
-.goji-error-page, .goji-not-found-page {
-	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABZ0RVh0Q3JlYXRpb24gVGltZQAxMC8yOS8xMiKqq3kAAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzVxteM2AAABHklEQVRIib2Vyw6EIAxFW5idr///Qx9sfG3pLEyJ3tAwi5EmBqRo7vHawiEEERHS6x7MTMxMVv6+z3tPMUYSkfTM/R0fEaG2bbMv+Gc4nZzn+dN4HAcREa3r+hi3bcuu68jLskhVIlW073tWaYlQ9+F9IpqmSfq+fwskhdO/AwmUTJXrOuaRQNeRkOd5lq7rXmS5InmERKoER/QMvUAPlZDHcZRhGN4CSeGY+aHMqgcks5RrHv/eeh455x5KrMq2yHQdibDO6ncG/KZWL7M8xDyS1/MIO0NJqdULLS81X6/X6aR0nqBSJcPeZnlZrzN477NKURn2Nus8sjzmEII0TfMiyxUuxphVWjpJkbx0btUnshRihVv70Bv8ItXq6Asoi/ZiCbU6YgAAAABJRU5ErkJggg==);
-	padding: 40px 15px;
-	text-align: center;
-
-	.error-details, h1, h2 {
-		text-align:center;
-	}
-
-	.error-actions {
-		margin-top:15px;
-		margin-bottom:15px;
-		text-align:center;
-	}
 }

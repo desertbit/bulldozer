@@ -6,8 +6,8 @@
 package template
 
 import (
-	"fmt"
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"fmt"
 	"strings"
 )
 
