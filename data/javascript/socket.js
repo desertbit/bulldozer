@@ -48,6 +48,14 @@ Bulldozer.fn.socket = new function () {
         return "sid=" + sid + "&tok=" + token + "&" + data;
     };
 
+    var stopConnectionLostTimeout = function() {
+        // Stop the timeout timer
+        if (timeoutConnectionLost !== false) {
+            clearTimeout(timeoutConnectionLost);
+            timeoutConnectionLost = false;
+        }
+    };
+
     var resetConnectionLostTimeout = function() {
         // Stop the timeout timer
         if (timeoutConnectionLost !== false) {
@@ -144,6 +152,9 @@ Bulldozer.fn.socket = new function () {
         // Hide the connection lost widget.
         Bulldozer.connectionLost.hide();
 
+        // Reset the timeout timer
+        resetConnectionLostTimeout();
+
         return true;
     };
 
@@ -154,6 +165,9 @@ Bulldozer.fn.socket = new function () {
 
         // Notify, that the connection failed.
         Bulldozer.connectionLost.reconnectFailed();
+
+        // Stop the reset timeout timer.
+        stopConnectionLostTimeout();
 
         // Force fallback flag.
         var fallback = false;
@@ -194,6 +208,9 @@ Bulldozer.fn.socket = new function () {
             console.log("empty session ID or socket access token!");
             return;
         }
+
+        // Stop the reset timeout timer.
+        stopConnectionLostTimeout();
 
         // Set the session ID and token
         sid = sessionID;
