@@ -44,6 +44,15 @@ Bulldozer.fn.loadingIndicator = new function () {
         timeLoadingInd = setTimeout(function () {
             timeLoadingInd = false;
             e.css('opacity', '1').addClass('show');
+
+            // Hide the loading indicator after 25 seconds and display an error message.
+            timeLoadingInd = setTimeout(function () {
+                timeLoadingInd = false;
+                Bulldozer.loadingIndicator.hide();
+                
+                // Show an error message box
+                Bulldozer.utils.showErrorMessageBox("Error", "Failed to perform the request. Timeout reached. Please try again...");  
+            }, 25000);
         }, 1000);
     };
 

@@ -1,16 +1,16 @@
 ===========================
 === Bulldozer TODO List ===
 ===========================
- 
-* create a new main.go in the project folder if not present.
-* create settings file...
+
+
 * Handle socket.send return false
-* Hide the loading indicator after 10 seconds and show an error message!
 
 
 
 IMPORTANT
 =========
+* create a new main.go in the project folder if not present.
+* create settings file...
 * Webcrawler support & sitemaps.
 * Finish the must action in the template execute method call. Also add an error action.
 * Don't load scripts and javascripts twice if already added to the HTML head!
