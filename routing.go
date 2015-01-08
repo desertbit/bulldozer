@@ -35,11 +35,12 @@ type pageRoute struct {
 //### Public ###//
 //##############//
 
-func RoutePage(path string, pageTemplate string, UID string) {
+func RoutePage(path string, pageTitle string, pageTemplate string, UID string) {
 	// Create a new page route value.
 	p := &pageRoute{
 		UID:          UID,
 		TemplateName: pageTemplate,
+		Title:        pageTitle,
 	}
 
 	// Add the value to the router.

@@ -21,6 +21,7 @@ Bulldozer.fn.socket = new function () {
 
     var SocketData = {
         InvalidRequest:     "invalid_request",
+        RefreshRequest:     "req_refresh",
         Ping:               "ping",
         Pong:               "pong"
     };
@@ -216,6 +217,8 @@ Bulldozer.fn.socket = new function () {
         sid = sessionID;
         token = socketAccessToken;
 
+        var waitDuration = 0;
+
         // Reset the previous socket if set
         if (socket) {
             socket.onOpen = undefined;
@@ -223,56 +226,63 @@ Bulldozer.fn.socket = new function () {
             socket.onMessage = undefined;
             socket.onError = undefined;
 
+            // Reset the socket.
             socket.reset();
+
+            // Set the wait duration to a short timeout.
+            waitDuration = 300;
         }
 
-        // Choose the socket layer depending on the browser support
-        if (window["WebSocket"] && forceFallback !== true) {
-            socket = Bulldozer.WebSocket;
-        } else {
-            socket = Bulldozer.AjaxSocket;
-        }
-
-
-        // Set the socket events
-        socket.onOpen = function() {
-            // Initialize the connection
-            socket.send(prepareSendMsg(""));
-        };
-
-        socket.onClose = function() {
-            connectionError();
-        };
-
-        socket.onError = function() {
-            console.log(socket.type() + ": a connection error occurred!");
-            connectionError();
-        };
-
-        socket.onMessage = function(data) {
-            // Initialize the socket session
-            if (!handleInitializeSession(data)) {
-                // Show an error message box
-                Bulldozer.utils.showErrorMessageBox("Error", "Failed to initialize web session! Please reload this webpage and try again...");
-                return;
+        // Wait for a short timeout, if set.
+        setTimeout(function() {
+            // Choose the socket layer depending on the browser support
+            if (window["WebSocket"] && forceFallback !== true) {
+                socket = Bulldozer.WebSocket;
+            } else {
+                socket = Bulldozer.AjaxSocket;
             }
 
-            // Trigger the custom bulldozer ready event if this
-            // is the first successfull socket connection.
-            if (!documentReady) {
-                documentReady = true;
-                $(document).triggerHandler('bulldozer.ready');
-            }
 
-            // On success update the callback which handles incomming messages
-            socket.onMessage = function(data) {
-                handleReceivedData(data);
+            // Set the socket events
+            socket.onOpen = function() {
+                // Initialize the connection
+                socket.send(prepareSendMsg(""));
             };
-        };
+
+            socket.onClose = function() {
+                connectionError();
+            };
+
+            socket.onError = function() {
+                console.log(socket.type() + ": a connection error occurred!");
+                connectionError();
+            };
+
+            socket.onMessage = function(data) {
+                // Initialize the socket session
+                if (!handleInitializeSession(data)) {
+                    // Show an error message box
+                    Bulldozer.utils.showErrorMessageBox("Error", "Failed to initialize web session! Please reload this webpage and try again...");
+                    return;
+                }
+
+                // Trigger the custom bulldozer ready event if this
+                // is the first successfull socket connection.
+                if (!documentReady) {
+                    documentReady = true;
+                    $(document).triggerHandler('bulldozer.ready');
+                }
+
+                // On success update the callback which handles incomming messages
+                socket.onMessage = function(data) {
+                    handleReceivedData(data);
+                };
+            };
 
 
-        // Connect to the server
-        socket.open();
+            // Connect to the server
+            socket.open();
+        }, waitDuration);
     };
 
     // Send the data object to the server. The data object is converted into a string.
@@ -305,6 +315,12 @@ Bulldozer.fn.socket = new function () {
             dataType: "text",
             timeout: 7000,
             success: function (data) {
+                if (data === SocketData.RefreshRequest) {
+                    // Reload the page.
+                    window.location.reload();
+                    return;
+                }
+
                 // Split the received data
                 var list = data.split('&');
                 

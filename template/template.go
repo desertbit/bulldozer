@@ -403,7 +403,7 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 		if err != nil {
 			// Don't exit on error, because the other templates should be loaded anyway.
 			// Just add the error and return it at the end.
-			errorMessage += fmt.Sprint(err) + "\n"
+			errorMessage += fmt.Sprintf("'%s': %v", filename, err) + "\n"
 			continue
 		}
 	}

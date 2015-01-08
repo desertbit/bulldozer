@@ -21,6 +21,7 @@ const (
 	escapedFragment        = "_escaped_fragment_"
 	postKeyInstanceID      = "id"
 	reconnectDataDelimiter = "&"
+	responseRequestRefresh = "req_refresh"
 )
 
 var (
@@ -109,7 +110,7 @@ func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
 
 	// Create a new session object, pass the instance ID and
 	// obtain the unique socket session token.
-	session, accessToken, err := sessions.New(rw, req, instanceID)
+	session, accessToken, isNewSession, err := sessions.New(rw, req, instanceID)
 	if err != nil {
 		// Log the error
 		log.L.Error("reconnect session error: %v", err)
@@ -119,8 +120,17 @@ func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Send the new session ID and the socket access token to the client.
-	responseData := session.SessionID() + reconnectDataDelimiter + accessToken
+	// Set the response data.
+	var responseData string
+	if isNewSession {
+		// This is a new session. The previous session was invalid or expired.
+		// Tell the client to perform a complete refresh, because previous event keys are invalid.
+		responseData = responseRequestRefresh
+	} else {
+		// Send the new session ID and the socket access token to the client.
+		responseData = session.SessionID() + reconnectDataDelimiter + accessToken
+	}
+
 	rw.Write([]byte(responseData))
 }
 
@@ -144,7 +154,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 
 	// Create a new session object and
 	// obtain the unique socket session token.
-	session, accessToken, err := sessions.New(rw, req)
+	session, accessToken, _, err := sessions.New(rw, req)
 	if err != nil {
 		log.L.Error("new session error: %v", err)
 		http.Error(rw, "Internal Server Error", 500)

@@ -2,15 +2,10 @@
 === Bulldozer TODO List ===
 ===========================
  
-
-
-
-* Load the title from the page template!!!!!
 * create a new main.go in the project folder if not present.
 * create settings file...
 * Handle socket.send return false
 * Hide the loading indicator after 10 seconds and show an error message!
-* If the main session ID is invalid, then perform a complete page reload!
 
 
 

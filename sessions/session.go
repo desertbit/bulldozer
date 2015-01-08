@@ -406,11 +406,12 @@ func Release() {
 // active session map. The session cookie is extracted from the request
 // and the the new session is assigned to the server session.
 // If no cookie is set, a new one will be assigned.
-// A unique socket access token is returned.
+// A unique socket access token is returned with a boolean indicating
+// if a new store session was created or if a previous store session was used.
 // Use this token to connect to the session socket.
 // One optional parameter can be passed, which set's the instance ID.
 // Otherwise a new instance ID is generated.
-func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, string, error) {
+func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, string, bool, error) {
 	// Get the store session
 	var err error
 	var storeSession *store.Session
@@ -418,7 +419,7 @@ func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, s
 	for {
 		storeSession, newStoreSessionCreated, err = getStoreSession(rw, req)
 		if err != nil {
-			return nil, "", err
+			return nil, "", false, err
 		}
 
 		// Add a lock for this new session
@@ -457,7 +458,7 @@ func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, s
 	if !ok {
 		// Remove the lock for this store session again.
 		storeSession.Unlock()
-		return nil, "", fmt.Errorf("failed to assert DOM encryption key to string: %v", domEncryptionKeyI)
+		return nil, "", false, fmt.Errorf("failed to assert DOM encryption key to string: %v", domEncryptionKeyI)
 	}
 
 	// Set the instance ID if passed as optional parameter or
@@ -546,7 +547,7 @@ func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, s
 	}()
 
 	// Return the new created session
-	return s, s.socketAccess.Token, nil
+	return s, s.socketAccess.Token, newStoreSessionCreated, nil
 }
 
 // GetSession returns a session with the given session ID.
