@@ -241,4 +241,6 @@ type settings struct {
 	// Don't manipulate this slices after Bulldozer initialization!
 	StaticJavaScripts []string
 	StaticStyleSheets []string
+
+	DisallowedRobotsUrls []string
 }

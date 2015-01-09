@@ -12,9 +12,9 @@ import (
 	"sync"
 )
 
-//##############//
-//### Public ###//
-//##############//
+//#############//
+//### Types ###//
+//#############//
 
 type Params map[string]string
 
@@ -25,8 +25,15 @@ type Data struct {
 	Params   Params
 }
 
+//###################//
+//### Router type ###//
+//###################//
+
 type Router struct {
 	route *routePart
+
+	paths      []string
+	pathsMutex sync.Mutex
 }
 
 func New() *Router {
@@ -60,6 +67,9 @@ func (r *Router) Route(path string, value interface{}) {
 		// Set the value to the root part.
 		r.route.value = value
 
+		// Add the path to the paths slice.
+		r.addPath(path)
+
 		return
 	}
 
@@ -67,6 +77,9 @@ func (r *Router) Route(path string, value interface{}) {
 	if overwritten := r.route.Set(parts, value); overwritten {
 		log.L.Warning("router: overwriting already set route path: '%s'", path)
 	}
+
+	// Add the path to the paths slice.
+	r.addPath(path)
 }
 
 func (r *Router) Match(path string) *Data {
@@ -92,6 +105,31 @@ func (r *Router) Match(path string) *Data {
 	}
 
 	return nil
+}
+
+// Paths returns all the current set route paths.
+func (r *Router) Paths() []string {
+	// Lock the mutex.
+	r.pathsMutex.Lock()
+	defer r.pathsMutex.Unlock()
+
+	return r.paths
+}
+
+func (r *Router) addPath(path string) {
+	// Lock the mutex.
+	r.pathsMutex.Lock()
+	defer r.pathsMutex.Unlock()
+
+	// Check if already present in the slice.
+	for _, p := range r.paths {
+		if p == path {
+			return
+		}
+	}
+
+	// Add the path to the slice.
+	r.paths = append(r.paths, path)
 }
 
 //###############//

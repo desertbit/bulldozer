@@ -9,7 +9,6 @@ IMPORTANT
 * Handle Bulldozer.socket.send return false.
 * create a new main.go in the project folder if not present.
 * create settings file...
-* Webcrawler support & sitemaps.
 * Finish the must action in the template execute method call. Also add an error action.
 * Don't load scripts and javascripts twice if already added to the HTML head!
 * Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer.
@@ -20,7 +19,7 @@ IMPORTANT
 
 STYLE
 =====
-* Fix the overflow in the loading indicator.
+* Fix the overflow in the loading indicator (Is this still present?).
 * Style the not found and error core template pages.
 * Implement the unused errorbox.
 * Add the description links to the noscript template: <a class="button">How to enable JS?</a><a class="button">What is JS?</a>

@@ -49,7 +49,8 @@ func init() {
 //###############//
 
 func serve() error {
-	// Create the default html handler
+	// Create the html handlers.
+	setWebCrawlerHtmlFuncs()
 	http.HandleFunc("/bulldozer/reconnect", reconnectSessionFunc)
 	http.HandleFunc("/", handleHtmlFunc)
 
