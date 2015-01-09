@@ -165,7 +165,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Execute the route
-	statusCode, body, title := execRoute(session, req.URL.Path)
+	statusCode, body, title, _ := execRoute(session, req.URL.Path)
 
 	// TODO: Don't load session scripts and javascripts twice if already added to the HTML head!
 

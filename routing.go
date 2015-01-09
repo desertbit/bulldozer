@@ -18,6 +18,8 @@ import (
 var (
 	mainRouter *router.Router = router.New()
 
+	valueKeyCurrentPath = "bzrCurrentPath"
+
 	requestTypeRoute = "route"
 	keyRoutePath     = "path"
 )
@@ -64,12 +66,54 @@ func Route(path string, f RouteFunc) {
 	mainRouter.Route(path, f)
 }
 
+// GetCurrentPath returns the current session route path.
+func GetCurrentPath(s *sessions.Session) string {
+	// Get the session current path. Create and add it, if not present.
+	i, _ := s.Get(valueKeyCurrentPath, func() interface{} {
+		return "/"
+	})
+
+	// Assertion
+	path, ok := i.(string)
+	if !ok {
+		// Log the error
+		log.L.Error("get currrent session path: failed to assert session value to string!")
+
+		// Just set it to the session.
+		path = "/"
+		s.Set(valueKeyCurrentPath, path)
+	}
+
+	return path
+}
+
+// ReloadPage reloads the current session page.
+func ReloadPage(s *sessions.Session) {
+	Navigate(s, GetCurrentPath(s))
+}
+
+// Navigate navigates the session to the given route path.
+func Navigate(s *sessions.Session, path string) {
+	// Execute the route.
+	_, body, title, path := execRoute(s, path)
+
+	// Create the client command.
+	cmd := `Bulldozer.render.page('` +
+		utils.EscapeJS(body) + `','` +
+		utils.EscapeJS(title) + `','` +
+		utils.EscapeJS(path) + `');`
+
+	// Send the new render request to the client.
+	s.SendCommand(cmd)
+}
+
 //###############//
 //### Private ###//
 //###############//
 
-// execRoute executes the routes and returns the status code with the body string and title.
-func execRoute(s *sessions.Session, path string) (int, string, string) {
+// execRoute executes the routes and returns the status code
+// with the body string, the title and the current path. The path might have changed...
+func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body string, title string, path string) {
 	// Recover panics and log the error message.
 	defer func() {
 		if e := recover(); e != nil {
@@ -77,45 +121,58 @@ func execRoute(s *sessions.Session, path string) (int, string, string) {
 		}
 	}()
 
+	// Set the default status code value.
+	statusCode = 200
+
 	// Release the previous temmplate session events.
 	template.ReleaseSessionEvents(s)
 
 	// Transform the path to a valid path.
-	path = utils.ToPath(path)
+	path = utils.ToPath(requestedPath)
+
+	// Set the path to the current session path.
+	s.Set(valueKeyCurrentPath, path)
 
 	// Execute the route.
 	data := mainRouter.Match(path)
 	if data == nil {
 		// Execute the not found template.
-		return global.ExecNotFoundTemplate(s)
+		statusCode, body, title = global.ExecNotFoundTemplate(s)
+		return
 	}
+
+	var err error
 
 	switch v := data.Value.(type) {
 	case RouteFunc:
-		o, title, err := v(s, data)
+		body, title, err = v(s, data)
 		if err != nil {
 			// Execute the error template.
-			return global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': %v", path, err))
+			statusCode, body, title = global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': %v", path, err))
+			return
 		}
 
-		return 200, o, title
+		return
 	case *pageRoute:
 		// Execute the template
 		o, found, err := global.TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, v.UID, "bulldozer-page")
 		if err != nil {
 			if found {
 				// Execute the error template.
-				return global.ExecErrorTemplate(s, fmt.Sprintf("page '%s': '%s': %v", v.TemplateName, path, err))
+				statusCode, body, title = global.ExecErrorTemplate(s, fmt.Sprintf("page '%s': '%s': %v", v.TemplateName, path, err))
+				return
 			} else {
 				// Execute the not found template.
-				return global.ExecNotFoundTemplate(s)
+				statusCode, body, title = global.ExecNotFoundTemplate(s)
+				return
 			}
 		}
 
-		return 200, o, v.Title
+		return 200, o, v.Title, path
 	default:
 		// Execute the error template.
-		return global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': unkown value type!", path))
+		statusCode, body, title = global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': unkown value type!", path))
+		return
 	}
 }
 
@@ -127,17 +184,8 @@ func sessionRequestRoute(s *sessions.Session, data map[string]string) error {
 		return fmt.Errorf("failed to execute route: missing route path!")
 	}
 
-	// Execute the route.
-	_, body, title := execRoute(s, path)
-
-	// Create the client command.
-	cmd := `Bulldozer.render.page('` +
-		utils.EscapeJS(body) + `','` +
-		utils.EscapeJS(title) + `','` +
-		utils.EscapeJS(path) + `');`
-
-	// Send the new render request to the client.
-	s.SendCommand(cmd)
+	// Navigate to the path.
+	Navigate(s, path)
 
 	return nil
 }
