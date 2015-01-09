@@ -410,7 +410,8 @@ func Release() {
 // if a new store session was created or if a previous store session was used.
 // Use this token to connect to the session socket.
 // One optional parameter can be passed, which set's the instance ID.
-// Otherwise a new instance ID is generated.
+// A new instance ID is generated if no instance ID is passed or if the
+// instance ID string length is invalid.
 func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, string, bool, error) {
 	// Get the store session
 	var err error

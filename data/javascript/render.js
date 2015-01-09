@@ -13,10 +13,8 @@ Bulldozer.fn.render = new function () {
      * Private Variables
      */
 
-     var currentPage;
      var currentUrl;
      var manualHistoryChange = false;
-     var isInitialized = false;
 
 
 
@@ -38,45 +36,15 @@ Bulldozer.fn.render = new function () {
         }
 
         // Load the page
-        Bulldozer.core.loadPage(hash);
+        Bulldozer.core.navigate(hash);
     });
-
-    var createMissingWrappers = function() {
-        var bulldozerBody = $("#bulldozer-body");
-
-        if (!isInitialized) {
-            // Empty the bulldozer body by simply replacing it.
-            bulldozerBody.replaceWith('<div id="bulldozer-body"></div>');
-
-            // Update the object
-            bulldozerBody = $("#bulldozer-body");
-
-            // Update the flag
-            isInitialized = true;
-        }
-
-        // Create the top template if not present
-        if ($("#bulldozer-top").length <= 0) {
-            bulldozerBody.append('<div id="bulldozer-top"></div>');
-        }
-
-        // Create the page body if not present
-        if ($("#bulldozer-pages-body").length <= 0) {
-            bulldozerBody.append('<div id="bulldozer-pages-body"></div>');
-        }
-
-        // Create the bottom template if not present
-        if ($("#bulldozer-bottom").length <= 0) {
-            bulldozerBody.append('<div id="bulldozer-bottom"></div>');
-        }
-    };
 
 
     /*
      * Public Methods
      */
 
-    this.currentPageUrl = function() {
+    this.currentUrl = function() {
         return currentUrl;
     };
 
@@ -98,82 +66,45 @@ Bulldozer.fn.render = new function () {
         Kepler.init();
     };
 
-    this.top = function (body) {
-        // Get the pages body
-        var t = $("#bulldozer-top");
 
-        // Check if it exists. Otherwise create it.
-        if (t.length <= 0) {
-            createMissingWrappers();
-            t = $("#bulldozer-top");
-        }
 
-        // Update the top template
-        t.html(body);
-    };
-
-    this.bottom = function (body) {
-        // Get the pages body
-        var t = $("#bulldozer-bottom");
-
-        // Check if it exists. Otherwise create it.
-        if (t.length <= 0) {
-            createMissingWrappers();
-            t = $("#bulldozer-bottom");
-        }
-
-        // Update the bottom template
-        t.html(body);
-    };
-
-    this.page = function (pageId, pageBody, title, url) {
+    this.page = function (body, title, url) {
         // Trigger the global js unload event
         $(document).triggerHandler('bulldozer.execJsUnload');
 
-        // Hide all pages
-        //$(".bulldozer-page").hide();
-        // Remove all other pages. The dynamic hide is currently deactivated
-        $(".bulldozer-page").remove();
+        var blzBody = $("#bulldozer-body");
 
-        // Do some cleanup if the current page is set
-        if (currentPage && currentPage.length > 0) {
+        // Do some cleanup
+        if (blzBody && body.length > 0) {
             // Unbind all events of the current page and all its children
-            currentPage.off();
-            currentPage.find("*").off();
+            blzBody.off();
+            blzBody.find("*").off();
         }
 
         // Remove any element in the body tag that doesn't belong there
-        var id;
-        $('body').children().each(function () {
-            id = $(this).attr('id');
-            if (id === "bulldozer-loading-indicator" || id === "bulldozer-body") { return; }
+        var el, id;
+        $('body').children().each(function() {
+            el = $(this);
+            id = el.attr('id');
+            if (id === "bulldozer-loading-indicator"
+                || id === "bulldozer-body"
+                || id === "bulldozer-connection-lost"
+                || (el.is('noscript') && el.has('#bulldozer-noscript')))
+            {
+                return;
+            }
+            
             $(this).remove();
         });
 
-        // Check if the page div is already present
-        if($("#bulldozer-pages-body > #" + pageId).length > 0) {
-            // Replace the page with the new page body
-            $("#" + pageId).replaceWith(pageBody);
-        }
-        else {
-            // Get the pages body
-            var pagesBody = $("#bulldozer-pages-body");
+        // Create the new body.
+        var newBlzBody = $('<div id="bulldozer-body"></div>');
 
-            // Check if it exists. Otherwise create it.
-            if (pagesBody.length <= 0) {
-                createMissingWrappers();
-                pagesBody = $("#bulldozer-pages-body");
-            }
+        // Append the page body.
+        newBlzBody.append(body);
 
-            // Add the page body
-            pagesBody.append(pageBody);
-        }
-
-        // Set the new current page
-        currentPage = $("#" + pageId);
-
-        // Finally show the current page
-        currentPage.show();
+        // Replace the bulldozer body.
+        blzBody.replaceWith(newBlzBody);
 
         // Scroll to the top of the page
         window.scrollTo(0, 0);

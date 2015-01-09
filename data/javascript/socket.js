@@ -62,9 +62,6 @@ Bulldozer.fn.socket = new function () {
         if (timeoutConnectionLost !== false) {
             clearTimeout(timeoutConnectionLost);
         }
-        
-        // Hide the connection lost widget.
-        Bulldozer.connectionLost.hide();
 
         // Start the timer again.
         // A Ping message should arrive each 30 seconds from the server.
@@ -102,13 +99,13 @@ Bulldozer.fn.socket = new function () {
             token = data.substring(0, i);
             data = data.substr(i + 1);
 
+            // Reset the timeout timer
+            resetConnectionLostTimeout();
+
             // Check if the server requests a pong reply
             if (data === SocketData.Ping) {
                 // Send the pong message.
                 socket.send(prepareSendMsg(SocketKey.Task + "=" + SocketData.Pong + "&"));
-
-                // Reset the timeout timer
-                resetConnectionLostTimeout();
                 return;
             }
 
@@ -147,14 +144,14 @@ Bulldozer.fn.socket = new function () {
         // Reset the reconnect count.
         reconnectCount = 0;
 
+        // Reset the timeout timer
+        resetConnectionLostTimeout();
+
         // Notify, that the reconnect was successfully.
         Bulldozer.connectionLost.reconnectSuccess();
 
         // Hide the connection lost widget.
         Bulldozer.connectionLost.hide();
-
-        // Reset the timeout timer
-        resetConnectionLostTimeout();
 
         return true;
     };

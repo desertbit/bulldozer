@@ -56,7 +56,7 @@ Bulldozer.fn.core = new function () {
             e.preventDefault();
 
             if (url) {
-                Bulldozer.core.loadPage(url);
+                Bulldozer.core.navigate(url);
             }
 
             return false;
@@ -69,11 +69,11 @@ Bulldozer.fn.core = new function () {
      * Public Methods
      */
 
-    this.loadDefaultPage = function () {
-        this.loadPage("/");
+    this.navigateToDefault = function () {
+        this.navigate("/");
     };
 
-    this.loadPage = function (path) {
+    this.navigate = function (path) {
         // Show the loading indicator
         Bulldozer.loadingIndicator.show();
 
@@ -83,7 +83,7 @@ Bulldozer.fn.core = new function () {
         };
 
         // Finally send the data
-        Bulldozer.socket.send('page', data);
+        Bulldozer.socket.send('route', data);
     };
 
     this.emit = function () {

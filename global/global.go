@@ -34,6 +34,10 @@ var (
 //##############//
 
 func Init() error {
+	//###
+	//### Load the Templates.
+	//###
+
 	// Create the store paths.
 	paths := []string{
 		settings.Settings.PagesPath,
@@ -49,6 +53,10 @@ func Init() error {
 
 	// Set the templates store.
 	TemplatesStore = s
+
+	//###
+	//### Load the Core Templates.
+	//###
 
 	// Create the store paths.
 	paths = []string{

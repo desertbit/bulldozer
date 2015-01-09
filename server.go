@@ -101,10 +101,12 @@ func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Get the instance ID from the POST query
+	// Get the instance ID from the POST query.
 	instanceID := req.PostFormValue(postKeyInstanceID)
 	if len(instanceID) == 0 {
-		http.Error(rw, "Bad Request", 400)
+		// Something wrong...
+		// Tell the client to perform a complete refresh, because previous event keys are invalid.
+		rw.Write([]byte(responseRequestRefresh))
 		return
 	}
 

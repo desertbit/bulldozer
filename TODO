@@ -3,12 +3,10 @@
 ===========================
 
 
-* Handle socket.send return false
-
-
-
 IMPORTANT
 =========
+* Implement reload current page.
+* Handle Bulldozer.socket.send return false.
 * create a new main.go in the project folder if not present.
 * create settings file...
 * Webcrawler support & sitemaps.
@@ -16,7 +14,9 @@ IMPORTANT
 * Don't load scripts and javascripts twice if already added to the HTML head!
 * Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer.
 * Load a config in the Init() method if the file exists and the ENV is set.
-
+* Search for old naming and replace it:
+  -> grep -R "Bulldozer.core.loadPage" ./
+  -> grep -R "Bulldozer.core.loadDefaultPage" ./
 
 STYLE
 =====
@@ -51,3 +51,9 @@ General
 * Watch for core template changes and reload them also.
 * Log sass build errors to a gui page...
 * Do some performance testing to check for bottlenecks (session store?)
+
+
+
+Features
+========
+* Add optional arg to template.Glob to load recursive templates.

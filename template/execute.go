@@ -52,7 +52,7 @@ func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name strin
 // ExecuteToString does the same as Execute, but instead writes the output to a string.
 func (t *Template) ExecuteToString(s *sessions.Session, data interface{}, vars ...string) (string, error) {
 	var b bytes.Buffer
-	err := t.Execute(s, &b, data)
+	err := t.Execute(s, &b, data, vars...)
 	if err != nil {
 		return "", err
 	}
@@ -63,7 +63,7 @@ func (t *Template) ExecuteToString(s *sessions.Session, data interface{}, vars .
 // ExecuteTemplateToString does the same as ExecuteTemplate, but instead writes the output to a string.
 func (t *Template) ExecuteTemplateToString(s *sessions.Session, name string, data interface{}, vars ...string) (string, bool, error) {
 	var b bytes.Buffer
-	found, err := t.ExecuteTemplate(s, &b, name, data)
+	found, err := t.ExecuteTemplate(s, &b, name, data, vars...)
 	if err != nil {
 		return "", found, err
 	}

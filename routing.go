@@ -7,6 +7,7 @@ package bulldozer
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/global"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/router"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/template"
@@ -16,7 +17,18 @@ import (
 
 var (
 	mainRouter *router.Router = router.New()
+
+	requestTypeRoute = "route"
+	keyRoutePath     = "path"
 )
+
+func init() {
+	// Register the route server request.
+	err := sessions.Request(requestTypeRoute, sessionRequestRoute)
+	if err != nil {
+		log.L.Fatalf("failed to register session route request: %v", err)
+	}
+}
 
 //#############//
 //### Types ###//
@@ -52,14 +64,19 @@ func Route(path string, f RouteFunc) {
 	mainRouter.Route(path, f)
 }
 
-// TODO: route requests...
-
 //###############//
 //### Private ###//
 //###############//
 
 // execRoute executes the routes and returns the status code with the body string and title.
 func execRoute(s *sessions.Session, path string) (int, string, string) {
+	// Recover panics and log the error message.
+	defer func() {
+		if e := recover(); e != nil {
+			log.L.Error("bulldozer execute route panic: %v", e)
+		}
+	}()
+
 	// Release the previous temmplate session events.
 	template.ReleaseSessionEvents(s)
 
@@ -84,7 +101,7 @@ func execRoute(s *sessions.Session, path string) (int, string, string) {
 		return 200, o, title
 	case *pageRoute:
 		// Execute the template
-		o, found, err := global.TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, v.UID)
+		o, found, err := global.TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, v.UID, "bulldozer-page")
 		if err != nil {
 			if found {
 				// Execute the error template.
@@ -100,4 +117,27 @@ func execRoute(s *sessions.Session, path string) (int, string, string) {
 		// Execute the error template.
 		return global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': unkown value type!", path))
 	}
+}
+
+// sessionRequestRoute is triggered from the client side.
+func sessionRequestRoute(s *sessions.Session, data map[string]string) error {
+	// Try to obtain the route path.
+	path, ok := data[keyRoutePath]
+	if !ok {
+		return fmt.Errorf("failed to execute route: missing route path!")
+	}
+
+	// Execute the route.
+	_, body, title := execRoute(s, path)
+
+	// Create the client command.
+	cmd := `Bulldozer.render.page('` +
+		utils.EscapeJS(body) + `','` +
+		utils.EscapeJS(title) + `','` +
+		utils.EscapeJS(path) + `');`
+
+	// Send the new render request to the client.
+	s.SendCommand(cmd)
+
+	return nil
 }

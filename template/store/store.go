@@ -12,6 +12,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
+	"github.com/chuckpreslar/emission"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -47,6 +48,21 @@ type Store struct {
 
 	key   int64
 	paths []string
+
+	emitter *emission.Emitter
+}
+
+func newStore(paths []string) *Store {
+	// Create a new store.
+	s := &Store{
+		paths: paths,
+	}
+
+	// Create a new emitter and set the recover function.
+	s.emitter = emission.NewEmitter().
+		RecoverWith(recoverEmitter)
+
+	return s
 }
 
 // Release releases the store from being watched.
@@ -64,6 +80,9 @@ func (s *Store) Paths() []string {
 }
 
 func (s *Store) Parse() {
+	// Trigger the event.
+	s.triggerOnBeforeParse()
+
 	// Parse all the templates in the paths.
 	var tmpls *template.Template
 	var err error
@@ -92,6 +111,9 @@ func (s *Store) Parse() {
 
 	// Finally set the templates pointer.
 	s.Templates = tmpls
+
+	// Trigger the event.
+	s.triggerOnAfterParse()
 }
 
 //##############//
@@ -119,9 +141,7 @@ func New(paths []string) (*Store, error) {
 	}
 
 	// Create a new store.
-	store := &Store{
-		paths: paths,
-	}
+	store := newStore(paths)
 
 	// Lock the mutex.
 	storesMutex.Lock()
