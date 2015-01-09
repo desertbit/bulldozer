@@ -99,7 +99,7 @@ func (r *Router) Match(path string) *Data {
 	d := r.route.Get(parts, rData)
 
 	// Call the route callback.
-	if d != nil {
+	if d != nil && d.value != nil {
 		rData.Value = d.value
 		return rData
 	}

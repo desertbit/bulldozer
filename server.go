@@ -26,6 +26,21 @@ const (
 
 var (
 	mainTemplate *template.Template
+
+	// The required bulldozer stylesheets.
+	bulldozerStyleSheets = []string{
+		settings.UrlBulldozerResources + "css/bulldozer.css",
+	}
+
+	// The required bulldozer javascripts.
+	bulldozerJavaScripts = []string{
+		settings.UrlBulldozerResources + "js/jquery.min.js",
+		settings.UrlBulldozerResources + "js/jquery.history.js",
+		settings.UrlBulldozerResources + "libs/kepler/js/vendors/fastclick/fastclick.min.js",
+		settings.UrlBulldozerResources + "libs/kepler/js/kepler.min.js",
+		settings.UrlBulldozerResources + "js/sha256.js",
+		settings.UrlBulldozerResources + "js/bulldozer.min.js",
+	}
 )
 
 func init() {
@@ -167,8 +182,6 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	// Execute the route
 	statusCode, body, title, _ := execRoute(session, req.URL.Path)
 
-	// TODO: Don't load session scripts and javascripts twice if already added to the HTML head!
-
 	// Create the template data struct
 	data := struct {
 		Session       *sessions.Session
@@ -185,8 +198,8 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		accessToken,
 		title,
 		template.HTML(body),
-		settings.Settings.StaticJavaScripts,
-		settings.Settings.StaticStyleSheets,
+		bulldozerJavaScripts,
+		bulldozerStyleSheets,
 		session.JavaScripts(),
 		session.StyleSheets(),
 		isWebCrawler,

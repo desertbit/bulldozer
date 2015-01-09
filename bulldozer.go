@@ -41,8 +41,14 @@ var (
 // Init initializes the bulldozer workspace and settings.
 // If you want to set any bulldozer settings, then do this before calling this method!
 func Init() {
+	// Set the default settings file path.
+	settingsPath := settings.Settings.WorkingPath + settings.DefaultSettingsFileName
+
 	// Set the isInitialized flag to true
 	isInitialized = true
+
+	// Bind the variables to the flags.
+	flag.StringVar(&settingsPath, "settings", settingsPath, "set the path to the main settings file.")
 
 	// Set the maximum number of CPUs that can be executing simultaneously.
 	if settings.Settings.AutoSetGOMAXPROCS {
@@ -72,8 +78,19 @@ func Init() {
 		}()
 	}
 
+	// Load the settings file if it exists.
+	exists, err := utils.Exists(settingsPath)
+	if err != nil {
+		log.L.Fatal(err)
+	}
+	if exists {
+		if err = settings.Load(settingsPath); err != nil {
+			log.L.Fatal(err)
+		}
+	}
+
 	// Check if the settings are valid
-	err := settings.Check()
+	err = settings.Check()
 	if err != nil {
 		log.L.Fatal(err)
 	}

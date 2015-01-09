@@ -9,6 +9,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
+	"github.com/BurntSushi/toml"
 	"os"
 	"strings"
 )
@@ -20,6 +21,8 @@ const (
 
 	TemplateSuffix = ".tmpl"
 	ScssSuffix     = ".scss"
+
+	DefaultSettingsFileName = "settings.toml"
 
 	// The socket types
 	TypeTcpSocket  SocketType = 1 << iota
@@ -67,21 +70,6 @@ func init() {
 
 		FirewallMaxRequestsPerMinute: 100,
 		FirewallReleaseBlockAfter:    60 * 5, // 5 minutes
-
-		// Set the required stylesheets
-		StaticStyleSheets: []string{
-			UrlBulldozerResources + "css/bulldozer.css",
-		},
-
-		// Set the required scripts
-		StaticJavaScripts: []string{
-			UrlBulldozerResources + "js/jquery.min.js",
-			UrlBulldozerResources + "js/jquery.history.js",
-			UrlBulldozerResources + "libs/kepler/js/vendors/fastclick/fastclick.min.js",
-			UrlBulldozerResources + "libs/kepler/js/kepler.min.js",
-			UrlBulldozerResources + "js/sha256.js",
-			UrlBulldozerResources + "js/bulldozer.min.js",
-		},
 
 		ScssCmd: "scss",
 	}
@@ -132,6 +120,7 @@ func init() {
 	Settings.BulldozerCoreTemplatesPath = Settings.BulldozerSourcePath + "/data/templates"
 	Settings.BulldozerResourcesPath = Settings.BulldozerSourcePath + "/data/resources"
 	Settings.BulldozerTranslationPath = Settings.BulldozerSourcePath + "/data/translations"
+	Settings.BulldozerPrototypesPath = Settings.BulldozerSourcePath + "/data/prototypes"
 
 }
 
@@ -172,6 +161,26 @@ func Check() error {
 
 	// Remove leading / from the site url
 	Settings.SiteUrl = strings.TrimSuffix(Settings.SiteUrl, "/")
+
+	return nil
+}
+
+// Load loads the settings file.
+func Load(path string) error {
+	log.L.Info("Loading settings from file: '%s'", path)
+
+	exists, err := utils.Exists(path)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("settings file does not exists: '%s'", path)
+	}
+
+	// Parse the configuration
+	if _, err = toml.DecodeFile(path, &Settings); err != nil {
+		return fmt.Errorf("failed to parse settings file '%s': %v", path, err)
+	}
 
 	return nil
 }
@@ -219,6 +228,7 @@ type settings struct {
 	BulldozerCoreTemplatesPath string
 	BulldozerResourcesPath     string
 	BulldozerTranslationPath   string
+	BulldozerPrototypesPath    string
 
 	// The CookieHashKey is required, used to authenticate the cookie value using HMAC.
 	// It is recommended to use a key with 32 or 64 bytes.

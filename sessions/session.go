@@ -210,13 +210,6 @@ func (s *Session) IsJavaScriptLoaded(url string) bool {
 		}
 	}
 
-	// Check if the javascript has been loaded statically
-	for _, s := range settings.Settings.StaticJavaScripts {
-		if s == url {
-			return true
-		}
-	}
-
 	// The javascript library is not loaded
 	return false
 }
@@ -261,7 +254,6 @@ func (s *Session) LoadJavaScript(url string, vars ...string) {
 }
 
 // JavaScripts returns a slice of all current loaded session javascripts.
-// Static settings javascripts are not included in this slice!
 func (s *Session) JavaScripts() []string {
 	// Lock the mutex
 	s.loadedJavaScriptsMutex.Lock()
@@ -281,13 +273,6 @@ func (s *Session) IsStyleSheetLoaded(url string) bool {
 
 	// Check if the stylesheet has already been loaded
 	for _, s := range s.loadedStyleSheets {
-		if s == url {
-			return true
-		}
-	}
-
-	// Check if the stylesheet has been loaded statically
-	for _, s := range settings.Settings.StaticStyleSheets {
 		if s == url {
 			return true
 		}
@@ -317,7 +302,6 @@ func (s *Session) LoadStyleSheet(url string) {
 }
 
 // StyleSheets returns a slice of all current loaded session stylesheets.
-// Static settings stylesheets are not included in this slice!
 func (s *Session) StyleSheets() []string {
 	// Lock the mutex
 	s.loadedStyleSheetsMutex.Lock()
@@ -444,6 +428,11 @@ func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, s
 		storeSession:                  storeSession,
 		stopExpireAccessSocketTimeout: make(chan struct{}),
 		isClosed:                      false,
+
+		// Add the static scripts and stylesheets.
+		// They will be loaded always on session initialization.
+		loadedJavaScripts: settings.Settings.StaticJavaScripts,
+		loadedStyleSheets: settings.Settings.StaticStyleSheets,
 	}
 
 	// Create a new emitter and set the recover function

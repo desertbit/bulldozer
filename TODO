@@ -7,8 +7,6 @@ IMPORTANT
 =========
 * Implement reload current page.
 * Handle Bulldozer.socket.send return false.
-* create a new main.go in the project folder if not present.
-* create settings file...
 * Finish the must action in the template execute method call. Also add an error action.
 * Don't load scripts and javascripts twice if already added to the HTML head!
 * Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer.
@@ -16,6 +14,7 @@ IMPORTANT
 * Search for old naming and replace it:
   -> grep -R "Bulldozer.core.loadPage" ./
   -> grep -R "Bulldozer.core.loadDefaultPage" ./
+
 
 STYLE
 =====

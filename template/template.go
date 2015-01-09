@@ -11,6 +11,7 @@ package template
 import (
 	htmlTemplate "html/template"
 
+	"errors"
 	"fmt"
 	"github.com/chuckpreslar/emission"
 	"io/ioutil"
@@ -19,8 +20,13 @@ import (
 )
 
 var (
+	// The global namespace.
 	nameSpaces      map[string]*nameSpace = make(map[string]*nameSpace)
 	nameSpacesMutex sync.Mutex
+
+	// Custom error types.
+	ErrNoFilesFound          = errors.New("bulldozer/template: no files named in call to ParseFiles")
+	ErrPatternMatchesNoFiles = errors.New("bulldozer/template: pattern matches no files!")
 )
 
 //################################//
@@ -369,7 +375,7 @@ func (t *Template) initDefaults() {
 func parseFiles(uid string, t *Template, filenames ...string) (*Template, error) {
 	if len(filenames) == 0 {
 		// Not really a problem, but be consistent.
-		return nil, fmt.Errorf("bulldozer/template: no files named in call to ParseFiles")
+		return nil, ErrNoFilesFound
 	}
 
 	var errorMessage string
@@ -423,7 +429,7 @@ func parseGlob(uid string, t *Template, pattern string) (*Template, error) {
 		return nil, err
 	}
 	if len(filenames) == 0 {
-		return nil, fmt.Errorf("bulldozer/template: pattern matches no files: %#q", pattern)
+		return nil, ErrPatternMatchesNoFiles
 	}
 	return parseFiles(uid, t, filenames...)
 }

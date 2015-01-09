@@ -97,7 +97,7 @@ func (s *Store) Parse() {
 		} else {
 			tmpls, err = template.ParseGlob(templatesUID+strconv.FormatInt(s.key, 10), pattern)
 		}
-		if err != nil {
+		if err != nil && err != template.ErrNoFilesFound && err != template.ErrPatternMatchesNoFiles {
 			// Just log this error.
 			log.L.Error("failed to parse templates in path '%s': %v", path, err)
 		}
