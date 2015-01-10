@@ -143,8 +143,15 @@ func (tp *templatePlugin) Render(c *template.Context, s *template.PluginSettings
 //### Public ###//
 //##############//
 
-// Must will log the error and exit the application.
+// Must will on error panic.
 func Must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+// Must will log the error and exit the application.
+func MustFatal(err error) {
 	if err != nil {
 		log.L.Fatal(err.Error())
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -63,6 +64,12 @@ func init() {
 		SocketType:        TypeTcpSocket,
 		ListenAddress:     ":9000",
 		ServeFiles:        true,
+
+		DatabaseAddress:     "localhost:28015",
+		DatabaseName:        "test",
+		DatabaseMaxIdle:     50,
+		DatabaseMaxActive:   50,
+		DatabaseIdleTimeout: time.Minute,
 
 		CookieHashKey:  []byte(defaultCookieHashKey),
 		CookieBlockKey: []byte(defaultCookieBlockKey),
@@ -205,6 +212,21 @@ type settings struct {
 	SocketType    SocketType
 	ListenAddress string
 	ServeFiles    bool
+
+	DatabaseAddress string
+	DatabaseName    string
+
+	// Maximum number of idle connections in the pool.
+	DatabaseMaxIdle int
+
+	// Maximum number of connections allocated by the pool at a given time.
+	// When zero, there is no limit on the number of connections in the pool.
+	DatabaseMaxActive int
+
+	// Close connections after remaining idle for this duration. If the value
+	// is zero, then idle connections are not closed. Applications should set
+	// the timeout to a value less than the server's timeout.
+	DatabaseIdleTimeout time.Duration
 
 	GoPath               string
 	WorkingPath          string

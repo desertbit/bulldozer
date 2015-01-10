@@ -11,6 +11,7 @@ IMPORTANT
 * Don't load scripts and javascripts twice if already added to the HTML head!
 * Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer.
 * Load a config in the Init() method if the file exists and the ENV is set.
+* Template parseFiles: Add a template error page with the detailed error to the templates collection on errors.
 * Search for old naming and replace it:
   -> grep -R "Bulldozer.core.loadPage" ./
   -> grep -R "Bulldozer.core.loadDefaultPage" ./

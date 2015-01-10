@@ -6,6 +6,9 @@
 package bulldozer
 
 import (
+	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
+
+	"code.desertbit.com/bulldozer/bulldozer/database"
 	"code.desertbit.com/bulldozer/bulldozer/global"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
@@ -13,6 +16,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/template/store"
 	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
+
 	"flag"
 	"fmt"
 	"os"
@@ -110,6 +114,11 @@ func Init() {
 		log.L.Fatal(err)
 	}
 
+	// Connect to the database server.
+	if err = database.Connect(); err != nil {
+		log.L.Fatal(err)
+	}
+
 	// Initialize the global package.
 	if err = global.Init(); err != nil {
 		log.L.Fatal(err)
@@ -169,6 +178,9 @@ func release() {
 	// Release the bulldozer sub packages
 	sessions.Release()
 	tr.Release()
+
+	// Close the database
+	database.Close()
 
 	// Just wait for a moment before exiting to be
 	// sure, all defers get called and the program

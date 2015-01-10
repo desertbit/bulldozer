@@ -378,25 +378,18 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 		return nil, ErrNoFilesFound
 	}
 
-	var errorMessage string
+	var tmpl *Template
+	var name, errorMessage string
 
-	for _, filename := range filenames {
-		b, err := ioutil.ReadFile(filename)
-		if err != nil {
-			// Don't exit on error, because the other templates should be loaded anyway.
-			// Just add the error and return it at the end.
-			errorMessage += fmt.Sprint(err) + "\n"
-			continue
-		}
-		s := string(b)
-		name := filepath.Base(filename)
+	// TODO: Add a template error page with the detailed error to the templates collection on errors.
+
+	addTemplate := func(s string) (err error) {
 		// First template becomes return value if not already defined,
 		// and we use that one for subsequent New calls to associate
 		// all the templates together. Also, if this file has the same name
 		// as t, this file becomes the contents of t, so
 		//  t, err := New(name).Funcs(xxx).ParseFiles(name)
 		// works. Otherwise we create a new template associated with t.
-		var tmpl *Template
 		if t == nil {
 			t = New(uid, name)
 		}
@@ -406,6 +399,21 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 			tmpl = t.New(name)
 		}
 		_, err = tmpl.Parse(s)
+		return
+	}
+
+	for _, filename := range filenames {
+		b, err := ioutil.ReadFile(filename)
+		if err != nil {
+			// Don't exit on error, because the other templates should be loaded anyway.
+			// Just add the error and return it at the end.
+			errorMessage += fmt.Sprint(err) + "\n"
+			continue
+		}
+
+		name = filepath.Base(filename)
+
+		err = addTemplate(string(b))
 		if err != nil {
 			// Don't exit on error, because the other templates should be loaded anyway.
 			// Just add the error and return it at the end.
