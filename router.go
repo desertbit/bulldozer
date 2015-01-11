@@ -114,6 +114,10 @@ func Navigate(s *sessions.Session, path string) {
 	s.SendCommand(cmd)
 }
 
+//###############//
+//### Private ###//
+//###############//
+
 // execRoute executes the routes and returns the status code
 // with the body string, the title and the current path. The path might have changed...
 func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body string, title string, path string) {
@@ -185,10 +189,6 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		return
 	}
 }
-
-//###############//
-//### Private ###//
-//###############//
 
 // sessionRequestRoute is triggered from the client side.
 func sessionRequestRoute(s *sessions.Session, data map[string]string) error {

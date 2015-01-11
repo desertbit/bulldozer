@@ -6,6 +6,7 @@
 package bulldozer
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/global"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 )
 
@@ -25,4 +26,8 @@ func newBulldozerBackend() *bulldozerBackend {
 
 func (b *bulldozerBackend) NavigateToPath(s *sessions.Session, path string) {
 	Navigate(s, path)
+}
+
+func (b *bulldozerBackend) ExecErrorTemplate(s *sessions.Session, errorMessage string, vars ...bool) (int, string, string) {
+	return global.ExecErrorTemplate(s, errorMessage, vars...)
 }

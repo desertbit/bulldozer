@@ -100,12 +100,22 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) (err error) {
 	// They will be registered by the following template execution.
 	releaseSessionTemplateEvents(c.s, c.domID)
 
+	// Return the last parse error if present.
+	if t.hasParseError != nil {
+		return t.hasParseError
+	}
+
 	// Call the must function.
 	action := t.callMustFuncs(c)
 	if action != nil && action.action != actionContinue {
 		if action.action == actionError {
-			return fmt.Errorf(action.data)
+			// Execute the error template without logging the error
+			// and write it to the io writer.
+			_, out, _ := backend.ExecErrorTemplate(c.s, action.data, false)
+			wr.Write([]byte(out))
+			return nil
 		} else if action.action == actionRedirect {
+			// Navigate to the path.
 			backend.NavigateToPath(c.s, action.data)
 			return nil
 		} else {

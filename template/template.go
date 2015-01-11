@@ -105,6 +105,9 @@ type Template struct {
 	// Delimiters
 	leftDelim, rightDelim string
 
+	// Store the parse error
+	hasParseError error
+
 	// DOM specific stuff
 	staticDomID  string
 	styleClasses []string
@@ -233,7 +236,12 @@ func (t *Template) Templates() []*Template {
 // non-empty template with the same name.  (In multiple calls to Parse
 // with the same receiver template, only one call can contain text
 // other than space, comments, and template definitions.)
-func (t *Template) Parse(src string) (*Template, error) {
+func (t *Template) Parse(src string) (tt *Template, err error) {
+	// Save the parse error if present.
+	defer func() {
+		t.hasParseError = err
+	}()
+
 	// Reset the plugin data.
 	func() {
 		t.pluginDataMapMutex.Lock()
@@ -246,13 +254,13 @@ func (t *Template) Parse(src string) (*Template, error) {
 	// Reset the must functions slice.
 	t.mustFuncs = nil
 
-	// Call the custom bulldozer parse method
-	src, err := parse(t, src, 0)
+	// Call the custom bulldozer parse method.
+	src, err = parse(t, src, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	// Call the html template parse method
+	// Call the html template parse method.
 	ret, err := t.template.Parse(src)
 	if err != nil {
 		return nil, err
@@ -381,9 +389,17 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 	var tmpl *Template
 	var name, errorMessage string
 
-	// TODO: Add a template error page with the detailed error to the templates collection on errors.
+	for _, filename := range filenames {
+		b, err := ioutil.ReadFile(filename)
+		if err != nil {
+			// Don't exit on error, because the other templates should be loaded anyway.
+			// Just add the error and return it at the end.
+			errorMessage += fmt.Sprint(err) + "\n"
+			continue
+		}
 
-	addTemplate := func(s string) (err error) {
+		name = filepath.Base(filename)
+
 		// First template becomes return value if not already defined,
 		// and we use that one for subsequent New calls to associate
 		// all the templates together. Also, if this file has the same name
@@ -398,22 +414,7 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 		} else {
 			tmpl = t.New(name)
 		}
-		_, err = tmpl.Parse(s)
-		return
-	}
-
-	for _, filename := range filenames {
-		b, err := ioutil.ReadFile(filename)
-		if err != nil {
-			// Don't exit on error, because the other templates should be loaded anyway.
-			// Just add the error and return it at the end.
-			errorMessage += fmt.Sprint(err) + "\n"
-			continue
-		}
-
-		name = filepath.Base(filename)
-
-		err = addTemplate(string(b))
+		_, err = tmpl.Parse(string(b))
 		if err != nil {
 			// Don't exit on error, because the other templates should be loaded anyway.
 			// Just add the error and return it at the end.

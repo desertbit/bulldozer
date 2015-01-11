@@ -86,7 +86,8 @@ func ExecNotFoundTemplate(s *sessions.Session) (int, string, string) {
 
 // ExecNotFoundTemplate executes the error template and shows the error message if the
 // user is authenticated. The error message will be also logged.
-func ExecErrorTemplate(s *sessions.Session, errorMessage string) (int, string, string) {
+// One optional boolean can be set. If set to false, the error message won't be logged.
+func ExecErrorTemplate(s *sessions.Session, errorMessage string, vars ...bool) (int, string, string) {
 	// Create the template data struct.
 	data := struct {
 		ErrorMessage string
@@ -94,8 +95,10 @@ func ExecErrorTemplate(s *sessions.Session, errorMessage string) (int, string, s
 		errorMessage,
 	}
 
-	// Log the error.
-	log.L.Error(errorMessage)
+	if len(vars) <= 0 || vars[0] != false {
+		// Log the error.
+		log.L.Error(errorMessage)
+	}
 
 	// Execute the template.
 	out, _, _, err := CoreTemplatesStore.Templates.ExecuteTemplateToString(s, ErrorTemplate, data)

@@ -19,6 +19,7 @@ var (
 
 type bulldozerBackend interface {
 	NavigateToPath(s *sessions.Session, path string)
+	ExecErrorTemplate(s *sessions.Session, errorMessage string, vars ...bool) (int, string, string)
 }
 
 //##############//
