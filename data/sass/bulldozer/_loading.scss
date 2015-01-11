@@ -23,6 +23,10 @@ $loading-secondary-color: #eee;
     padding: 0;
     background-color: rgba(0, 0, 0, 0);
 
+    &.none-pointer-events {
+        pointer-events: none;
+    }
+
     // Overlay
     .overlay {
         overflow: hidden;

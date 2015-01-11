@@ -6,11 +6,11 @@
 package template
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
 	"fmt"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"reflect"
 	"strconv"
 	"strings"

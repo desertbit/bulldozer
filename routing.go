@@ -154,8 +154,15 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 
 		return
 	case *pageRoute:
+		// Create the optional options for the template.
+		opts := template.ExecOpts{
+			ID:           v.UID,
+			StyleClasses: []string{"bulldozer-page"},
+		}
+
 		// Execute the template
-		o, found, err := global.TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, v.UID, "bulldozer-page")
+		o, _, found, err := global.TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, opts)
+
 		if err != nil {
 			if found {
 				// Execute the error template.

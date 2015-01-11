@@ -43,9 +43,15 @@ code {
 	position: relative;
 	width: 100%;
 	height: 100%;
+}
 
-	// Fix for collapsing child margins. 
-	overflow: hidden;
+#bulldozer-body {
+    // Fix for collapsing child margins.
+    overflow: hidden;
+}
+
+.bulldozer-page { 
+    overflow: auto;
 }
 
 #bulldozer-script {

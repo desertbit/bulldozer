@@ -15,7 +15,6 @@ import (
 	"github.com/chuckpreslar/emission"
 	"github.com/gorilla/securecookie"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -33,6 +32,8 @@ const (
 
 	// Value keys
 	keyInstanceValues   = "bzrInstances"
+	keyUniqueID         = "bzrUniqueID"
+	keyUniqueDomID      = "bzrUniqueDomID"
 	keyCookieToken      = "bzrCookieToken"
 	keyDomEncryptionKey = "bzrDomEncryptionKey"
 
@@ -82,9 +83,7 @@ type Session struct {
 	instanceID string
 	path       string
 
-	domEncryptionKey      string
-	uniqueDomIdCount      int64
-	uniqueDomIdCountMutex sync.Mutex
+	domEncryptionKey string
 
 	sessionInstance *instance
 
@@ -130,22 +129,6 @@ func (s *Session) Path() string {
 // DomEncryptionKey returns the unique secret DOM key
 func (s *Session) DomEncryptionKey() string {
 	return s.domEncryptionKey
-}
-
-// NewUniqueDomID returns a new unique DOM ID
-func (s *Session) NewUniqueDomID() string {
-	// Lock the mutex
-	s.uniqueDomIdCountMutex.Lock()
-	defer s.uniqueDomIdCountMutex.Unlock()
-
-	// Increment the unique count
-	s.uniqueDomIdCount++
-
-	// Get the uid as string
-	idStr := "uid_" + strconv.FormatInt(s.uniqueDomIdCount, 10)
-
-	// Calculate the unique DOM ID with the session key
-	return utils.EncryptDomId(s.domEncryptionKey, idStr)
 }
 
 // SendCommand sends a javascript command to the client
@@ -318,6 +301,7 @@ func (s *Session) StyleSheets() []string {
 // A single variadic argument is accepted, and it is optional:
 // if a function is set, this function will be called if no value
 // exists for the given key.
+// This values are stored to the database backend.
 func (s *Session) Get(key interface{}, vars ...func() interface{}) (interface{}, bool) {
 	return s.storeSession.Get(key, vars...)
 }
@@ -348,6 +332,8 @@ func (s *Session) Dirty() {
 // A single variadic argument is accepted, and it is optional:
 // if a function is set, this function will be called if no value
 // exists for the given key.
+// Cache values, are values only saved as long as this session is in the memory cache.
+// This cache does not survive application restarts.
 func (s *Session) CacheGet(key interface{}, vars ...func() interface{}) (interface{}, bool) {
 	return s.storeSession.CacheGet(key, vars...)
 }

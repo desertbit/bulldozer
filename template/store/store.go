@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	templatesUID = "store_"
+	templatesUID = "blz_store_"
 )
 
 var (
@@ -121,7 +121,7 @@ func (s *Store) Parse() {
 //##############//
 
 // New creates a new template store and loads all templates in the passed paths slice.
-func New(paths []string) (*Store, error) {
+func New(paths ...string) (*Store, error) {
 	if paths == nil {
 		return nil, fmt.Errorf("templates store: nil passed as path slice!")
 	}

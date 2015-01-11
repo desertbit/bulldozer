@@ -15,6 +15,7 @@ IMPORTANT
 * Search for old naming and replace it:
   -> grep -R "Bulldozer.core.loadPage" ./
   -> grep -R "Bulldozer.core.loadDefaultPage" ./
+* Remove old removed $.DialogId...
 
 
 STYLE

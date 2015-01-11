@@ -216,7 +216,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 }
 
 func templateCoreTemplateFunc(s *sessions.Session, name string) (template.HTML, error) {
-	out, _, err := global.CoreTemplatesStore.Templates.ExecuteTemplateToString(s, name, nil)
+	out, _, _, err := global.CoreTemplatesStore.Templates.ExecuteTemplateToString(s, name, nil)
 	return template.HTML(out), err
 }
 
@@ -246,7 +246,7 @@ const htmlBody = `
 	{{if not .IsWebCrawler}}<noscript>{{coreTemplate .Session "` + global.NoScriptTemplate + `"}}</noscript>{{end}}
 	<div id="bulldozer-script"><script>
 		$(document).ready(function() {
-			Bulldozer.socket.init("{{.Session.SessionID}}","{{.AccessToken}}");
+			Bulldozer.init("{{.Session.SessionID}}","{{.AccessToken}}");
 			$("#bulldozer-script").remove();
 		});
 	</script></div>

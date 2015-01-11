@@ -15,6 +15,16 @@ import (
 	"io"
 )
 
+//##########################//
+//### Optional Data type ###//
+//##########################//
+
+type ExecOpts struct {
+	ID           string   // This is added to the unique context ID.
+	DomID        string   // Set this, to set a custom DOM ID.
+	StyleClasses []string // Additional style classes.
+}
+
 //###############################//
 //### Template struct methods ###//
 //###############################//
@@ -25,10 +35,9 @@ import (
 // execution stops, but partial results may already have been written to
 // the output writer.
 // A template may be executed safely in parallel.
-// First optional string is an ID string, which is added to the unique context ID.
-// All further optional strings are additional template style classes.
-func (t *Template) Execute(s *sessions.Session, wr io.Writer, data interface{}, vars ...string) error {
-	return execute(t, s, wr, data, vars...)
+// Optional options can be passed.
+func (t *Template) Execute(s *sessions.Session, wr io.Writer, data interface{}, optArgs ...ExecOpts) (*Context, error) {
+	return execute(t, s, wr, data, optArgs...)
 }
 
 // ExecuteTemplate applies the template associated with t that has the given
@@ -38,37 +47,37 @@ func (t *Template) Execute(s *sessions.Session, wr io.Writer, data interface{}, 
 // the output writer.
 // A template may be executed safely in parallel.
 // A boolean is returned, defining if the template exists...
-// First optional string is an ID string, which is added to the unique context ID.
-// All further optional strings are additional template style classes.
-func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name string, data interface{}, vars ...string) (bool, error) {
+// Optional options can be passed.
+func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name string, data interface{}, optArgs ...ExecOpts) (*Context, bool, error) {
 	tt := t.Lookup(name)
 	if tt == nil {
-		return false, fmt.Errorf("failed to execute template: template not found with name '%s'", name)
+		return nil, false, fmt.Errorf("failed to execute template: template not found with name '%s'", name)
 	}
 
-	return true, execute(tt, s, wr, data, vars...)
+	c, err := execute(tt, s, wr, data, optArgs...)
+	return c, true, err
 }
 
 // ExecuteToString does the same as Execute, but instead writes the output to a string.
-func (t *Template) ExecuteToString(s *sessions.Session, data interface{}, vars ...string) (string, error) {
+func (t *Template) ExecuteToString(s *sessions.Session, data interface{}, optArgs ...ExecOpts) (string, *Context, error) {
 	var b bytes.Buffer
-	err := t.Execute(s, &b, data, vars...)
+	c, err := t.Execute(s, &b, data, optArgs...)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return b.String(), err
+	return b.String(), c, err
 }
 
 // ExecuteTemplateToString does the same as ExecuteTemplate, but instead writes the output to a string.
-func (t *Template) ExecuteTemplateToString(s *sessions.Session, name string, data interface{}, vars ...string) (string, bool, error) {
+func (t *Template) ExecuteTemplateToString(s *sessions.Session, name string, data interface{}, optArgs ...ExecOpts) (string, *Context, bool, error) {
 	var b bytes.Buffer
-	found, err := t.ExecuteTemplate(s, &b, name, data, vars...)
+	c, found, err := t.ExecuteTemplate(s, &b, name, data, optArgs...)
 	if err != nil {
-		return "", found, err
+		return "", nil, found, err
 	}
 
-	return b.String(), found, err
+	return b.String(), c, found, err
 }
 
 //##############//
@@ -76,7 +85,14 @@ func (t *Template) ExecuteTemplateToString(s *sessions.Session, name string, dat
 //##############//
 
 // ExecuteContext executes the template context.
-func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
+func ExecuteContext(c *Context, wr io.Writer, data interface{}) (err error) {
+	// Recover panics and return the error message.
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("bulldozer execute template panic: %v", e)
+		}
+	}()
+
 	// Get the template pointer.
 	t := c.t
 
@@ -121,13 +137,19 @@ type renderData struct {
 // Execute executes the passed template.
 // First optional string is an ID string, which is added to the unique context ID.
 // All further optional strings are additional template style classes.
-func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, vars ...string) error {
-	varsLen := len(vars)
-
+func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, optArgs ...ExecOpts) (*Context, error) {
 	// Create the ID
 	id := t.Name()
-	if varsLen > 0 {
-		id += "@" + vars[0]
+
+	// Apply the optional options.
+	var opts *ExecOpts
+	if len(optArgs) > 0 {
+		opts = &optArgs[0]
+
+		// Add the custom ID.
+		if len(opts.ID) != 0 {
+			id += "@" + opts.ID
+		}
 	}
 
 	// Create a new context with the unique ID. The parent ID is the current ID,
@@ -140,10 +162,18 @@ func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, v
 		c = NewContext(s, t, t.globalContextID, t.globalContextID)
 	}
 
-	// Add additional style classes if present
-	if varsLen > 1 {
-		c.styleClasses = append(c.styleClasses, vars[1:]...)
+	// Apply the optional options.
+	if opts != nil {
+		// Set the custom DOM ID if set.
+		if len(opts.DomID) != 0 {
+			c.domID = opts.DomID
+		}
+
+		// Add additional style classes if present.
+		if len(opts.StyleClasses) > 0 {
+			c.styleClasses = append(c.styleClasses, opts.StyleClasses...)
+		}
 	}
 
-	return ExecuteContext(c, wr, data)
+	return c, ExecuteContext(c, wr, data)
 }

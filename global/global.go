@@ -38,14 +38,8 @@ func Init() error {
 	//### Load the Templates.
 	//###
 
-	// Create the store paths.
-	paths := []string{
-		settings.Settings.PagesPath,
-		settings.Settings.TemplatesPath,
-	}
-
 	// Create a new store and parse it.
-	s, err := store.New(paths)
+	s, err := store.New(settings.Settings.TemplatesPath, settings.Settings.PagesPath)
 	if err != nil {
 		return err
 	}
@@ -58,13 +52,8 @@ func Init() error {
 	//### Load the Core Templates.
 	//###
 
-	// Create the store paths.
-	paths = []string{
-		settings.Settings.CoreTemplatesPath,
-	}
-
 	// Create a new store and parse it.
-	s, err = store.New(paths)
+	s, err = store.New(settings.Settings.CoreTemplatesPath)
 	if err != nil {
 		return err
 	}
@@ -87,7 +76,7 @@ func Init() error {
 
 func ExecNotFoundTemplate(s *sessions.Session) (int, string, string) {
 	// Execute the not found page
-	out, _, err := CoreTemplatesStore.Templates.ExecuteTemplateToString(s, NotFoundTemplate, nil)
+	out, _, _, err := CoreTemplatesStore.Templates.ExecuteTemplateToString(s, NotFoundTemplate, nil)
 	if err != nil {
 		return ExecErrorTemplate(s, err.Error())
 	}
@@ -109,7 +98,7 @@ func ExecErrorTemplate(s *sessions.Session, errorMessage string) (int, string, s
 	log.L.Error(errorMessage)
 
 	// Execute the template.
-	out, _, err := CoreTemplatesStore.Templates.ExecuteTemplateToString(s, ErrorTemplate, data)
+	out, _, _, err := CoreTemplatesStore.Templates.ExecuteTemplateToString(s, ErrorTemplate, data)
 	if err != nil {
 		log.L.Error("failed to execute error core template: %v", err)
 		return 500, "Internal Server Error", tr.S("blz.page.error.pageTitle")

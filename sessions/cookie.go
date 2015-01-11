@@ -6,11 +6,11 @@
 package sessions
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions/store"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"net/http"
 	"time"
 )
@@ -63,15 +63,18 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 			log.L.Error("failed to decode session cookie: %v", err)
 		}
 	} else if err != http.ErrNoCookie {
-		// Return the error if this is not the not found cookie error
+		// Return the error if this is not the not found cookie error.
 		return nil, false, err
 	}
 
-	// Try to obtain the store session with the cookie session ID
+	// Try to obtain the store session with the cookie session ID.
 	if len(sCookie.ID) > 0 {
 		storeSession, err = store.Get(sCookie.ID)
-		if err != nil && err != store.ErrNotFound {
-			return nil, false, err
+		if err != nil {
+			// Just log the error and create a new session.
+			// This should not prevent a client from connecting...
+			storeSession = nil
+			log.L.Error("failed to get session with ID '%s' from session store: %v", sCookie.ID, err)
 		}
 
 		if storeSession != nil {
