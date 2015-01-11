@@ -8,11 +8,13 @@ package bulldozer
 import (
 	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
 
+	"code.desertbit.com/bulldozer/bulldozer/auth"
 	"code.desertbit.com/bulldozer/bulldozer/database"
 	"code.desertbit.com/bulldozer/bulldozer/global"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/template/store"
 	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
@@ -114,6 +116,10 @@ func Init() {
 		log.L.Fatal(err)
 	}
 
+	// Initialize the bulldozer sub packages.
+	sessions.Init()
+	template.Init(backend)
+
 	// Connect to the database server.
 	if err = database.Connect(); err != nil {
 		log.L.Fatal(err)
@@ -121,6 +127,11 @@ func Init() {
 
 	// Initialize the global package.
 	if err = global.Init(); err != nil {
+		log.L.Fatal(err)
+	}
+
+	// Initialize the authentication package.
+	if err = auth.Init(); err != nil {
 		log.L.Fatal(err)
 	}
 
@@ -143,9 +154,6 @@ func Bulldoze() {
 	if !isInitialized {
 		log.L.Fatalf("failed to bulldoze: bulldozer is not initialized! It is required to call the bulldoze.Init method before bulldozing!")
 	}
-
-	// Initialize the bulldozer sub packages
-	sessions.Init()
 
 	// Start the server
 	err := serve()

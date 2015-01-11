@@ -15,6 +15,12 @@ const (
 	MustMethodPrefix = "Must"
 )
 
+const (
+	actionContinue int = 1 << iota
+	actionError    int = 1 << iota
+	actionRedirect int = 1 << iota
+)
+
 var (
 	packages  map[string]interface{} = make(map[string]interface{})
 	mustFuncs map[string]*mustFunc   = make(map[string]*mustFunc)
@@ -30,23 +36,24 @@ type mustFunc struct {
 }
 
 type Action struct {
-	stopped    bool
-	redirectTo string
+	action int
+	data   string
 }
 
 func newAction() *Action {
 	return &Action{
-		stopped: false,
+		action: actionContinue,
 	}
 }
 
-func (a *Action) Stop() {
-	a.stopped = true
+func (a *Action) Error(errorMessage string) {
+	a.action = actionError
+	a.data = errorMessage
 }
 
 func (a *Action) Redirect(url string) {
-	a.redirectTo = url
-	a.stopped = true
+	a.action = actionRedirect
+	a.data = url
 }
 
 //##############//
@@ -55,6 +62,8 @@ func (a *Action) Redirect(url string) {
 
 // RegisterPackage registeres a new template package.
 // This call is not thread-safe! Register packages during program initialization.
+// A template package function has the following syntax:
+// func (p *Package) MustIsAuth(a *template.Action, c *template.Context) {}
 func RegisterPackage(name string, i interface{}) {
 	// Log an error message if a package is overwritten,
 	_, ok := packages[name]
@@ -138,7 +147,7 @@ func (t *Template) callMustFuncs(c *Context) (action *Action) {
 		f.method.Call(in)
 
 		// Check if a stop is requested.
-		if action.stopped {
+		if action.action != actionContinue {
 			return
 		}
 	}

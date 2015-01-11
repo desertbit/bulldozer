@@ -5,9 +5,8 @@
 
 IMPORTANT
 =========
-* Implement reload current page.
 * Handle Bulldozer.socket.send return false.
-* Finish the must action in the template execute method call. Also add an error action.
+* The connectionlost widget showsup sometimes, even if the connection is still valid.
 * Don't load scripts and javascripts twice if already added to the HTML head!
 * Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer.
 * Load a config in the Init() method if the file exists and the ENV is set.
@@ -47,7 +46,8 @@ Session Store
 
 General
 =======
-* Maybe remove the core templates from the bulldozer templates and readd them to the mainTemplate. This could be less overhead...
+* Maybe remove the core templates from the bulldozer templates and read them to the mainTemplate. This could be less overhead...
+* If some core templates exists (example: auth) in the project folder, then load them instead of the bulldozer default templates.
 * Watch for core template changes and reload them also.
 * Log sass build errors to a gui page...
 * Do some performance testing to check for bottlenecks (session store?)

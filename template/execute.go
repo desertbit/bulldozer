@@ -102,9 +102,15 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) (err error) {
 
 	// Call the must function.
 	action := t.callMustFuncs(c)
-	if action != nil && action.stopped {
-		// TODO: Finish this
-		return fmt.Errorf("TODO: Finish this action!")
+	if action != nil && action.action != actionContinue {
+		if action.action == actionError {
+			return fmt.Errorf(action.data)
+		} else if action.action == actionRedirect {
+			backend.NavigateToPath(c.s, action.data)
+			return nil
+		} else {
+			return fmt.Errorf("invalid template action type: %v", action.action)
+		}
 	}
 
 	// Trigger the template execution event.

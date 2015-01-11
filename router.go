@@ -49,6 +49,7 @@ type pageRoute struct {
 //### Public ###//
 //##############//
 
+// RoutePage creates a new page route.
 func RoutePage(path string, pageTitle string, pageTemplate string, UID string) {
 	// Create a new page route value.
 	p := &pageRoute{
@@ -61,9 +62,15 @@ func RoutePage(path string, pageTitle string, pageTemplate string, UID string) {
 	mainRouter.Route(path, p)
 }
 
+// Route the given path.
 func Route(path string, f RouteFunc) {
 	// Add the callback to the router.
 	mainRouter.Route(path, f)
+}
+
+// RoutePaths returns all current route paths.
+func RoutePaths() []string {
+	return mainRouter.Paths()
 }
 
 // GetCurrentPath returns the current session route path.
@@ -106,10 +113,6 @@ func Navigate(s *sessions.Session, path string) {
 	// Send the new render request to the client.
 	s.SendCommand(cmd)
 }
-
-//###############//
-//### Private ###//
-//###############//
 
 // execRoute executes the routes and returns the status code
 // with the body string, the title and the current path. The path might have changed...
@@ -182,6 +185,10 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		return
 	}
 }
+
+//###############//
+//### Private ###//
+//###############//
 
 // sessionRequestRoute is triggered from the client side.
 func sessionRequestRoute(s *sessions.Session, data map[string]string) error {
