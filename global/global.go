@@ -115,6 +115,10 @@ func ExecErrorTemplate(s *sessions.Session, errorMessage string, vars ...bool) (
 //###############//
 
 func lookupMust(t *template.Template, name string) *template.Template {
+	if t == nil {
+		log.L.Fatalf("failed to find template '%s'", name)
+	}
+
 	t = t.Lookup(name)
 	if t == nil {
 		log.L.Fatalf("failed to find template '%s'", name)

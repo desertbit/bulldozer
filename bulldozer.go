@@ -131,7 +131,7 @@ func Init() {
 	}
 
 	// Initialize the authentication package.
-	if err = auth.Init(); err != nil {
+	if err = auth.Init(backend); err != nil {
 		log.L.Fatal(err)
 	}
 
