@@ -7,6 +7,7 @@
 
 IMPORTANT
 =========
+* Implement utils.SendMail and send the registration mail...
 * bulldoze: don't initialize the project folder automatically. Implement a init command.
 * Bulldozer.socket.send: clear the queue after a short timeout.
 * The connectionlost widget showsup sometimes, even if the connection is still valid.
@@ -35,11 +36,12 @@ AUTHENTICATION
   Implement:
   - https://tech.dropbox.com/2012/04/zxcvbn-realistic-password-strength-estimation/
   - https://github.com/dropbox/zxcvbn
-* Check if getUsers works with a pointer.
+* getUsers: Add an option to retrieve batched users. Don't return all at once!
+* Check on registration, if the e-mail already exists.
 * Is it possible to add for each user a custom salt to the db?
 * Reload user data value stored in memory from the database if the user data changed...
 * Implement user confirmation over e-mail after registration.
-* Remove not confirmed users automatically after a timeout.
+* Include a notice, that a new registered user is removed after 2 days, if not logged in the first time.
 * Encrypt the password transmition of a new set password.
 
 

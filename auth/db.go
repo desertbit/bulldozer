@@ -9,6 +9,7 @@ import (
 	db "code.desertbit.com/bulldozer/bulldozer/database"
 	r "github.com/dancannon/gorethink"
 
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
@@ -27,6 +28,13 @@ const (
 	// This might be useful, if the password key is stolen from the config,
 	// however it isn't the final password encryption key.
 	additionalPasswordKey = "bpw"
+
+	cleanupLoopTimeout = 10 * time.Minute // Each 10 minutes.
+	expiredUserAfter   = 60 * 60 * 24 * 2 // 2 Day
+)
+
+var (
+	stopCleanupLoop chan struct{} = make(chan struct{})
 )
 
 //########################//
@@ -41,6 +49,7 @@ type dbUser struct {
 	PasswordHash string
 	Enabled      bool
 	LastLogin    int64
+	Created      int64
 }
 
 //#######################//
@@ -62,7 +71,15 @@ func initDB() error {
 		}
 	})
 
+	// Start the cleanup loop in a new goroutine.
+	go cleanupLoop()
+
 	return err
+}
+
+func releaseDB() {
+	// Stop the loop by triggering the quit trigger.
+	close(stopCleanupLoop)
 }
 
 func dbUserExists(loginName string) (bool, error) {
@@ -79,13 +96,18 @@ func dbGetUser(loginName string) (*dbUser, error) {
 		return nil, fmt.Errorf("failed to get database user: login name is empty!")
 	}
 
-	rows, _ := r.Table(dbUserTable).GetAllByIndex(dbUserTableIndex, loginName).Run(db.Session)
+	rows, err := r.Table(dbUserTable).GetAllByIndex(dbUserTableIndex, loginName).Run(db.Session)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get database user '%s': %v", loginName, err)
+	}
+
+	// Check if nothing was found.
 	if rows.IsNil() {
 		return nil, nil
 	}
 
 	var u dbUser
-	err := rows.One(&u)
+	err = rows.One(&u)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database user '%s': %v", loginName, err)
 	}
@@ -98,13 +120,18 @@ func dbGetUserByID(id string) (*dbUser, error) {
 		return nil, fmt.Errorf("failed to get database user: ID is empty!")
 	}
 
-	rows, _ := r.Table(dbUserTable).Get(id).Run(db.Session)
+	rows, err := r.Table(dbUserTable).Get(id).Run(db.Session)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get database user by ID '%s': %v", id, err)
+	}
+
+	// Check if nothing was found.
 	if rows.IsNil() {
 		return nil, nil
 	}
 
 	var u dbUser
-	err := rows.One(&u)
+	err = rows.One(&u)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database user by ID '%s': %v", id, err)
 	}
@@ -112,14 +139,20 @@ func dbGetUserByID(id string) (*dbUser, error) {
 	return &u, nil
 }
 
-func dbGetUsers() (users []*dbUser, err error) {
-	rows, _ := r.Table(dbUserTable).Run(db.Session)
-	err = rows.All(users)
+// TODO: Add an option to retrieve batched users. Don't return all at once!
+func dbGetUsers() ([]*dbUser, error) {
+	rows, err := r.Table(dbUserTable).Run(db.Session)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all database users: %v", err)
 	}
 
-	return
+	var users []*dbUser
+	err = rows.All(&users)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all database users: %v", err)
+	}
+
+	return users, nil
 }
 
 func dbAddUser(loginName string, name string, email string, password string) (u *dbUser, err error) {
@@ -167,6 +200,7 @@ func dbAddUser(loginName string, name string, email string, password string) (u 
 		PasswordHash: password,
 		Enabled:      true,
 		LastLogin:    -1,
+		Created:      time.Now().Unix(),
 	}
 
 	// Insert it to the database.
@@ -214,4 +248,45 @@ func decryptPasswordHash(hash string) (password string, err error) {
 	// Decrypt and generate the temporary SHA256 hash with the session ID and random token.
 	password, err = utils.DecryptXorBase64(additionalPasswordKey+settings.Settings.PasswordEncryptionKey, hash)
 	return
+}
+
+//###############//
+//### Cleanup ###//
+//###############//
+
+func cleanupLoop() {
+	// Create a new ticker
+	ticker := time.NewTicker(cleanupLoopTimeout)
+
+	defer func() {
+		// Stop the ticker
+		ticker.Stop()
+	}()
+
+	for {
+		select {
+		case <-ticker.C:
+			// Cleanup some expired database data.
+			cleanupExpiredData()
+		case <-stopCleanupLoop:
+			// Just exit the loop
+			return
+		}
+	}
+}
+
+func cleanupExpiredData() {
+	// Create the expire timestamp.
+	expires := time.Now().Unix() - expiredUserAfter
+
+	// Remove all expired users.
+	_, err := r.Table(dbUserTable).Filter(
+		r.Row.Field("LastLogin").Eq(-1).
+			And(r.Row.Field("Created").Sub(expires).Le(0))).
+		Delete().RunWrite(db.Session)
+
+	if err != nil {
+		log.L.Error("failed to remove expired database users: %v", err)
+		return
+	}
 }

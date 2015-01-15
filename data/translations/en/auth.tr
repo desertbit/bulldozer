@@ -12,6 +12,8 @@
 {"ID": "blz.auth.login.error.username", "Text": "Please enter an username"}
 {"ID": "blz.auth.login.error.password", "Text": "Please enter a password"}
 
+
+
 {"ID": "blz.auth.changePassword.title", "Text": "Change password"}
 {"ID": "blz.auth.changePassword.passwordLabel", "Text": "Enter new Password"}
 {"ID": "blz.auth.changePassword.passwordPlaceholder", "Text": "Enter new password"}
@@ -26,3 +28,32 @@
 {"ID": "blz.auth.changePassword.error.shortPassword", "Text": "Your password is to short. The password has to contain at least 8 characters."}
 {"ID": "blz.auth.changePassword.error.changePasswordTitle", "Text": "Error!"}
 {"ID": "blz.auth.changePassword.error.changePassword", "Text": "Failed to change password! Please contact the site administrator!"}
+
+
+
+{"ID": "blz.auth.register.pageTitle", "Text": "Register"}
+{"ID": "blz.auth.register.title", "Text": "Register"}
+{"ID": "blz.auth.register.nameLabel", "Text": "Name"}
+{"ID": "blz.auth.register.namePlaceholder", "Text": "Enter your full name"}
+{"ID": "blz.auth.register.usernameLabel", "Text": "Username"}
+{"ID": "blz.auth.register.usernamePlaceholder", "Text": "Enter your username"}
+{"ID": "blz.auth.register.eMailLabel", "Text": "E-Mail"}
+{"ID": "blz.auth.register.eMailPlaceholder", "Text": "Enter your e-mail address"}
+{"ID": "blz.auth.register.verifyEMailLabel", "Text": "Verify E-Mail"}
+{"ID": "blz.auth.register.verifyEMailPlaceholder", "Text": "Enter your e-mail address again"}
+{"ID": "blz.auth.register.loginQuestion", "Text": "You already have an account? Click here to login."}
+{"ID": "blz.auth.register.registerButton", "Text": "Register"}
+{"ID": "blz.auth.register.cancelButton", "Text": "Cancel"}
+
+{"ID": "blz.auth.register.error.name", "Text": "Please enter a valid name"}
+{"ID": "blz.auth.register.error.username", "Text": "Please enter a valid username"}
+{"ID": "blz.auth.register.error.eMail", "Text": "Please enter a valid e-mail address"}
+{"ID": "blz.auth.register.error.verifyEMail", "Text": "The e-mails do not match"}
+{"ID": "blz.auth.register.error.title", "Text": "Registration failed"}
+{"ID": "blz.auth.register.error.general", "Text": "The user registration failed. Please check your name, username and e-mail!"}
+{"ID": "blz.auth.register.error.generalShort", "Text": "The user registration failed!"}
+{"ID": "blz.auth.register.error.userAlreadyExists", "Text": "The user with username '%s' already exists!"}
+{"ID": "blz.auth.register.error.registrationDisabled", "Text": "The user registration process is disabled!"}
+
+{"ID": "blz.auth.register.success.title", "Text": "User registered"}
+{"ID": "blz.auth.register.success.text", "Text": "Your new password has been send to your e-mail address."}

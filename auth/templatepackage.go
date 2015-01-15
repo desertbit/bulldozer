@@ -24,6 +24,8 @@ func init() {
 
 type templatePackage struct{}
 
+// Also add logout function.
+
 func (p *templatePackage) MustIsAuth(a *template.Action, c *template.Context) {
 	// TODO: Finish this
 	a.Error("Error Message!")

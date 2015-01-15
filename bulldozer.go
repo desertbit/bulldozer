@@ -183,6 +183,7 @@ func release() {
 	// Release the bulldozer sub packages
 	sessions.Release()
 	tr.Release()
+	auth.Release()
 
 	// Close the database
 	database.Close()

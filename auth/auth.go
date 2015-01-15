@@ -17,13 +17,15 @@ import (
 
 const (
 	// Page Urls
-	LoginPageUrl = "/login"
+	LoginPageUrl    = "/login"
+	RegisterPageUrl = "/register"
 
 	// Authentication template directory name.
 	authTemplatesDir = "auth"
 
 	// Template names:
-	loginTemplate = "login.tmpl"
+	loginTemplate    = "login.tmpl"
+	registerTemplate = "register.tmpl"
 
 	// Session value keys.
 	sessionValueKeyIsAuth = "blzAuthData"
@@ -78,6 +80,10 @@ func Init(b bulldozerBackend) error {
 		if t := lookupTemplate(s.Templates, loginTemplate); t != nil {
 			t.AddStyleClass("bulldozer-page").RegisterEvents(new(loginEvents))
 		}
+
+		if t := lookupTemplate(s.Templates, registerTemplate); t != nil {
+			t.AddStyleClass("bulldozer-page").RegisterEvents(new(registerEvents))
+		}
 	})
 
 	// Parse the templates.
@@ -88,6 +94,7 @@ func Init(b bulldozerBackend) error {
 
 	// Set the login route.
 	backend.Route(LoginPageUrl, routeLoginPage)
+	backend.Route(RegisterPageUrl, routeRegisterPage)
 
 	// Initialize the database.
 	if err = initDB(); err != nil {
@@ -95,6 +102,11 @@ func Init(b bulldozerBackend) error {
 	}
 
 	return nil
+}
+
+// Release this package and stop all goroutines.
+func Release() {
+	releaseDB()
 }
 
 // IsAuth returns a boolean if the current session is authenticated

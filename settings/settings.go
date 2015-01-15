@@ -83,7 +83,7 @@ func init() {
 
 		ScssCmd: "scss",
 
-		RegistrationDisabled:  false,
+		RegistrationDisabled:  true,
 		PasswordEncryptionKey: defaultPasswordEncryptionKey,
 	}
 
