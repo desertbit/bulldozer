@@ -6,10 +6,10 @@
 package sessions
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"sync"
 	"time"
 )
@@ -79,6 +79,17 @@ func (s *Session) InstanceGet(key interface{}, vars ...func() interface{}) (valu
 	}
 
 	return
+}
+
+// InstancePull does the same as InstanceGet(), but additionally removes the value from the store if present.
+// Use this for Flash values...
+func (s *Session) InstancePull(key interface{}, vars ...func() interface{}) (interface{}, bool) {
+	i, ok := s.InstanceGet(key, vars...)
+	if ok {
+		s.InstanceDelete(key)
+	}
+
+	return i, ok
 }
 
 // InstanceSet sets the instance value with the given key.

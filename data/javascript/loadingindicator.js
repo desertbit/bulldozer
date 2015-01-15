@@ -39,11 +39,14 @@ Bulldozer.fn.loadingIndicator = new function () {
         // Stop the timeout
         stopTimeout();
 
+        // Remove the class first.
+        e.removeClass('none-pointer-events');
+
         // Show the loading indicator and make it visible after 1 second
         e.css('opacity', '0').show();
         timeLoadingInd = setTimeout(function () {
             timeLoadingInd = false;
-            e.css('opacity', '1').removeClass('none-pointer-events').addClass('show');
+            e.css('opacity', '1').addClass('show');
 
             // Hide the loading indicator after 25 seconds and display an error message.
             timeLoadingInd = setTimeout(function () {

@@ -11,6 +11,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"io/ioutil"
 	"strconv"
 )
 
@@ -80,7 +81,17 @@ func (d *Dialog) RegisterEvents(i interface{}, vars ...string) {
 	d.t.RegisterEvents(i, vars...)
 }
 
-// Parse a template text
+// ParseFile parses a template file.
+func (d *Dialog) ParseFile(filename string) (err error) {
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	return d.Parse(string(b))
+}
+
+// Parse a template text.
 func (d *Dialog) Parse(text string) (err error) {
 	// Append the dialog javascript code
 	text += `{{js load}}
@@ -103,8 +114,9 @@ func (d *Dialog) Parse(text string) (err error) {
 func (d *Dialog) Show(s *sessions.Session, data interface{}) (*template.Context, error) {
 	// Create the optional options for the template.
 	opts := template.ExecOpts{
-		ID:    s.NewUniqueId(),
-		DomID: s.NewUniqueDomID(),
+		ID: s.NewUniqueId(),
+		// TODO: Uncomment this if the context bug is fixed.
+		//DomID: s.NewUniqueDomID(),
 	}
 
 	// Execute the template
@@ -114,7 +126,9 @@ func (d *Dialog) Show(s *sessions.Session, data interface{}) (*template.Context,
 	}
 
 	// Create the dialog DOM ID.
-	dialogDomID := opts.DomID + "__d"
+	// TODO: Uncomment this if the context bug is fixed.
+	//dialogDomID := opts.DomID + "__d"
+	dialogDomID := c.DomID() + "__d"
 
 	// Transform to string
 	closableStr := strconv.FormatBool(d.closable)

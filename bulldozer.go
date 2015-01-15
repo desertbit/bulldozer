@@ -7,6 +7,7 @@ package bulldozer
 
 import (
 	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
 	"code.desertbit.com/bulldozer/bulldozer/auth"
 	"code.desertbit.com/bulldozer/bulldozer/database"
@@ -16,7 +17,6 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/template/store"
-	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 
 	"flag"
@@ -134,9 +134,6 @@ func Init() {
 	if err = auth.Init(backend); err != nil {
 		log.L.Fatal(err)
 	}
-
-	// Watch the store template files and reload them on changes,
-	store.Watch()
 
 	// Build the scss files.
 	buildScss()

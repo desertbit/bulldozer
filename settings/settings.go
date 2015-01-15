@@ -44,6 +44,9 @@ const (
 	// Default cookie keys
 	defaultCookieHashKey  = "R7DqYdgWlztQ06diRM4z7ByuDwfiAvehLxTwAEDHFvgjkA4CcPrWBhZk6FJIBuDs"
 	defaultCookieBlockKey = "2Mox41MlNDHOzShGfiO6AMq3isx5hz9r"
+
+	// Default password key
+	defaultPasswordEncryptionKey = "gNlmWx0jurl8ohIVZMi8k9eRZxP25kEeQq68TeTVLD9omFZmP7sSqLK"
 )
 
 var (
@@ -79,6 +82,9 @@ func init() {
 		FirewallReleaseBlockAfter:    60 * 5, // 5 minutes
 
 		ScssCmd: "scss",
+
+		RegistrationDisabled:  false,
+		PasswordEncryptionKey: defaultPasswordEncryptionKey,
 	}
 
 	// Set the temporary directory path
@@ -164,6 +170,11 @@ func Check() error {
 	// Print a warning if the SecureHttpsAccess flag is false
 	if !Settings.SecureHttpsAccess {
 		log.L.Warning("[WARNING] settings: the secure https access flag is false! You should provide a secure https access!")
+	}
+
+	// Print a warning if the default password encryption key is used.
+	if Settings.PasswordEncryptionKey == defaultPasswordEncryptionKey {
+		log.L.Warning("[WARNING] settings: the default password encryption key is set! You should replace this with a secret key!")
 	}
 
 	// Remove leading / from the site url
@@ -275,4 +286,8 @@ type settings struct {
 	StaticStyleSheets []string
 
 	DisallowedRobotsUrls []string
+
+	// Authentication stuff
+	RegistrationDisabled  bool
+	PasswordEncryptionKey string
 }

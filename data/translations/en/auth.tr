@@ -1,1 +1,28 @@
 {"ID": "blz.auth.login.pageTitle", "Text": "Login"}
+{"ID": "blz.auth.login.title", "Text": "Login"}
+{"ID": "blz.auth.login.usernameLabel", "Text": "Username"}
+{"ID": "blz.auth.login.usernamePlaceholder", "Text": "Enter your username"}
+{"ID": "blz.auth.login.passwordLabel", "Text": "Password"}
+{"ID": "blz.auth.login.passwordPlaceholder", "Text": "Enter your password"}
+{"ID": "blz.auth.login.registerQuestion", "Text": "You don't have an account? Click here to register a new user account."}
+{"ID": "blz.auth.login.loginButton", "Text": "Login"}
+
+{"ID": "blz.auth.login.error.title", "Text": "Authentication failed"}
+{"ID": "blz.auth.login.error.text", "Text": "The user authentication failed. Please check your username and password."}
+{"ID": "blz.auth.login.error.username", "Text": "Please enter an username"}
+{"ID": "blz.auth.login.error.password", "Text": "Please enter a password"}
+
+{"ID": "blz.auth.changePassword.title", "Text": "Change password"}
+{"ID": "blz.auth.changePassword.passwordLabel", "Text": "Enter new Password"}
+{"ID": "blz.auth.changePassword.passwordPlaceholder", "Text": "Enter new password"}
+{"ID": "blz.auth.changePassword.passwordVerifyLabel", "Text": "Verify new Password"}
+{"ID": "blz.auth.changePassword.passwordVerifyPlaceholder", "Text": "Enter new password again"}
+{"ID": "blz.auth.changePassword.cancelButton", "Text": "Cancel"}
+{"ID": "blz.auth.changePassword.submitButton", "Text": "Submit"}
+
+{"ID": "blz.auth.changePassword.error.password", "Text": "Passwords must be at least 8 characters with 1 capital letter and 1 number"}
+{"ID": "blz.auth.changePassword.error.passwordsDontMatch", "Text": "The passwords don't match!"}
+{"ID": "blz.auth.changePassword.error.shortPasswordTitle", "Text": "Invalid Password"}
+{"ID": "blz.auth.changePassword.error.shortPassword", "Text": "Your password is to short. The password has to contain at least 8 characters."}
+{"ID": "blz.auth.changePassword.error.changePasswordTitle", "Text": "Error!"}
+{"ID": "blz.auth.changePassword.error.changePassword", "Text": "Failed to change password! Please contact the site administrator!"}

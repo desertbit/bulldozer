@@ -14,6 +14,7 @@ Bulldozer.fn.socket = new function () {
      */
 
     var reconnectAttempts = 3;
+    var sendQueue = [];
 
     var SocketKey = {
         Task: "tsk"
@@ -173,6 +174,8 @@ Bulldozer.fn.socket = new function () {
         // Increment the count.
         reconnectCount += 1;
 
+        /* TODO: Currently disabled, because backend session allows only
+        // one socket type... See Bulldozer TODO.
         // Fallback to the ajax socket if this is the last attempt.
         if (reconnectCount == reconnectAttempts
             && socket.type() !== Bulldozer.AjaxSocket.type()) {
@@ -180,6 +183,7 @@ Bulldozer.fn.socket = new function () {
             console.log("falling back to ajax socket...");
             fallback = true;
         }
+        */
 
         if (reconnectCount <= reconnectAttempts) {
             // Try to reconnect
@@ -200,6 +204,10 @@ Bulldozer.fn.socket = new function () {
     /*
      * Public Methods
      */
+
+    this.sessionID = function() {
+        return sid;
+    };
 
     this.init = function (sessionID, socketAccessToken, forceFallback) {
         if (!sessionID || !socketAccessToken) {
@@ -263,6 +271,13 @@ Bulldozer.fn.socket = new function () {
                     return;
                 }
 
+                // Send data, which could not be send...
+                var l = sendQueue.length;
+                for (var i = 0; i < l; i++) {
+                    socket.send(prepareSendMsg(sendQueue[i]));
+                }
+                sendQueue = [];
+
                 // Trigger the custom bulldozer ready event if this
                 // is the first successfull socket connection.
                 if (!documentReady) {
@@ -284,13 +299,8 @@ Bulldozer.fn.socket = new function () {
 
     // Send the data object to the server. The data object is converted into a string.
     // A boolean is returned, indicating if the data has been send to the server.
+    // if false, it is added to the queue and will be resend as soon as a connection is established.
     this.send = function(type, data) {
-        // Reconnect the socket session if the connection is lost.
-        if (Bulldozer.connectionLost.connectionLost()) {
-            Bulldozer.socket.reconnect();
-            return false;
-        }
-
         var str = SocketKey.Task + '=' + String(type) + '&';
         for (var p in data) {
             if (data.hasOwnProperty(p)) {
@@ -298,6 +308,16 @@ Bulldozer.fn.socket = new function () {
             }
         }
 
+        // Reconnect the socket session if the connection is lost.
+        if (Bulldozer.connectionLost.connectionLost()) {
+            // Add the data to the queue.
+            sendQueue.push(str);
+
+            // Reconnect.
+            Bulldozer.socket.reconnect();
+            return false;
+        }
+        
         socket.send(prepareSendMsg(str));
         return true;
     };

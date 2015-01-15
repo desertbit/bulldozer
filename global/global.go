@@ -6,12 +6,13 @@
 package global
 
 import (
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/template/store"
-	"code.desertbit.com/bulldozer/bulldozer/tr"
 )
 
 const (
@@ -57,16 +58,32 @@ func Init() error {
 	if err != nil {
 		return err
 	}
+
+	// Customize the templates after each parse.
+	s.OnAfterParse(func(s *store.Store) {
+		if t := lookupTemplate(s.Templates, LoadingIndicatorTemplate); t != nil {
+			t.SetStaticDomID("bulldozer-loading-indicator")
+		}
+
+		if t := lookupTemplate(s.Templates, ConnectionLostTemplate); t != nil {
+			t.SetStaticDomID("bulldozer-connection-lost")
+		}
+
+		if t := lookupTemplate(s.Templates, NoScriptTemplate); t != nil {
+			t.SetStaticDomID("bulldozer-noscript")
+		}
+
+		if t := lookupTemplate(s.Templates, NotFoundTemplate); t != nil {
+			t.AddStyleClass("bulldozer-page").AddStyleClass("bulldozer-not-found-page")
+		}
+
+		if t := lookupTemplate(s.Templates, ErrorTemplate); t != nil {
+			t.AddStyleClass("bulldozer-page").AddStyleClass("bulldozer-error-page")
+		}
+	})
+
+	// Parse the templates.
 	s.Parse()
-
-	// Set the static DOM IDs.
-	lookupMust(s.Templates, LoadingIndicatorTemplate).SetStaticDomID("bulldozer-loading-indicator")
-	lookupMust(s.Templates, ConnectionLostTemplate).SetStaticDomID("bulldozer-connection-lost")
-	lookupMust(s.Templates, NoScriptTemplate).SetStaticDomID("bulldozer-noscript")
-
-	// Set the template classes.
-	lookupMust(s.Templates, NotFoundTemplate).AddStyleClass("bulldozer-page").AddStyleClass("bulldozer-not-found-page")
-	lookupMust(s.Templates, ErrorTemplate).AddStyleClass("bulldozer-page").AddStyleClass("bulldozer-error-page")
 
 	// Set the core templates store.
 	CoreTemplatesStore = s
@@ -114,14 +131,14 @@ func ExecErrorTemplate(s *sessions.Session, errorMessage string, vars ...bool) (
 //### Private ###//
 //###############//
 
-func lookupMust(t *template.Template, name string) *template.Template {
+func lookupTemplate(t *template.Template, name string) *template.Template {
 	if t == nil {
-		log.L.Fatalf("failed to find template '%s'", name)
+		log.L.Error("failed to find template '%s'", name)
 	}
 
 	t = t.Lookup(name)
 	if t == nil {
-		log.L.Fatalf("failed to find template '%s'", name)
+		log.L.Error("failed to find template '%s'", name)
 	}
 
 	return t

@@ -306,6 +306,17 @@ func (s *Session) Get(key interface{}, vars ...func() interface{}) (interface{},
 	return s.storeSession.Get(key, vars...)
 }
 
+// Pull does the same as Get(), but additionally removes the value from the store if present.
+// Use this for Flash values...
+func (s *Session) Pull(key interface{}, vars ...func() interface{}) (interface{}, bool) {
+	i, ok := s.Get(key, vars...)
+	if ok {
+		s.Delete(key)
+	}
+
+	return i, ok
+}
+
 // Set sets the value with the given key.
 func (s *Session) Set(key interface{}, value interface{}) {
 	s.storeSession.Set(key, value)
@@ -336,6 +347,17 @@ func (s *Session) Dirty() {
 // This cache does not survive application restarts.
 func (s *Session) CacheGet(key interface{}, vars ...func() interface{}) (interface{}, bool) {
 	return s.storeSession.CacheGet(key, vars...)
+}
+
+// CachePull does the same as CacheGet(), but additionally removes the value from the cache if present.
+// Use this for Flash values...
+func (s *Session) CachePull(key interface{}, vars ...func() interface{}) (interface{}, bool) {
+	i, ok := s.CacheGet(key, vars...)
+	if ok {
+		s.CacheDelete(key)
+	}
+
+	return i, ok
 }
 
 // CacheSet sets the cache value with the given key.

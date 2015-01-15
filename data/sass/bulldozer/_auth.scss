@@ -1,0 +1,54 @@
+/*
+ *  Bulldozer Authentication
+ */
+
+.bulldozer-login-bg,
+.bulldozer-register-bg {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: url("../img/blur-bg.jpg") no-repeat center center; 
+    background-size: cover;
+    background-attachment: fixed;
+    text-align: center;
+
+    /* Align to vertical center */
+    &:before {
+        content: '';
+        display: inline-block;
+        width: 0;
+        height: 100%;
+        vertical-align: middle;
+    }
+}
+
+.bulldozer-login {
+    @include topbar-panel;
+
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    text-align: left;
+    border: none;
+    margin: 0 auto;
+    background-color: #FEFEFE;
+    max-width: 480px;
+    width: auto;
+
+    @include box-shadow(0 0 100px 3px rgba(0,0,0,0.2));
+
+    .bulldozer-link {
+        font-size: rem-calc(12px);
+    }
+
+    @media #{$small-only} {
+        margin: 15px auto;
+        width: 92% !important;
+    }
+}
+
+.bulldozer-register {
+    @extend .bulldozer-login;
+
+    max-width: 700px;
+}

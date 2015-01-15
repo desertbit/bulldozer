@@ -6,8 +6,9 @@
 package template
 
 import (
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+
 	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
 	"strconv"

@@ -22,15 +22,16 @@ $loading-secondary-color: #eee;
     margin: 0;
     padding: 0;
     background-color: rgba(0, 0, 0, 0);
+    pointer-events: all;
 
-    &.none-pointer-events {
+    &.none-pointer-events,
+    &.none-pointer-events * {
         pointer-events: none;
     }
 
     // Overlay
     .overlay {
         overflow: hidden;
-        pointer-events: all;
         position: fixed;
         top: 0;
         bottom: 110%;

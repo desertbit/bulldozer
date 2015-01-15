@@ -6,20 +6,22 @@
 package messagebox
 
 import (
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+
+	"code.desertbit.com/bulldozer/bulldozer/callback"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/tr"
 	"code.desertbit.com/bulldozer/bulldozer/ui/dialog"
 	"fmt"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 const (
 	messageBoxTemplateUID = "blz_msgbox"
-	cacheValueKey         = "bzrMsgBox"
+	sessionValueKeyPrefix = "bzrMsgBox_"
+	callbackPrefixName    = "blzMsgBox_"
 )
 
 const (
@@ -48,7 +50,8 @@ type MessageBox struct {
 	buttons        Button
 	messageBoxType MessageBoxType
 	icon           string // CSS icon class. Predefined Kepler classes or font awesome classes...
-	callback       Callback
+	callbackFunc   Callback
+	callbackName   string
 }
 
 type templButton struct {
@@ -81,21 +84,6 @@ func init() {
 	d.RegisterEvents(&receiver{})
 }
 
-//################################//
-//### Private cache value type ###//
-//################################//
-
-type callbacks struct {
-	mutex sync.Mutex
-	set   map[string]Callback
-}
-
-func newCallbacks() *callbacks {
-	return &callbacks{
-		set: make(map[string]Callback),
-	}
-}
-
 //###########################//
 //### Event Receiver type ###//
 //###########################//
@@ -103,43 +91,43 @@ func newCallbacks() *callbacks {
 type receiver struct{}
 
 func (r *receiver) EventButtonClicked(c *template.Context, b int) {
+	// Save the session pointer.
+	s := c.Session()
+
+	// Create the session value access key.
+	key := sessionValueKeyPrefix + c.ID()
+
 	// Get the callbacks from the session cache.
-	i, _ := c.Session().CacheGet(cacheValueKey, func() interface{} {
-		return newCallbacks()
-	})
-
-	// Assertion.
-	callbacks := i.(*callbacks)
-
-	// The access key is the context ID.
-	id := c.ID()
-
-	// Lock the mutex.
-	callbacks.mutex.Lock()
-	defer callbacks.mutex.Unlock()
-
-	// Try to find the callback for the current context ID.
-	cb, ok := callbacks.set[id]
+	i, ok := s.InstancePull(key)
 	if !ok {
-		log.L.Error("messagebox: failed to get messagebox callback for id: '%s'", id)
-		return
+		i, ok = s.CachePull(key)
+		if !ok {
+			log.L.Warning("messagebox: failed to get messagebox callback for id: '%s': this is caused, because messagebox callbacks set with messagebox.CallbackFunc are stored in the session cache and don't survive application restarts! Use messagebox.SetCallback instead...", c.ID())
+			return
+		}
 	}
 
-	// Remove the callback value from the cache.
-	delete(callbacks.set, id)
-
-	if cb == nil {
-		log.L.Error("messagebox: failed to get messagebox callback for id: '%s': callback is nil!", id)
+	// Assertion
+	switch i.(type) {
+	case string:
+		// Assert and call the callback.
+		name := i.(string)
+		callback.Call(name, Button(b))
+	case Callback:
+		// Assert and call the callback.
+		cb := i.(Callback)
+		if cb != nil {
+			cb(Button(b))
+		}
+	default:
+		log.L.Error("messagebox: failed to get messagebox callback for id: '%s': unkown callback type!", c.ID())
 		return
 	}
-
-	// Call the callback after the mutex got unlocked.
-	defer cb(Button(b))
 }
 
-//#######################//
-//### MessageBox type ###//
-//#######################//
+//##############//
+//### Public ###//
+//##############//
 
 // New creates a new MessageBox
 func New() *MessageBox {
@@ -148,6 +136,20 @@ func New() *MessageBox {
 		messageBoxType: TypeDefault,
 	}
 }
+
+// RegisterCallback registers a callback. This is necessary, because
+// otherwise callbacks could not be called after application restarts.
+// They have to be registered globally...
+// One optional booleam can be passed, to force a overwrite of
+// a previous registered callback with the same name.
+func RegisterCallback(name string, cb Callback, vars ...bool) {
+	// Register the callback.
+	callback.Register(callbackPrefixName+name, cb, vars...)
+}
+
+//#######################//
+//### MessageBox type ###//
+//#######################//
 
 // SetTitle sets the messagebox title
 func (m *MessageBox) SetTitle(title string) *MessageBox {
@@ -180,9 +182,17 @@ func (m *MessageBox) SetIcon(iconClass string) *MessageBox {
 }
 
 // SetCallback sets the callback which is called as soon as any messagebox button is clicked.
+// Use RegisterCallback to register a callback with a name.
+func (m *MessageBox) SetCallback(callbackName string) *MessageBox {
+	m.callbackName = callbackPrefixName + callbackName
+	return m
+}
+
+// SetCallbackFunc sets the callback which is called as soon as any messagebox button is clicked.
 // Note: This callback is saved in the session cache and it won't survive application restarts!
-func (m *MessageBox) SetCallback(c Callback) *MessageBox {
-	m.callback = c
+// Use SetCallback instead!
+func (m *MessageBox) SetCallbackFunc(c Callback) *MessageBox {
+	m.callbackFunc = c
 	return m
 }
 
@@ -271,22 +281,15 @@ func (m *MessageBox) Show(s *sessions.Session) (err error) {
 		return
 	}
 
-	// Add the callback if present.
-	if m.callback != nil {
-		// Get the callbacks from the session cache.
-		i, _ := s.CacheGet(cacheValueKey, func() interface{} {
-			return newCallbacks()
-		})
-
-		// Assertion.
-		callbacks := i.(*callbacks)
-
-		// Lock the mutex.
-		callbacks.mutex.Lock()
-		defer callbacks.mutex.Unlock()
-
-		// Add the callback to the map.
-		callbacks.set[c.ID()] = m.callback
+	// Save the callback to the session...
+	key := sessionValueKeyPrefix + c.ID()
+	if len(m.callbackName) > 0 {
+		// Set the callback name to the session instance values.
+		s.InstanceSet(key, m.callbackName)
+	} else {
+		// Hint: This won't survive application restarts.
+		// Set the callbacks to the session cache.
+		s.CacheSet(key, m.callbackFunc)
 	}
 
 	return nil

@@ -6,12 +6,14 @@
 package database
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	r "github.com/dancannon/gorethink"
+
+	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"fmt"
 )
 
 var (
-	session *r.Session
+	Session *r.Session
 )
 
 //##############//
@@ -20,7 +22,7 @@ var (
 
 func Connect() (err error) {
 	// Connext to the database server.
-	session, err = r.Connect(r.ConnectOpts{
+	Session, err = r.Connect(r.ConnectOpts{
 		Address:     settings.Settings.DatabaseAddress,
 		Database:    settings.Settings.DatabaseName,
 		MaxIdle:     settings.Settings.DatabaseMaxIdle,
@@ -35,9 +37,67 @@ func Connect() (err error) {
 }
 
 func Close() {
-	if session == nil {
+	if Session == nil {
 		return
 	}
 
-	session.Close()
+	Session.Close()
+}
+
+// UUID creates a new unique ID, which can be used as database access ID.
+func UUID() (string, error) {
+	// Create a new unique ID.
+	r, err := r.UUID().Run(Session)
+	if err != nil {
+		return "", fmt.Errorf("failed to obtain a new unique ID: %v", err)
+	}
+
+	// Get the value.
+	var id string
+	err = r.One(&id)
+	if err != nil {
+		return "", fmt.Errorf("failed to obtain a new unique ID: %v", err)
+	}
+
+	if len(id) == 0 {
+		return "", fmt.Errorf("failed to obtain a new unique ID: %v", err)
+	}
+
+	return id, nil
+}
+
+// CreateTableIfNotExists creates the table if it does not exists
+// and calls the function f if passed.
+func CreateTableIfNotExists(tableName string, f ...func()) error {
+	// Get a table list.
+	res, err := r.Db(settings.Settings.DatabaseName).TableList().Run(Session)
+	if err != nil {
+		return err
+	}
+
+	var tableList []string
+	err = res.All(&tableList)
+	if err != nil {
+		return err
+	}
+
+	// Check if the table exists.
+	for _, table := range tableList {
+		if table == tableName {
+			return nil
+		}
+	}
+
+	// Create the table.
+	_, err = r.Db(settings.Settings.DatabaseName).TableCreate(tableName).RunWrite(Session)
+	if err != nil {
+		return err
+	}
+
+	// Call the callback if present
+	if len(f) > 0 {
+		f[0]()
+	}
+
+	return nil
 }

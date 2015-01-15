@@ -37,6 +37,16 @@ var (
 
 func init() {
 	reparseTemplates = utils.Debounce(300*time.Millisecond, parseTemplates)
+
+	// Create the filewatcher.
+	var err error
+	templateFileWatcher, err = filewatcher.New()
+	if err != nil {
+		log.L.Fatalf("failed to create templates filewatcher: %v", err)
+	}
+
+	// Set the event function.
+	templateFileWatcher.OnEvent(onTemplatesFileChange)
 }
 
 //##################//
@@ -154,6 +164,11 @@ func New(paths ...string) (*Store, error) {
 	// Add the store to the map.
 	stores[storesCounter] = store
 
+	// Add the paths which should be watched.
+	for _, path := range paths {
+		templateFileWatcher.Add(path)
+	}
+
 	return store, nil
 }
 
@@ -163,28 +178,6 @@ func Release() {
 	if templateFileWatcher != nil {
 		templateFileWatcher.Close()
 	}
-}
-
-// Watch starts a filewatcher and reloads all the store templates on any change.
-func Watch() {
-	// Stop any previous filewatcher.
-	if templateFileWatcher != nil {
-		templateFileWatcher.Close()
-	}
-
-	// Create the filewatcher.
-	var err error
-	templateFileWatcher, err = filewatcher.New()
-	if err != nil {
-		log.L.Fatalf("failed to create templates filewatcher: %v", err)
-	}
-
-	// Set the event function.
-	templateFileWatcher.OnEvent(onTemplatesFileChange)
-
-	// Add the paths which should be watched.
-	templateFileWatcher.Add(settings.Settings.PagesPath)
-	templateFileWatcher.Add(settings.Settings.TemplatesPath)
 }
 
 //###############//

@@ -1,0 +1,58 @@
+<div class="bulldozer-login-bg">
+	<div class="bulldozer-login radius">
+		<div class="topbar">
+		    <div class="icon lock"></div>
+		    <div class="title">
+		        <h3>{{tr "blz.auth.login.title"}}</h3>
+		    </div>
+		</div>
+		<div class="kepler grid" data-kepler-odin="{{id "val"}}">
+			<div class="column large-12 space-bottom">
+				<label>{{tr "blz.auth.login.usernameLabel"}}
+					<input id="{{id "name"}}" class="kepler" type="text" maxlength="30" placeholder="{{tr "blz.auth.login.usernamePlaceholder"}}" required error="{{tr "blz.auth.login.error.username"}}" />
+				</label>
+			</div>
+			<div class="column large-12">
+				<label>{{tr "blz.auth.login.passwordLabel"}}
+					<input id="{{id "pass"}}" class="kepler" type="password" maxlength="50" placeholder="{{tr "blz.auth.login.passwordPlaceholder"}}" required error="{{tr "blz.auth.login.error.password"}}" />
+				</label>
+			</div>
+			{{if not #.RegistrationDisabled}}
+			<div class="column large-12 space-top">
+				<a id="{{id "register"}}" class="bulldozer-link">{{tr "blz.auth.login.registerQuestion"}}</a>
+			</div>
+			{{end}}
+			<div class="column large-12">
+				<hr></hr>
+			</div>
+			<div class="column large-12">
+				<a class="kepler button expand" validate>{{tr "blz.auth.login.loginButton"}}</a>
+			</div>
+		</div>
+	</div>
+</div>
+{{js load}}
+	$("#{{id "name"}}").keyup(function(event){
+		if(event.keyCode == 13){
+			$("#{{id "pass"}}").focus();
+		}
+	});
+	$("#{{id "pass"}}").keyup(function(event){
+		if(event.keyCode == 13){
+			Kepler.odin.validate("{{id "val"}}");
+		}
+	});
+	Kepler.odin.valid("{{id "val"}}", function() {
+		var passInput = $("#{{id "pass"}}");
+		var name=$.trim($("#{{id "name"}}").val());
+		var hash=Bulldozer.auth.hashPassword(passInput.val(),"{{#.PasswordToken}}");
+		passInput.val("");
+		Bulldozer.loadingIndicator.show();
+		{{emit Login(name,hash)}}
+	});
+	{{if not #.RegistrationDisabled}}
+	$("#{{id "register"}}").click(function() {
+		Bulldozer.core.navigate("/register");
+	});
+	{{end}}
+{{end js}}

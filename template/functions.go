@@ -6,7 +6,7 @@
 package template
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/tr"
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 	"fmt"
 )
 
