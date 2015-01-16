@@ -6,6 +6,8 @@
 package auth
 
 import (
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+
 	"code.desertbit.com/bulldozer/bulldozer/template"
 )
 
@@ -24,11 +26,27 @@ func init() {
 
 type templatePackage struct{}
 
-// TODO: Also add logout function.
-
 func (p *templatePackage) MustIsAuth(a *template.Action, c *template.Context) {
 	if !IsAuth(c.Session()) {
-		// TODO: Translate this!
-		a.Error("Access denied! Please authenticate to access this page.")
+		a.Error(tr.S("blz.auth.pkg.mustAuthErrorMessage"))
 	}
+}
+
+func (p *templatePackage) IsAuth(c *template.Context) bool {
+	return IsAuth(c.Session())
+}
+
+func (p *templatePackage) GetUser(c *template.Context) *User {
+	return GetUser(c.Session())
+}
+
+func (p *templatePackage) Group(c *template.Context, groups ...string) bool {
+	// Get the user.
+	u := GetUser(c.Session())
+	if u == nil {
+		return false
+	}
+
+	// Perform the actual action.
+	return u.IsInGroup(groups...)
 }

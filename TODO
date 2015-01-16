@@ -29,6 +29,7 @@ STYLE
 
 AUTHENTICATION
 ==============
+* Add template package calls or js methods to login, logout and register.
 * Add an option to add a user without automatic deletion if not logged in and confirmed.
 * Implement user confirmation over e-mail after registration.
 * Include a notice, that a new registered user is removed after 2 days, if not logged in the first time.

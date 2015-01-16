@@ -55,6 +55,27 @@ func (u *User) Groups() []string {
 	return u.u.Groups
 }
 
+func (u *User) IsInGroup(groups ...string) bool {
+	userGroups := u.u.Groups
+
+	var found bool
+	for _, group := range groups {
+		found = false
+		for _, userGroup := range userGroups {
+			if group == userGroup {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return false
+		}
+	}
+
+	return true
+}
+
 // Update the user data, by retreiving the data from the database.
 func (u *User) Update() error {
 	// Obtain the user value from the cache or database with the user ID.

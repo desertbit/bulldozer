@@ -1,3 +1,7 @@
+{"ID": "blz.auth.pkg.mustAuthErrorMessage", "Text": "Access denied! Please authenticate to access this page."}
+
+
+
 {"ID": "blz.auth.login.pageTitle", "Text": "Login"}
 {"ID": "blz.auth.login.title", "Text": "Login"}
 {"ID": "blz.auth.login.usernameLabel", "Text": "Username"}
