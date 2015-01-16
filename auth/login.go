@@ -94,19 +94,16 @@ func (e *loginEvents) EventLogin(c *template.Context, loginName string, password
 		return
 	}
 
-	// Create a new user wrapper value.
-	user := newUser(u)
-
 	// If this is the first login, then request a new password.
-	if u.LastLogin == -1 {
-		if err = ShowChangePasswordDialog(s, user, finishLoginCallbackName); err != nil {
+	if u.LastLogin <= 0 {
+		if err = showChangePasswordDialog(s, u, finishLoginCallbackName); err != nil {
 			log.L.Error(err.Error())
 		}
 		return
 	}
 
 	// Finish the login
-	finishLogin(s, user)
+	finishLogin(s, u)
 }
 
 //###############//
@@ -153,10 +150,7 @@ func showLoginErrorMsgBox(s *sessions.Session) {
 		Show(s)
 }
 
-func finishLogin(s *sessions.Session, user *User) {
-	// Get the database user pointer.
-	u := user.u
-
+func finishLogin(s *sessions.Session, u *dbUser) {
 	// Update the last login time
 	err := dbUpdateLastLogin(u)
 	if err != nil {
@@ -168,7 +162,6 @@ func finishLogin(s *sessions.Session, user *User) {
 	// Create a new session authentication data value.
 	d := &sessionAuthData{
 		UserID: u.ID,
-		user:   user,
 	}
 
 	// Save the authentication data to the session values.

@@ -29,8 +29,7 @@ const (
 	// however it isn't the final password encryption key.
 	additionalPasswordKey = "bpw"
 
-	cleanupLoopTimeout = 10 * time.Minute // Each 10 minutes.
-	expiredUserAfter   = 60 * 60 * 24 * 2 // 2 Day
+	cleanupLoopTimeout = 1 * time.Hour // Each one hour.
 )
 
 var (
@@ -217,7 +216,14 @@ func dbUpdateLastLogin(u *dbUser) error {
 	u.LastLogin = time.Now().Unix()
 
 	_, err := r.Table(dbUserTable).Update(u).RunWrite(db.Session)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Tell the cache, that the user data has changed.
+	cacheUserOutOfDate(u.ID)
+
+	return nil
 }
 
 func dbChangePassword(u *dbUser, newPassword string) error {
@@ -231,7 +237,14 @@ func dbChangePassword(u *dbUser, newPassword string) error {
 
 	// Update the data in the database
 	_, err := r.Table(dbUserTable).Update(u).RunWrite(db.Session)
-	return err
+	if err != nil {
+		return err
+	}
+
+	// Tell the cache, that the user data has changed.
+	cacheUserOutOfDate(u.ID)
+
+	return nil
 }
 
 //########################//
@@ -277,7 +290,7 @@ func cleanupLoop() {
 
 func cleanupExpiredData() {
 	// Create the expire timestamp.
-	expires := time.Now().Unix() - expiredUserAfter
+	expires := time.Now().Unix() - int64(settings.Settings.RemoveNotConfirmedUsersTimeout)
 
 	// Remove all expired users.
 	_, err := r.Table(dbUserTable).Filter(

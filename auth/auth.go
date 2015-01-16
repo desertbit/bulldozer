@@ -58,7 +58,6 @@ type bulldozerBackend interface {
 
 type sessionAuthData struct {
 	UserID string
-	user   *User
 }
 
 //##############//
@@ -101,12 +100,16 @@ func Init(b bulldozerBackend) error {
 		return err
 	}
 
+	// Start the expire cache loop.
+	startExpireCacheLoop()
+
 	return nil
 }
 
 // Release this package and stop all goroutines.
 func Release() {
 	releaseDB()
+	releaseCache()
 }
 
 // IsAuth returns a boolean if the current session is authenticated
@@ -117,6 +120,7 @@ func IsAuth(s *sessions.Session) bool {
 
 // GetUser returns the logged in user value if logged in.
 // Otherwise nil is returned.
+// This user value is not updated, if any user data changes!
 func GetUser(s *sessions.Session) *User {
 	// Get the session data value.
 	i, ok := s.Get(sessionValueKeyIsAuth)
@@ -130,20 +134,16 @@ func GetUser(s *sessions.Session) *User {
 		return nil
 	}
 
-	// Obtain the user value from the database with the user ID.
-	if d.user == nil {
-		u, err := dbGetUserByID(d.UserID)
-		if err != nil {
-			log.L.Error("failed to get session user by ID: %v", err)
-			return nil
-		} else if u == nil {
-			return nil
-		}
-
-		d.user = newUser(u)
+	// Obtain the user value from the cache or database with the user ID.
+	u, err := cacheGetDBUser(d.UserID)
+	if err != nil {
+		log.L.Error(err.Error())
+		return nil
+	} else if u == nil {
+		return nil
 	}
 
-	return d.user
+	return newUser(u)
 }
 
 // Logout logs out the user if authenticated.

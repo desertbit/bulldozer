@@ -83,8 +83,9 @@ func init() {
 
 		ScssCmd: "scss",
 
-		RegistrationDisabled:  true,
-		PasswordEncryptionKey: defaultPasswordEncryptionKey,
+		RegistrationDisabled:           true,
+		PasswordEncryptionKey:          defaultPasswordEncryptionKey,
+		RemoveNotConfirmedUsersTimeout: 60 * 60 * 24 * 14, // 14 Days
 	}
 
 	// Set the temporary directory path
@@ -288,6 +289,7 @@ type settings struct {
 	DisallowedRobotsUrls []string
 
 	// Authentication stuff
-	RegistrationDisabled  bool
-	PasswordEncryptionKey string
+	RegistrationDisabled           bool
+	PasswordEncryptionKey          string
+	RemoveNotConfirmedUsersTimeout int
 }

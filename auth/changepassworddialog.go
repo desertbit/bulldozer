@@ -52,24 +52,14 @@ func init() {
 	changePasswordDialog.RegisterEvents(new(changePasswordDialogEvents))
 }
 
-//#############//
-//### Types ###//
-//#############//
-
-// Callback method.
-type ChangePasswordDialogCallback func(s *sessions.Session, user *User)
-
 //##############//
 //### Public ###//
 //##############//
 
-// ShowChangePasswordDialog shows a change password dialog for the given user.
+// showChangePasswordDialog shows a change password dialog for the given user.
 // One optional parameter can be passed, defining a callback name for the callback package.
 // This callback is executed on success.
-func ShowChangePasswordDialog(s *sessions.Session, user *User, vars ...string) error {
-	// Get the database user value.
-	u := user.u
-
+func showChangePasswordDialog(s *sessions.Session, u *dbUser, vars ...string) error {
 	// Create the template render data.
 	data := struct {
 		Username string
@@ -178,7 +168,7 @@ func (e *changePasswordDialogEvents) EventSubmit(c *template.Context, newPasswor
 	if ok {
 		name, ok := i.(string)
 		if ok {
-			callback.Call(name, s, newUser(user))
+			callback.Call(name, s, user)
 		}
 	}
 }
