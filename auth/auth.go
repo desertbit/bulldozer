@@ -121,6 +121,7 @@ func IsAuth(s *sessions.Session) bool {
 // GetUser returns the logged in user value if logged in.
 // Otherwise nil is returned.
 // This user value is not updated, if any user data changes!
+// Call user.Update() to get the latest state.
 func GetUser(s *sessions.Session) *User {
 	// Get the session data value.
 	i, ok := s.Get(sessionValueKeyIsAuth)
