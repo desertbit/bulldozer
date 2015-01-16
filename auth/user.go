@@ -46,3 +46,7 @@ func (u *User) LastLogin() int64 {
 func (u *User) Created() int64 {
 	return u.u.Created
 }
+
+func (u *User) Groups() []string {
+	return u.u.Groups
+}

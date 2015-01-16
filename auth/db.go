@@ -240,10 +240,7 @@ func dbAddUser(loginName string, name string, email string, password string, gro
 	return u, nil
 }
 
-func dbUpdateLastLogin(u *dbUser) error {
-	// Set the last login time
-	u.LastLogin = time.Now().Unix()
-
+func dbUpdateUser(u *dbUser) error {
 	_, err := r.Table(dbUserTable).Update(u).RunWrite(db.Session)
 	if err != nil {
 		return err
@@ -255,6 +252,13 @@ func dbUpdateLastLogin(u *dbUser) error {
 	return nil
 }
 
+func dbUpdateLastLogin(u *dbUser) error {
+	// Set the last login time
+	u.LastLogin = time.Now().Unix()
+
+	return dbUpdateUser(u)
+}
+
 func dbChangePassword(u *dbUser, newPassword string) error {
 	// Validate input.
 	if len(newPassword) < minPasswordLength {
@@ -264,16 +268,7 @@ func dbChangePassword(u *dbUser, newPassword string) error {
 	// Hash and encrypt the password.
 	u.PasswordHash = hashPassword(newPassword)
 
-	// Update the data in the database
-	_, err := r.Table(dbUserTable).Update(u).RunWrite(db.Session)
-	if err != nil {
-		return err
-	}
-
-	// Tell the cache, that the user data has changed.
-	cacheUserOutOfDate(u.ID)
-
-	return nil
+	return dbUpdateUser(u)
 }
 
 func dbAddGroup(name string, description string) (*dbGroup, error) {
