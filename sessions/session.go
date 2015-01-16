@@ -31,15 +31,15 @@ const (
 	domEncryptionKeyLength  = 40
 
 	// Value keys
-	keyInstanceValues   = "bzrInstances"
-	keyUniqueID         = "bzrUniqueID"
-	keyUniqueDomID      = "bzrUniqueDomID"
-	keyCookieToken      = "bzrCookieToken"
-	keyDomEncryptionKey = "bzrDomEncryptionKey"
+	keyInstanceValues   = "blzInstances"
+	keyUniqueID         = "blzUniqueID"
+	keyUniqueDomID      = "blzUniqueDomID"
+	keyCookieToken      = "blzCookieToken"
+	keyDomEncryptionKey = "blzDomEncryptionKey"
 
 	// Cache value keys
-	cacheKeyCookieToken = "bzrCookieToken"
-	cacheKeySocketType  = "bzrSocketType"
+	cacheKeyCookieToken = "blzCookieToken"
+	cacheKeySocketType  = "blzSocketType"
 )
 
 var (

@@ -23,8 +23,8 @@ const (
 	globalEventsNameSpace = "global"
 	eventsAccessKeyLength = 10
 
-	// Session instance value keys
-	instanceKeyEvents = "bzrEvents"
+	// Session instance value keys:
+	instanceKeyEvents = "blzEvents"
 
 	requestTypeEmit = "emit"
 	keyEmitDomID    = "did"

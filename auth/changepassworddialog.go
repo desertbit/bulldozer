@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	changePasswordDialogTemplateUID       = "blz_changePasswordDialog"
+	changePasswordDialogTemplateUID       = "blzChangePasswordDialog"
 	changePasswordDialogTemplateFile      = "/dialogs/changepassword.tmpl"
-	sessionValueKeyChangePasswordUserID   = "bzrChangePasswordUID"
-	sessionValueKeyChangePasswordCallback = "bzrChangePasswordCB"
+	sessionValueKeyChangePasswordUserID   = "blzChangePasswordUID"
+	sessionValueKeyChangePasswordCallback = "blzChangePasswordCB"
 )
 
 var (

@@ -18,7 +18,7 @@ import (
 var (
 	mainRouter *router.Router = router.New()
 
-	valueKeyCurrentPath = "bzrCurrentPath"
+	valueKeyCurrentPath = "blzCurrentPath"
 
 	requestTypeRoute = "route"
 	keyRoutePath     = "path"

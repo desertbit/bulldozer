@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	messageBoxTemplateUID = "blz_msgbox"
-	sessionValueKeyPrefix = "bzrMsgBox_"
+	messageBoxTemplateUID = "blzMsgbox"
+	sessionValueKeyPrefix = "blzMsgBox_"
 	callbackPrefixName    = "blzMsgBox_"
 )
 

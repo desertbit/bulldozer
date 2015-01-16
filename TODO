@@ -2,7 +2,6 @@
 === Bulldozer TODO List ===
 ===========================
 
-* Replace all brz to blz!
 * Fix the context bug, where static set DOM IDs and style classes are not reused on function events. If this is fixed, then uncomment the commented lines in dialog.go
 
 IMPORTANT
@@ -29,6 +28,7 @@ STYLE
 
 AUTHENTICATION
 ==============
+* Add log messages if any user data is changed.
 * Add template package calls or js methods to login, logout and register.
 * Add an option to add a user without automatic deletion if not logged in and confirmed.
 * Implement user confirmation over e-mail after registration.
