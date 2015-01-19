@@ -12,6 +12,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/template/store"
+	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
 )
 
@@ -69,7 +70,7 @@ func Init(b bulldozerBackend) error {
 	backend = b
 
 	// Create a new store and parse it.
-	s, err := store.New(settings.Settings.BulldozerCoreTemplatesPath + "/" + authTemplatesDir)
+	s, err := store.New(utils.AddTrailingSlashToPath(settings.Settings.BulldozerCoreTemplatesPath) + authTemplatesDir)
 	if err != nil {
 		return err
 	}

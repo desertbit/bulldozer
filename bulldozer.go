@@ -6,6 +6,7 @@
 package bulldozer
 
 import (
+	bk "code.desertbit.com/bulldozer/bulldozer/backend"
 	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
 	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
@@ -127,6 +128,11 @@ func Init() {
 
 	// Initialize the global package.
 	if err = global.Init(); err != nil {
+		log.L.Fatal(err)
+	}
+
+	// Initialize the backend package.
+	if err = bk.Init(); err != nil {
 		log.L.Fatal(err)
 	}
 
