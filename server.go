@@ -6,6 +6,7 @@
 package bulldozer
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/backend/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/firewall"
 	"code.desertbit.com/bulldozer/bulldozer/global"
 	"code.desertbit.com/bulldozer/bulldozer/log"
@@ -179,14 +180,23 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Execute the route
+	// Execute the route.
 	statusCode, body, title, _ := execRoute(session, req.URL.Path)
+
+	// Execute the topbar.
+	topBar, err := topbar.ExecTopBar(session)
+	if err != nil {
+		// Execute the error template.
+		statusCode, body, title = global.ExecErrorTemplate(session, fmt.Sprintf("failed to execute the topbar template: %v", err))
+		return
+	}
 
 	// Create the template data struct
 	data := struct {
 		Session       *sessions.Session
 		AccessToken   string
 		Title         string
+		TopBar        template.HTML
 		Body          template.HTML
 		JSLibs        []string
 		Styles        []string
@@ -197,6 +207,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		session,
 		accessToken,
 		title,
+		template.HTML(topBar),
 		template.HTML(body),
 		bulldozerJavaScripts,
 		bulldozerStyleSheets,
@@ -252,6 +263,6 @@ const htmlBody = `
 	</script></div>
 	{{coreTemplate .Session "` + global.LoadingIndicatorTemplate + `"}}
 	{{coreTemplate .Session "` + global.ConnectionLostTemplate + `"}}
-	<div id="bulldozer-body">{{.Body}}</div>
+	{{.TopBar}}<div id="bulldozer-body">{{.Body}}</div>
 </body>
 </html>`
