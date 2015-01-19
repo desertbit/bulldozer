@@ -2,6 +2,7 @@
 === Bulldozer TODO List ===
 ===========================
 
+* Add default groups (Admin,...) to the auth package and make them accessible in the template engine.
 * Fix the context bug, where static set DOM IDs and style classes are not reused on function events. If this is fixed, then uncomment the commented lines in dialog.go
 
 IMPORTANT

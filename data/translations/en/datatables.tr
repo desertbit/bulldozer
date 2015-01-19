@@ -1,0 +1,17 @@
+{"ID": "blz.datatables.emptyTable", "Text": "No data available in table"}
+{"ID": "blz.datatables.info", "Text": "Showing _START_ to _END_ of _TOTAL_ entries"}
+{"ID": "blz.datatables.infoEmpty", "Text": "Showing 0 to 0 of 0 entries"}
+{"ID": "blz.datatables.infoFiltered", "Text": "(filtered from _MAX_ total entries)"}
+{"ID": "blz.datatables.infoPostFix", "Text": ""}
+{"ID": "blz.datatables.thousands", "Text": ","}
+{"ID": "blz.datatables.lengthMenu", "Text": "Show _MENU_ entries"}
+{"ID": "blz.datatables.loadingRecords", "Text": "Loading..."}
+{"ID": "blz.datatables.processing", "Text": "Processing..."}
+{"ID": "blz.datatables.search", "Text": "Search:"}
+{"ID": "blz.datatables.zeroRecords", "Text": "No matching records found"}
+{"ID": "blz.datatables.Pagination.first", "Text": "First"}
+{"ID": "blz.datatables.Pagination.last", "Text": "Last"}
+{"ID": "blz.datatables.Pagination.next", "Text": "Next"}
+{"ID": "blz.datatables.Pagination.previous", "Text": "Previous"}
+{"ID": "blz.datatables.sortAscending", "Text": ": activate to sort column ascending"}
+{"ID": "blz.datatables.sortDescending", "Text": ": activate to sort column descending"}
