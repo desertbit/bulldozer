@@ -18,6 +18,9 @@ var Bulldozer = new function() {
 	 */
 
 	 this.init = function(sessionID, socketAccessToken) {
+	 	// Show the loading indicator.
+	 	Bulldozer.loadingIndicator.show();
+
 	 	// Initialize the socket session.
 	 	Bulldozer.socket.init(sessionID, socketAccessToken);
 

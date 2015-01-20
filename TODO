@@ -3,7 +3,6 @@
 ===========================
 
 * Add default groups (Admin,...) to the auth package and make them accessible in the template engine.
-* add a template js load which does not wait for the socket connection or show a loading indicator during the first startup...
 * Fix the context bug, where static set DOM IDs and style classes are not reused on function events. If this is fixed, then uncomment the commented lines in dialog.go
 
 IMPORTANT
@@ -87,3 +86,4 @@ Features
 ========
 * Reload dialog templates automatically on file changes if loaded with dialog.ParseFile.
 * Add optional arg to template.Glob to load recursive templates.
+* Add a template js load which does not wait for the socket connection?

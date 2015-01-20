@@ -6,9 +6,9 @@
 package sessions
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions/socket"
 	"code.desertbit.com/bulldozer/bulldozer/sessions/stream"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"time"
 )
 
