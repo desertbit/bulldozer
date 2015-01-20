@@ -2,9 +2,18 @@
  * Bulldozer TopBar
  */
 
-$bulldozer_top_panel_bg_color: #E25400;
+$bulldozer_topbar_height: 50px;
+$bulldozer_topbar_bg_color: #E25400;
+$bulldozer_topbar_color: #FFF;
+$bulldozer_topbar_split_color: lighten($bulldozer_topbar_bg_color, 10%);
+$bulldozer_topbar_hover_bg_color: #F6F6F6;
+$bulldozer_topbar_hover_color: #444444;
 
-#bulldozer_top_panel
+$bulldozer_topbar_sub_menu_bg_color: #F6F6F6;
+$bulldozer_topbar_sub_menu_color: #444444;
+
+
+#bulldozer-topbar
 {
 	position: fixed;
 	z-index: 500;
@@ -14,31 +23,140 @@ $bulldozer_top_panel_bg_color: #E25400;
 	margin: 0;
 	padding: 0;
 	width: 100%;
-	height: 40px;
-	background-color: $bulldozer_top_panel_bg_color;
+	height: $bulldozer_topbar_height;
+	background-color: $bulldozer_topbar_bg_color;
 
-	> .bulldozer_top_panel_logo
+	> .bulldozer-topbar-logo
 	{
 		float: left;
 		position: relative;
-        width: auto;
-		line-height:40px;
-		text-align:center;
-        color:#FFF;
-        text-align: left;
+        width: 75px;
+        height: 50px;
+        background: url('../img/logo.png') no-repeat center center;
+        color: $bulldozer_topbar_color;
         padding: 0;
-        margin: 0 15px;
+        margin: 0;
         cursor: default;
 
         @include user-select(none);
-
-        span {
-            background-color: #fff;
-            height: 24px;
-            padding: 0 5px;
-            color: $bulldozer_top_panel_bg_color;
-
-            @include border-radius(3px);
-        }
     }
+
+
+    /* Menu */
+
+	.bulldozer-left-menu,
+	.bulldozer-right-menu
+	{
+		position: relative;
+		float: left;
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		height: $bulldozer_topbar_height;
+
+		li {
+			float: left;
+			position: relative;
+			padding: 0;
+			margin: 0;
+			border-left: solid 1px $bulldozer_topbar_split_color;
+
+			i {
+				font-size: 1em;
+			}
+
+			a, span {
+				font: 'Open Sans';
+				font-size: 0.93em;
+				font-weight: bold;
+				text-decoration: none;
+				letter-spacing: 1px;
+				white-space: nowrap;
+				color: $bulldozer_topbar_color;
+				-webkit-user-select: none;  
+				-moz-user-select: none;    
+				-ms-user-select: none;      
+				user-select: none;
+			}
+
+			span {
+				display: inline-block;
+				margin: 0 0 0 5px;
+			}
+
+			a {
+				display: block;
+				padding: 0 22px;
+				margin: 0;
+				height: $bulldozer_topbar_height;
+				line-height: $bulldozer_topbar_height;
+				vertical-align: middle;
+				cursor: pointer;
+			}
+
+			&:hover > a {
+				color: $bulldozer_topbar_hover_color;
+				background-color: $bulldozer_topbar_hover_bg_color;
+
+				span {
+					color: $bulldozer_topbar_hover_color;
+				}
+			}
+
+
+			/* Sub Menu */
+
+			ul {
+				position: absolute;
+				display: none;
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				left: 0;
+				right: auto;
+				width: auto;
+				z-index: -1;    
+				background-color: $bulldozer_topbar_sub_menu_bg_color;
+
+				// Shadow
+				-webkit-box-shadow: 0px 0px 2px 0px rgba(46,46,46,0.8);
+				-moz-box-shadow: 0px 0px 2px 0px rgba(46,46,46,0.8);
+				box-shadow: 0px 0px 2px 0px rgba(46,46,46,0.8);
+
+				li {
+					float: none;
+					margin: 0;
+					padding: 0;
+					display: block;
+					border-left: solid 2px $bulldozer_topbar_sub_menu_bg_color;
+
+					a, span {
+						color: $bulldozer_topbar_sub_menu_color;
+					}
+
+					&:hover {
+						border-left: solid 2px $bulldozer_topbar_split_color;
+
+						a, span {
+							color: $bulldozer_topbar_sub_menu_color;
+						}
+					}
+				}
+			}
+
+			&:hover > ul {
+				display: block;
+			}
+		}
+	}
+
+	.bulldozer-right-menu
+	{
+		float: right;
+
+		ul {
+			left: auto !important;
+			right: 0 !important;
+		}
+	}
 }

@@ -51,7 +51,7 @@ func init() {
 //### Public Template methods ###//
 //###############################//
 
-// RegisterEvents registeres the event methods of the interface.
+// RegisterEvents registeres the event methods of the interface to all templates.
 // Event method names have to start with the EventMethodPrefix.
 // They are called from the client-side without this prefix.
 // One optional parameter can be set, to define the events namespace.

@@ -133,7 +133,7 @@ func routeLoginPage(s *sessions.Session, routeData *router.Data) (string, string
 	}
 
 	// Execute the login template.
-	o, _, _, err := templatesStore.Templates.ExecuteTemplateToString(s, loginTemplate, data)
+	o, _, _, err := templates.ExecuteTemplateToString(s, loginTemplate, data)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to execute login template: %v", err)
 	}

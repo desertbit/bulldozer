@@ -6,9 +6,9 @@
 package bulldozer
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/backend/topbar"
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+
 	"code.desertbit.com/bulldozer/bulldozer/firewall"
-	"code.desertbit.com/bulldozer/bulldozer/global"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
@@ -23,10 +23,15 @@ const (
 	postKeyInstanceID      = "id"
 	reconnectDataDelimiter = "&"
 	responseRequestRefresh = "req_refresh"
+
+	// Main template files:
+	loadingIndicatorTemplate = "loadingindicator" + settings.TemplateSuffix
+	connectionLostTemplate   = "connectionlost" + settings.TemplateSuffix
+	noScriptTemplate         = "noscript" + settings.TemplateSuffix
 )
 
 var (
-	mainTemplate *template.Template
+	mainTemplates *template.Template
 
 	// The required bulldozer stylesheets.
 	bulldozerStyleSheets = []string{
@@ -46,17 +51,28 @@ var (
 
 func init() {
 	// Create the main template.
-	mainTemplate = template.New("main")
+	mainTemplates = template.New("main")
 
-	// Set the custom template functions.
-	mainTemplate.Funcs(template.FuncMap{
-		"coreTemplate": templateCoreTemplateFunc,
+	// Add some important core functions.
+	mainTemplates.Funcs(template.FuncMap{
+		"tr": tr.S,
 	})
 
-	// Parse the main template
-	_, err := mainTemplate.Parse(htmlBody)
+	// Parse the main template body.
+	_, err := mainTemplates.Parse(htmlBody)
 	if err != nil {
-		log.L.Fatalf("main template parsing error: %v", err)
+		log.L.Fatalf("main template body parsing error: %v", err)
+	}
+
+	// Parse the additional main template files.
+	files := []string{
+		settings.GetCoreTemplatePath(loadingIndicatorTemplate),
+		settings.GetCoreTemplatePath(connectionLostTemplate),
+		settings.GetCoreTemplatePath(noScriptTemplate),
+	}
+	_, err = mainTemplates.ParseFiles(files...)
+	if err != nil {
+		log.L.Fatalf("main templates parsing error: %v", err)
 	}
 }
 
@@ -183,20 +199,11 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	// Execute the route.
 	statusCode, body, title, _ := execRoute(session, req.URL.Path)
 
-	// Execute the topbar.
-	topBar, err := topbar.ExecTopBar(session)
-	if err != nil {
-		// Execute the error template.
-		statusCode, body, title = global.ExecErrorTemplate(session, fmt.Sprintf("failed to execute the topbar template: %v", err))
-		return
-	}
-
 	// Create the template data struct
 	data := struct {
 		Session       *sessions.Session
 		AccessToken   string
 		Title         string
-		TopBar        template.HTML
 		Body          template.HTML
 		JSLibs        []string
 		Styles        []string
@@ -207,7 +214,6 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		session,
 		accessToken,
 		title,
-		template.HTML(topBar),
 		template.HTML(body),
 		bulldozerJavaScripts,
 		bulldozerStyleSheets,
@@ -220,15 +226,10 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(statusCode)
 
 	// Execute the main body template
-	err = mainTemplate.Execute(rw, data)
+	err = mainTemplates.Execute(rw, data)
 	if err != nil {
 		log.L.Error("main template execution error: %v", err)
 	}
-}
-
-func templateCoreTemplateFunc(s *sessions.Session, name string) (template.HTML, error) {
-	out, _, _, err := global.CoreTemplatesStore.Templates.ExecuteTemplateToString(s, name, nil)
-	return template.HTML(out), err
 }
 
 // This is the static html template body loaded only on session initialization
@@ -254,15 +255,15 @@ const htmlBody = `
 	{{end}}
 </head>
 <body>
-	{{if not .IsWebCrawler}}<noscript>{{coreTemplate .Session "` + global.NoScriptTemplate + `"}}</noscript>{{end}}
+	{{if not .IsWebCrawler}}<noscript><div id="bulldozer-noscript">{{template "` + noScriptTemplate + `"}}</div></noscript>{{end}}
 	<div id="bulldozer-script"><script>
 		$(document).ready(function() {
 			Bulldozer.init("{{.Session.SessionID}}","{{.AccessToken}}");
 			$("#bulldozer-script").remove();
 		});
 	</script></div>
-	{{coreTemplate .Session "` + global.LoadingIndicatorTemplate + `"}}
-	{{coreTemplate .Session "` + global.ConnectionLostTemplate + `"}}
-	{{.TopBar}}<div id="bulldozer-body">{{.Body}}</div>
+	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplate + `"}}</div>
+	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplate + `"}}</div>
+	<div id="bulldozer-body">{{.Body}}</div>
 </body>
 </html>`

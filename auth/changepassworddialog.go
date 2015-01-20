@@ -20,7 +20,7 @@ import (
 
 const (
 	changePasswordDialogTemplateUID       = "blzChangePasswordDialog"
-	changePasswordDialogTemplateFile      = "/dialogs/changepassword.tmpl"
+	changePasswordDialogTemplateFile      = authTemplatesDir + "dialogs/changepassword" + settings.TemplateSuffix
 	sessionValueKeyChangePasswordUserID   = "blzChangePasswordUID"
 	sessionValueKeyChangePasswordCallback = "blzChangePasswordCB"
 )
@@ -37,7 +37,7 @@ func init() {
 	changePasswordDialog.SetClosable(false)
 
 	// Create the template filepath.
-	path := settings.Settings.BulldozerCoreTemplatesPath + "/" + authTemplatesDir + changePasswordDialogTemplateFile
+	path := settings.GetCoreTemplatePath(changePasswordDialogTemplateFile)
 
 	// Parse the template file.
 	err := changePasswordDialog.ParseFile(path)

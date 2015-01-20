@@ -29,7 +29,7 @@ const (
 
 type registerEvents struct{}
 
-func (e *loginEvents) EventRegister(c *template.Context, name string, loginName string, email string) {
+func (e *registerEvents) EventRegister(c *template.Context, name string, loginName string, email string) {
 	// Get the session pointer.
 	s := c.Session()
 
@@ -108,7 +108,7 @@ func routeRegisterPage(s *sessions.Session, routeData *router.Data) (string, str
 	}
 
 	// Execute the login template.
-	o, _, _, err := templatesStore.Templates.ExecuteTemplateToString(s, registerTemplate, nil)
+	o, _, _, err := templates.ExecuteTemplateToString(s, registerTemplate, nil)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to execute register template: %v", err)
 	}

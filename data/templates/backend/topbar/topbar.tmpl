@@ -1,0 +1,36 @@
+<div id="bulldozer-topbar">
+	<div class="bulldozer-topbar-logo"></div>
+
+	<ul class="bulldozer-left-menu">
+		<li><a>
+			<i class="fa fa-pencil"></i>
+			<span>{{tr "blz.topbar.startEditMode"}}</span>
+		</a></li>
+	</ul>
+
+	<ul class="bulldozer-right-menu">
+		<li><a>
+			<i class="fa fa-gears"></i>
+			<span>{{tr "blz.topbar.controlPanel"}}</span>
+		</a></li>
+		<li>
+			<a>
+				<i class="fa fa-user"></i>
+				<span>{{#.User.LoginName}}</span>
+			</a>
+			<ul>
+				<li><a id="{{id "logout"}}">
+					<i class="fa fa-power-off fa-fw"></i>
+					<span>{{tr "blz.topbar.logout"}}</span>
+				</a></li>
+			</ul>
+		</li>
+	</ul>
+</div>
+{{js load}}
+	Bulldozer.topbar.space(true);
+
+	$("#{{id "logout"}}").click(function() {
+		{{emit Logout()}}
+	});
+{{end js}}

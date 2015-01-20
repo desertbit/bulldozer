@@ -6,7 +6,7 @@
 package bulldozer
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/global"
+	"code.desertbit.com/bulldozer/bulldozer/backend/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/router"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
@@ -144,7 +144,7 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 	data := mainRouter.Match(path)
 	if data == nil {
 		// Execute the not found template.
-		statusCode, body, title = global.ExecNotFoundTemplate(s)
+		statusCode, body, title = execNotFoundTemplate(s)
 		return
 	}
 
@@ -155,7 +155,7 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		body, title, err = v(s, data)
 		if err != nil {
 			// Execute the error template.
-			statusCode, body, title = global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': %v", path, err))
+			statusCode, body, title = execErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': %v", path, err))
 			return
 		}
 
@@ -168,24 +168,35 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		}
 
 		// Execute the template
-		o, _, found, err := global.TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, opts)
+		o, _, found, err := TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, opts)
 
 		if err != nil {
 			if found {
 				// Execute the error template.
-				statusCode, body, title = global.ExecErrorTemplate(s, fmt.Sprintf("page '%s': '%s': %v", v.TemplateName, path, err))
+				statusCode, body, title = execErrorTemplate(s, fmt.Sprintf("page '%s': '%s': %v", v.TemplateName, path, err))
 				return
 			} else {
 				// Execute the not found template.
-				statusCode, body, title = global.ExecNotFoundTemplate(s)
+				statusCode, body, title = execNotFoundTemplate(s)
 				return
 			}
 		}
 
-		return 200, o, v.Title, path
+		// Execute the topbar.
+		topBarO, err := topbar.ExecTopBar(s)
+		if err != nil {
+			// Execute the error template.
+			statusCode, body, title = execErrorTemplate(s, fmt.Sprintf("failed to execute the topbar template: %v", err))
+			return
+		}
+
+		// The body is composed of the topbar and the page body.
+		body = topBarO + o
+
+		return 200, body, v.Title, path
 	default:
 		// Execute the error template.
-		statusCode, body, title = global.ExecErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': unkown value type!", path))
+		statusCode, body, title = execErrorTemplate(s, fmt.Sprintf("failed to execute route: '%s': unkown value type!", path))
 		return
 	}
 }

@@ -11,8 +11,6 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/template/store"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
 )
 
@@ -21,12 +19,12 @@ const (
 	LoginPageUrl    = "/login"
 	RegisterPageUrl = "/register"
 
-	// Authentication template directory name.
-	authTemplatesDir = "auth"
+	authTemplatesUID = "blzAuth"
+	authTemplatesDir = "auth/"
 
 	// Template names:
-	loginTemplate    = "login.tmpl"
-	registerTemplate = "register.tmpl"
+	loginTemplate    = "login" + settings.TemplateSuffix
+	registerTemplate = "register" + settings.TemplateSuffix
 
 	// Session value keys.
 	sessionValueKeyIsAuth = "blzAuthData"
@@ -35,8 +33,8 @@ const (
 var (
 	backend bulldozerBackend
 
-	// Template Stores
-	templatesStore *store.Store
+	// Templates
+	templates *template.Template
 )
 
 func init() {
@@ -65,32 +63,30 @@ type sessionAuthData struct {
 //### Public ###//
 //##############//
 
-func Init(b bulldozerBackend) error {
+func Init(b bulldozerBackend) (err error) {
 	// Set the backend.
 	backend = b
 
-	// Create a new store and parse it.
-	s, err := store.New(utils.AddTrailingSlashToPath(settings.Settings.BulldozerCoreTemplatesPath) + authTemplatesDir)
+	// Create the files slice.
+	files := []string{
+		settings.GetCoreTemplatePath(authTemplatesDir + loginTemplate),
+		settings.GetCoreTemplatePath(authTemplatesDir + registerTemplate),
+	}
+
+	// Create and parse the templates.
+	templates, err = template.ParseFiles(authTemplatesUID, files...)
 	if err != nil {
 		return err
 	}
 
-	// Customize the templates after each parse.
-	s.OnAfterParse(func(s *store.Store) {
-		if t := lookupTemplate(s.Templates, loginTemplate); t != nil {
-			t.AddStyleClass("bulldozer-page").RegisterEvents(new(loginEvents))
-		}
+	// Customize the templates.
+	templates.LookupFatal(loginTemplate).
+		AddStyleClass("bulldozer-page").
+		RegisterEvents(new(loginEvents))
 
-		if t := lookupTemplate(s.Templates, registerTemplate); t != nil {
-			t.AddStyleClass("bulldozer-page").RegisterEvents(new(registerEvents))
-		}
-	})
-
-	// Parse the templates.
-	s.Parse()
-
-	// Set the templates store.
-	templatesStore = s
+	templates.LookupFatal(registerTemplate).
+		AddStyleClass("bulldozer-page").
+		RegisterEvents(new(registerEvents))
 
 	// Set the login route.
 	backend.Route(LoginPageUrl, routeLoginPage)
@@ -158,21 +154,4 @@ func Logout(s *sessions.Session) {
 
 	// Trigger the event
 	triggerOnEndAuthenticatedSession(s)
-}
-
-//###############//
-//### Private ###//
-//###############//
-
-func lookupTemplate(t *template.Template, name string) *template.Template {
-	if t == nil {
-		log.L.Error("failed to find template '%s'", name)
-	}
-
-	t = t.Lookup(name)
-	if t == nil {
-		log.L.Error("failed to find template '%s'", name)
-	}
-
-	return t
 }

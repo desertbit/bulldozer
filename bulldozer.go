@@ -6,13 +6,12 @@
 package bulldozer
 
 import (
-	bk "code.desertbit.com/bulldozer/bulldozer/backend"
 	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
 	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
 	"code.desertbit.com/bulldozer/bulldozer/auth"
+	"code.desertbit.com/bulldozer/bulldozer/backend/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/database"
-	"code.desertbit.com/bulldozer/bulldozer/global"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
@@ -24,7 +23,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
@@ -112,11 +110,6 @@ func Init() {
 	tr.Add(settings.Settings.TranslationPath)
 	tr.Load()
 
-	// Create missing core templates in the working path.
-	if err = createMissingCoreTemplates(); err != nil {
-		log.L.Fatal(err)
-	}
-
 	// Initialize the bulldozer sub packages.
 	sessions.Init()
 	template.Init(backend)
@@ -126,18 +119,18 @@ func Init() {
 		log.L.Fatal(err)
 	}
 
-	// Initialize the global package.
-	if err = global.Init(); err != nil {
-		log.L.Fatal(err)
-	}
-
-	// Initialize the backend package.
-	if err = bk.Init(); err != nil {
+	// Load the templates.
+	if err = loadTemplates(); err != nil {
 		log.L.Fatal(err)
 	}
 
 	// Initialize the authentication package.
 	if err = auth.Init(backend); err != nil {
+		log.L.Fatal(err)
+	}
+
+	// Initialize the topbar package.
+	if err = topbar.Init(); err != nil {
 		log.L.Fatal(err)
 	}
 
@@ -208,7 +201,6 @@ func createDirectories() (err error) {
 		settings.Settings.PublicPath,
 		settings.Settings.PagesPath,
 		settings.Settings.TemplatesPath,
-		settings.Settings.CoreTemplatesPath,
 		settings.Settings.TranslationPath,
 		settings.Settings.DataPath,
 		settings.Settings.ScssPath,
@@ -219,30 +211,6 @@ func createDirectories() (err error) {
 		err = utils.MkDirIfNotExists(dir)
 		if err != nil {
 			return fmt.Errorf("failed to create directory: '%s': %v", dir, err)
-		}
-	}
-
-	return nil
-}
-
-func createMissingCoreTemplates() error {
-	// Get all filenames of the bulldozer core templates
-	coreFilenames, err := filepath.Glob(settings.Settings.BulldozerCoreTemplatesPath + "/*" + settings.TemplateSuffix)
-	if err != nil {
-		return err
-	}
-	if len(coreFilenames) == 0 {
-		return nil
-	}
-
-	// Create missing template files
-	for _, src := range coreFilenames {
-		// Create the destination path
-		dest := settings.Settings.CoreTemplatesPath + "/" + filepath.Base(src)
-
-		// Copy the file if it doesn't exists
-		if err = utils.CopyFileIfNotExists(src, dest); err != nil {
-			return fmt.Errorf("failed to copy core template '%s' to '%s': %v", src, dest, err)
 		}
 	}
 

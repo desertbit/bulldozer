@@ -204,6 +204,19 @@ func Load(path string) error {
 	return nil
 }
 
+// GetCoreTemplatePath returns the core template path depeding on,
+// if the template exists in the project folder.
+// If not the bulldozer core template path is returned.
+func GetCoreTemplatePath(path string) string {
+	tmpPath := Settings.CoreTemplatesPath + "/" + path
+	if exists, _ := utils.Exists(tmpPath); exists {
+		return tmpPath
+	}
+
+	// Fallback to the bulldozer core template path.
+	return Settings.BulldozerCoreTemplatesPath + "/" + path
+}
+
 //###############//
 //### Private ###//
 //###############//

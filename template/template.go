@@ -11,6 +11,7 @@ package template
 import (
 	htmlTemplate "html/template"
 
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"errors"
 	"fmt"
 	"github.com/chuckpreslar/emission"
@@ -151,6 +152,26 @@ func (t *Template) New(name string) *Template {
 func (t *Template) Lookup(name string) *Template {
 	// Lookup the template in the namespace
 	return t.ns.Get(name)
+}
+
+// LookupFatal fatals if the template does not exists with the given name.
+func (t *Template) LookupFatal(name string) (tt *Template) {
+	tt = t.Lookup(name)
+	if tt == nil {
+		log.L.Fatalf("failed to lookup template '%s': template does not exists!", name)
+	}
+
+	return
+}
+
+// LookupMust panics if the template does not exists with the given name.
+func (t *Template) LookupMust(name string) (tt *Template) {
+	tt = t.Lookup(name)
+	if tt == nil {
+		panic(fmt.Errorf("failed to lookup template '%s': template does not exists!", name))
+	}
+
+	return
 }
 
 // Name returns the name of the template.
@@ -390,6 +411,10 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 	var name, errorMessage string
 
 	for _, filename := range filenames {
+		// Clean the path.
+		filename = filepath.Clean(filename)
+
+		// Read the file.
 		b, err := ioutil.ReadFile(filename)
 		if err != nil {
 			// Don't exit on error, because the other templates should be loaded anyway.
@@ -398,6 +423,7 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 			continue
 		}
 
+		// Get the base file name.
 		name = filepath.Base(filename)
 
 		// First template becomes return value if not already defined,
@@ -414,6 +440,8 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 		} else {
 			tmpl = t.New(name)
 		}
+
+		// Parse the template.
 		_, err = tmpl.Parse(string(b))
 		if err != nil {
 			// Don't exit on error, because the other templates should be loaded anyway.
