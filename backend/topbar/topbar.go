@@ -7,6 +7,7 @@ package topbar
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/auth"
+	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
@@ -90,4 +91,26 @@ type events struct{}
 func (e *events) EventLogout(c *template.Context) {
 	// Logout.
 	auth.Logout(c.Session())
+}
+
+func (e *events) EventStartEdit(c *template.Context) {
+	// Get the session pointer.
+	s := c.Session()
+
+	// Hide the loading indicator on return.
+	defer s.HideLoadingIndicator()
+
+	// Start the edit mode.
+	editmode.Start(s)
+}
+
+func (e *events) EventStopEdit(c *template.Context) {
+	// Get the session pointer.
+	s := c.Session()
+
+	// Hide the loading indicator on return.
+	defer s.HideLoadingIndicator()
+
+	// Stop the edit mode.
+	editmode.Stop(s)
 }

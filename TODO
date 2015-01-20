@@ -2,7 +2,8 @@
 === Bulldozer TODO List ===
 ===========================
 
-* Add default groups (Admin,...) to the auth package and make them accessible in the template engine.
+* Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
+* Also check for the desired group in the topbar exec package!
 * Fix the context bug, where static set DOM IDs and style classes are not reused on function events. If this is fixed, then uncomment the commented lines in dialog.go
 
 IMPORTANT
@@ -22,7 +23,7 @@ IMPORTANT
 
 STYLE
 =====
-* Fix the overflow in the loading indicator (Is this still present?).
+* Hide the overflow on the body or page if the loading indicator is shown.
 * Style the not found and error core template pages.
 * Implement the unused errorbox.
 * Add the description links to the noscript template: <a class="button">How to enable JS?</a><a class="button">What is JS?</a>

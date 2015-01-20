@@ -1,13 +1,19 @@
 <div id="bulldozer-topbar">
 	<div class="bulldozer-topbar-logo"></div>
-
+{{if %.editmode.IsActive}}
 	<ul class="bulldozer-left-menu">
-		<li><a>
+		<li><a id="{{id "stopEdit"}}">
+			<i class="fa fa-close"></i>
+			<span>{{tr "blz.topbar.stopEditMode"}}</span>
+		</a></li>
+	</ul>
+{{else}}
+	<ul class="bulldozer-left-menu">
+		<li><a id="{{id "startEdit"}}">
 			<i class="fa fa-pencil"></i>
 			<span>{{tr "blz.topbar.startEditMode"}}</span>
 		</a></li>
 	</ul>
-
 	<ul class="bulldozer-right-menu">
 		<li><a>
 			<i class="fa fa-gears"></i>
@@ -26,10 +32,19 @@
 			</ul>
 		</li>
 	</ul>
+{{end}}
 </div>
 {{js load}}
 	Bulldozer.topbar.space(true);
 
+	$("#{{id "startEdit"}}").click(function() {
+		Bulldozer.loadingIndicator.show();
+		{{emit StartEdit()}}
+	});
+	$("#{{id "stopEdit"}}").click(function() {
+		Bulldozer.loadingIndicator.show();
+		{{emit StopEdit()}}
+	});
 	$("#{{id "logout"}}").click(function() {
 		{{emit Logout()}}
 	});
