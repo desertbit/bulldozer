@@ -50,5 +50,6 @@ func (p *Plugin) Prepare(d *plugin.Data) {
 }
 
 func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
+	println(c.ID() + "  " + c.ParentID())
 	return d.Section
 }

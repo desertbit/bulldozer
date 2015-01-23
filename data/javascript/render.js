@@ -44,10 +44,6 @@ Bulldozer.fn.render = new function () {
      * Public Methods
      */
 
-    this.currentUrl = function() {
-        return currentUrl;
-    };
-
     this.updateTemplate = function (domId, body) {
         var obj = $("#" + domId);
         if (obj.length <= 0) {
