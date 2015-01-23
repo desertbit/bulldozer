@@ -45,15 +45,6 @@ code {
 	height: 100%;
 }
 
-#bulldozer-body {
-    // Fix for collapsing child margins.
-    overflow: hidden;
-}
-
-.bulldozer-page { 
-    overflow: auto;
-}
-
 #bulldozer-script {
 	display: none;
 }
