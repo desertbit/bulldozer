@@ -50,8 +50,8 @@ Bulldozer.fn.core = new function () {
         // and if the url points not to a file on the server...
         else if (this.host === window.location.host
             && url.slice(0, 1) !== "#"
-            && url.slice(0, 6) !== "public/"
-            && url.slice(0, 7) !== "/public/")
+            && url.slice(0, 7) !== "public/"
+            && url.slice(0, 8) !== "/public/")
         {
             e.preventDefault();
 

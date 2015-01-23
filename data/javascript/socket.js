@@ -224,19 +224,25 @@ Bulldozer.fn.socket = new function () {
 
         var waitDuration = 0;
 
-        // Reset the previous socket if set
-        if (socket) {
-            socket.onOpen = undefined;
-            socket.onClose = undefined;
-            socket.onMessage = undefined;
-            socket.onError = undefined;
 
-            // Reset the socket.
-            socket.reset();
+        // Function wich resets the previous socket if set.
+        var resetSocket = function() {
+            if (socket) {
+                socket.onOpen = undefined;
+                socket.onClose = undefined;
+                socket.onMessage = undefined;
+                socket.onError = undefined;
 
-            // Set the wait duration to a short timeout.
-            waitDuration = 300;
-        }
+                // Reset the socket.
+                socket.reset();
+
+                // Set the wait duration to a short timeout.
+                waitDuration = 300;
+            }
+        };
+
+        // Reset the socket.
+        resetSocket();
 
         // Wait for a short timeout, if set.
         setTimeout(function() {
@@ -266,8 +272,8 @@ Bulldozer.fn.socket = new function () {
             socket.onMessage = function(data) {
                 // Initialize the socket session
                 if (!handleInitializeSession(data)) {
-                    // Show an error message box
-                    Bulldozer.utils.showErrorMessageBox("Error", "Failed to initialize web session! Please reload this webpage and try again...");
+                    resetSocket();
+                    connectionError();
                     return;
                 }
 
