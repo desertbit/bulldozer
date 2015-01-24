@@ -15,6 +15,10 @@ import (
 	"io"
 )
 
+const (
+	GlobalID = "global"
+)
+
 //##########################//
 //### Optional Data type ###//
 //##########################//
@@ -154,8 +158,7 @@ type renderData struct {
 // First optional string is an ID string, which is added to the unique context ID.
 // All further optional strings are additional template style classes.
 func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, optArgs ...ExecOpts) (*Context, error) {
-	// Create the ID
-	id := t.Name()
+	var id string
 
 	// Apply the optional options.
 	var opts *ExecOpts
@@ -164,8 +167,13 @@ func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, o
 
 		// Add the custom ID.
 		if len(opts.ID) != 0 {
-			id += "@" + opts.ID
+			id = opts.ID
 		}
+	}
+
+	// Prepare the ID.
+	if len(id) == 0 {
+		id = GlobalID
 	}
 
 	// Create a new context with the unique ID. The parent ID is the current ID,

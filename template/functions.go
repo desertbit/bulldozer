@@ -26,7 +26,7 @@ var (
 //### Private template functions ###//
 //##################################//
 
-func templateContext(templateName string, r *renderData, values ...interface{}) (*renderData, error) {
+func templateContext(templateName string, id string, r *renderData, values ...interface{}) (*renderData, error) {
 	// Get the context.
 	c := r.Context
 
@@ -36,8 +36,13 @@ func templateContext(templateName string, r *renderData, values ...interface{}) 
 		return nil, fmt.Errorf("no template found with name: '%s'", templateName)
 	}
 
-	// Create the unique sub template ID.
-	id := c.id + "_" + templateName
+	// Create the unique sub template ID if present.
+	// Otherwise use the previous ID.
+	if len(id) > 0 {
+		id = c.id + "_" + id
+	} else {
+		id = c.id
+	}
 
 	// Create the template context.
 	if len(t.globalContextID) == 0 {

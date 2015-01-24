@@ -6,6 +6,7 @@
 package template
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
 	"strings"
 )
@@ -16,37 +17,11 @@ type Args map[string]string
 // If the passed string s is emtpy, then a nil map is returned.
 func getArgs(s string) (Args, error) {
 	// First split the string into a list, but skip delimiters in quotes
-	var l []string
-	var data []rune
-	var dataStr string
-	skip := false
-
-	// Trim all empty spaces
-	s = strings.TrimSpace(s)
-
-	// If s is empty, then return nil
-	if len(s) == 0 {
+	l, err := utils.Fields(s)
+	if err != nil {
+		return nil, fmt.Errorf("argument split: '%s': %v", s, err)
+	} else if l == nil {
 		return nil, nil
-	}
-
-	// Append a delimiter to the end of the string, to ensure
-	// that the last element is also added to the list.
-	s += " "
-
-	// Split the string
-	for _, p := range s {
-		if p == '"' {
-			skip = !skip
-		} else if !skip && p == ' ' {
-			dataStr = strings.TrimSpace(string(data))
-			if dataStr != "" {
-				l = append(l, dataStr)
-			}
-
-			data = data[:0]
-		} else {
-			data = append(data, p)
-		}
 	}
 
 	// Fill the map
@@ -56,7 +31,7 @@ func getArgs(s string) (Args, error) {
 		// Find the '=' delimiter
 		pos := strings.Index(str, "=")
 
-		// If not found, throw and error and exit
+		// If not found, throw an error and exit
 		if pos == -1 {
 			return nil, fmt.Errorf("argument split: '%s': missing '=' delimiter!", s)
 		}
@@ -65,7 +40,16 @@ func getArgs(s string) (Args, error) {
 		p1 := str[0:pos]
 		p2 := str[pos+1:]
 
-		if p1 == "" || p2 == "" {
+		// Check if quotes are present.
+		l := len(p2)
+		if l < 2 || p2[0] != '"' || p2[l-1] != '"' {
+			return nil, fmt.Errorf("argument split: '%s': quotes are missing around the data value!", s)
+		}
+
+		// Remove the quotes.
+		p2 = p2[1 : l-1]
+
+		if len(p1) == 0 || len(p2) == 0 {
 			return nil, fmt.Errorf("argument split: '%s': empty data key or value!", s)
 		}
 

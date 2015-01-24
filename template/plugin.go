@@ -15,24 +15,33 @@ import (
 )
 
 var (
-	plugins map[string]Plugin = make(map[string]Plugin)
+	plugins map[string]*pluginWrapper = make(map[string]*pluginWrapper)
 )
 
 //####################//
 //### Plugin types ###//
 //####################//
 
-type Plugin interface {
-	Type() string                    // The plugin type.
-	HasSection() bool                // If the plugin requires a template section.
-	Prepare(s *PluginSettings) error // Prepare is called for each plugin context. Settings should be parsed...
-	Render(c *Context, s *PluginSettings) (interface{}, error)
+type pluginWrapper struct {
+	i    Plugin
+	opts *PluginOpts
 }
 
-type PluginSettings struct {
+type Plugin interface {
+	Prepare(d *PluginData) error // Prepare is called for each plugin context. Settings should be parsed...
+	Render(c *Context, d *PluginData) (interface{}, error)
+}
+
+type PluginData struct {
 	Value   interface{}
 	Args    Args
 	Section string
+}
+
+type PluginOpts struct {
+	Type       string // The plugin type.
+	HasSection bool   // If the plugin requires a template section.
+	RequireID  bool   // If the plugin requires a unique ID as argument.
 }
 
 //##########################//
@@ -42,8 +51,8 @@ type PluginSettings struct {
 type pluginDataMap map[int64]*pluginData
 
 type pluginData struct {
-	plugin   Plugin
-	settings *PluginSettings
+	plugin *pluginWrapper
+	data   *PluginData
 }
 
 //##############//
@@ -52,21 +61,29 @@ type pluginData struct {
 
 // RegisterPlugin adds and registers a template plugin with the given type.
 // This method call is not thread-safe!
-func RegisterPlugin(p Plugin) {
-	// Get the type.
-	typeStr := p.Type()
-
-	// Print a warning if a previous plugin is overwritten.
-	_, ok := plugins[typeStr]
-	if ok {
-		log.L.Error("bulldozer template: plugin: overwritting already set plugin '%s'!", typeStr)
+func RegisterPlugin(p Plugin, opts *PluginOpts) error {
+	// Just be sure.
+	if opts == nil {
+		return fmt.Errorf("bulldozer template: plugin: failed to register new plugin: options value is nil!")
+	} else if len(opts.Type) == 0 {
+		return fmt.Errorf("bulldozer template: plugin: failed to register new plugin: type string is empty!")
 	}
 
-	// Add the plugin interface to the map.
-	plugins[typeStr] = p
+	// Print a warning if a previous plugin is overwritten.
+	_, ok := plugins[opts.Type]
+	if ok {
+		log.L.Error("bulldozer template: plugin: overwritting already set plugin '%s'!", opts.Type)
+	}
+	// Add the plugin wrapper to the map.
+	plugins[opts.Type] = &pluginWrapper{
+		i:    p,
+		opts: opts,
+	}
 
 	// Register the template parse function for the given plugin type.
-	registerParseFunc(typeStr, parsePlugin)
+	registerParseFunc(opts.Type, parsePlugin)
+
+	return nil
 }
 
 //###############//
@@ -81,7 +98,7 @@ func parsePlugin(typeStr string, token string, d *parseData) (err error) {
 		}
 	}()
 
-	// Try to get the plugin interface.
+	// Try to get the plugin wrapper.
 	plugin, ok := plugins[typeStr]
 	if !ok {
 		return fmt.Errorf("plugin: no plugin exists with name '%s'", typeStr)
@@ -96,21 +113,21 @@ func parsePlugin(typeStr string, token string, d *parseData) (err error) {
 	// Create a new plugin data value.
 	data := &pluginData{
 		plugin: plugin,
-		settings: &PluginSettings{
+		data: &PluginData{
 			Args: args,
 		},
 	}
 
 	// Get the section if required.
-	if plugin.HasSection() {
-		data.settings.Section, err = getSection(typeStr, d.src, d)
+	if plugin.opts.HasSection {
+		data.data.Section, err = getSection(typeStr, d.src, d)
 		if err != nil {
 			return fmt.Errorf("invalid plugin '%s' syntax! Missing end tag {{end %s}}", typeStr, typeStr)
 		}
 	}
 
-	// Prepare the plugin settings
-	err = plugin.Prepare(data.settings)
+	// Prepare the plugin data.
+	err = plugin.i.Prepare(data.data)
 	if err != nil {
 		return fmt.Errorf("failed to prepare plugin '%s': %v", typeStr, err)
 	}
@@ -167,9 +184,9 @@ func renderPlugin(c *Context, uid int64) (r interface{}) {
 	}
 
 	// Call the plugin render method.
-	r, err = data.plugin.Render(c, data.settings)
+	r, err = data.plugin.i.Render(c, data.data)
 	if err != nil {
-		err = fmt.Errorf("plugin: failed to render plugin of type '%v': %v", data.plugin.Type(), err)
+		err = fmt.Errorf("plugin: failed to render plugin of type '%v': %v", data.plugin.opts.Type, err)
 		log.L.Error(err.Error())
 		return utils.ErrorBox(tr.S("blz.template.plugin.error"), err)
 	}

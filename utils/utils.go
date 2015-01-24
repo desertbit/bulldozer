@@ -22,6 +22,51 @@ func AddTrailingSlashToPath(path string) string {
 	return strings.TrimSuffix(path, "/") + "/"
 }
 
+// Fields splits a string between spaces, but skips spaces in quotes.
+// nil is returned, if the string is empty or if it only contains empty spaces.
+func Fields(s string) ([]string, error) {
+	// Trim all empty spaces
+	s = strings.TrimSpace(s)
+
+	// If s is empty, then return nil
+	if len(s) == 0 {
+		return nil, nil
+	}
+
+	var l []string
+	var data []rune
+	var dataStr string
+	skip := false
+
+	// Split the string
+	for _, p := range s {
+		if p == '"' {
+			skip = !skip
+			data = append(data, p)
+		} else if !skip && p == ' ' {
+			dataStr = strings.TrimSpace(string(data))
+			if len(dataStr) > 0 {
+				l = append(l, dataStr)
+			}
+
+			data = data[:0]
+		} else {
+			data = append(data, p)
+		}
+	}
+
+	dataStr = strings.TrimSpace(string(data))
+	if len(dataStr) > 0 {
+		if skip {
+			return nil, fmt.Errorf("utils fields: failed to split string. Missing end quote: '%s'", s)
+		}
+
+		l = append(l, dataStr)
+	}
+
+	return l, nil
+}
+
 // RandomString generates a random string with a length of n
 func RandomString(n int) string {
 	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"

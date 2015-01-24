@@ -7,6 +7,7 @@ package template
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
 	"strings"
 )
@@ -28,20 +29,65 @@ func init() {
 //###############//
 
 // parseTemplate passes the templates context to the template pipeline.
+// An unique template context id can be set as second argument with id="%ID".
+// To pass only one argument to the template render context, just append it.
+// Multiple arguments can be passed with key=%Value.
 func parseTemplate(typeStr string, token string, d *parseData) error {
-	// Split the token between spaces
-	fields := strings.Fields(token)
+	// Split the string into a slice, but skip delimiters in quotes.
+	fields, err := utils.Fields(token)
+	if err != nil {
+		return fmt.Errorf("include template: arguments: '%s': %v", token, err)
+	}
+
 	fieldsLen := len(fields)
+	argIndex := 1
 
 	if fieldsLen == 0 {
 		return fmt.Errorf("no template name specified!")
 	}
 
-	*d.final += d.leftDelim + "template " + fields[0] + " tmplC " + fields[0] + " $ "
-	for i := 1; i < fieldsLen; i++ {
-		*d.final += fields[i] + " "
+	// Get the template name.
+	templateName := fields[0]
+
+	// Get the ID if present.
+	id := `""`
+	if fieldsLen >= 2 && strings.HasPrefix(fields[1], "id=") {
+		id = strings.TrimPrefix(fields[1], "id=")
+		argIndex = 2
 	}
-	*d.final += d.rightDelim
+
+	// Prepare the arguments.
+	var args string
+	if argIndex+1 == fieldsLen {
+		args = fields[argIndex]
+	} else {
+		var str, key, data string
+		var pos int
+		for ; argIndex < fieldsLen; argIndex++ {
+			str = fields[argIndex]
+
+			// Find the '=' delimiter
+			pos = strings.Index(str, "=")
+
+			// If not found, return an error.
+			if pos == -1 {
+				return fmt.Errorf("include template: arguments: '%s': missing '=' delimiter!", str)
+			}
+
+			// Get the values.
+			key = str[0:pos]
+			data = str[pos+1:]
+
+			if len(key) == 0 || len(data) == 0 {
+				return fmt.Errorf("include template: arguments: '%s': empty key or value!", str)
+			}
+
+			// Add the arguments to the final string.
+			args += "\"" + key + "\" " + data + " "
+		}
+	}
+
+	*d.final += d.leftDelim + "template " + templateName + " tmplC " + templateName + " " + id + " $ " + args + d.rightDelim
 
 	return nil
 }

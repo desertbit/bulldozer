@@ -19,7 +19,11 @@ const (
 
 func init() {
 	// Register the plugin.
-	plugin.MustFatal(plugin.Register(new(Plugin)))
+	plugin.MustFatal(plugin.Register(new(Plugin), &plugin.Opts{
+		Type:       "text",
+		HasSection: true,
+		RequireID:  false,
+	}))
 }
 
 // ############## //
@@ -27,14 +31,6 @@ func init() {
 // ############## //
 
 type Plugin struct {
-}
-
-func (p *Plugin) Type() string {
-	return "text"
-}
-
-func (p *Plugin) HasSection() bool {
-	return true
 }
 
 func (p *Plugin) Initialize() *template.Template {
@@ -50,6 +46,5 @@ func (p *Plugin) Prepare(d *plugin.Data) {
 }
 
 func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
-	println(c.ID() + "  " + c.ParentID())
 	return d.Section
 }
