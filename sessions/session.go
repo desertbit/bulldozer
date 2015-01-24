@@ -378,7 +378,7 @@ func (s *Session) CacheDelete(key interface{}) {
 // This is called and handled by default by the bulldozer main package.
 func Init() {
 	// Create a new secure cookie object with the cookie keys
-	secureCookie = securecookie.New(settings.Settings.CookieHashKey, settings.Settings.CookieBlockKey)
+	secureCookie = securecookie.New(settings.Settings.CookieHashKeyBytes(), settings.Settings.CookieBlockKeyBytes())
 
 	// Set the max age in seconds
 	secureCookie.MaxAge(settings.Settings.SessionMaxAge)

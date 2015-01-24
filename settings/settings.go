@@ -74,8 +74,8 @@ func init() {
 		DatabaseMaxActive:   50,
 		DatabaseIdleTimeout: time.Minute,
 
-		CookieHashKey:  []byte(defaultCookieHashKey),
-		CookieBlockKey: []byte(defaultCookieBlockKey),
+		CookieHashKey:  defaultCookieHashKey,
+		CookieBlockKey: defaultCookieBlockKey,
 		SessionMaxAge:  60 * 60 * 24 * 14, // 14 Days
 
 		FirewallMaxRequestsPerMinute: 100,
@@ -151,20 +151,20 @@ func Check() error {
 	}
 
 	// Check if the length of the cookie keys are valid
-	l := len(Settings.CookieHashKey)
+	l := len(Settings.CookieHashKeyBytes())
 	if l != 32 && l != 64 {
-		return fmt.Errorf("settings: the cookie hash key has an invalid length! Valid lengths are 32 or 64 bytes...")
+		return fmt.Errorf("settings: the cookie hash key has an invalid length of %v bytes! Valid lengths are 32 or 64 bytes...", l)
 	}
-	l = len(Settings.CookieBlockKey)
+	l = len(Settings.CookieBlockKeyBytes())
 	if l != 16 && l != 24 && l != 32 {
-		return fmt.Errorf("settings: the cookie block key has an invalid length! For AES, used by default, valid lengths are 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.")
+		return fmt.Errorf("settings: the cookie block key has an invalid length of %v bytes! For AES, used by default, valid lengths are 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.", l)
 	}
 
 	// Print a warning if the default cookie keys are set
-	if string(Settings.CookieHashKey) == defaultCookieHashKey {
+	if Settings.CookieHashKey == defaultCookieHashKey {
 		log.L.Warning("[WARNING] settings: the default cookie hash key is set! You should replace this with a secret key!")
 	}
-	if string(Settings.CookieBlockKey) == defaultCookieBlockKey {
+	if Settings.CookieBlockKey == defaultCookieBlockKey {
 		log.L.Warning("[WARNING] settings: the default cookie block key is set! You should replace this with a secret key!")
 	}
 
@@ -217,9 +217,9 @@ func GetCoreTemplatePath(path string) string {
 	return Settings.BulldozerCoreTemplatesPath + "/" + path
 }
 
-//###############//
-//### Private ###//
-//###############//
+//#######################//
+//### Settings struct ###//
+//#######################//
 
 type settings struct {
 	// If some jobs should be done automatically by the Bulldoze() function
@@ -279,11 +279,11 @@ type settings struct {
 
 	// The CookieHashKey is required, used to authenticate the cookie value using HMAC.
 	// It is recommended to use a key with 32 or 64 bytes.
-	CookieHashKey []byte
+	CookieHashKey string
 	// The CookieBlockKey is used to encrypt the cookie value.
 	// The length must correspond to the block size of the encryption algorithm.
 	// For AES, used by default, valid lengths are 16, 24, or 32 bytes to select AES-128, AES-192, or AES-256.
-	CookieBlockKey []byte
+	CookieBlockKey string
 
 	// The maximum session age in seconds
 	SessionMaxAge int
@@ -305,4 +305,12 @@ type settings struct {
 	RegistrationDisabled           bool
 	PasswordEncryptionKey          string
 	RemoveNotConfirmedUsersTimeout int
+}
+
+func (s *settings) CookieHashKeyBytes() []byte {
+	return []byte(s.CookieHashKey)
+}
+
+func (s *settings) CookieBlockKeyBytes() []byte {
+	return []byte(s.CookieBlockKey)
 }
