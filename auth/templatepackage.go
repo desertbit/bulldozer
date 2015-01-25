@@ -27,22 +27,22 @@ func init() {
 type templatePackage struct{}
 
 func (p *templatePackage) MustIsAuth(a *template.Action, c *template.Context) {
-	if !IsAuth(c.Session()) {
+	if !IsAuth(c) {
 		a.Error(tr.S("blz.auth.pkg.mustAuthErrorMessage"))
 	}
 }
 
 func (p *templatePackage) IsAuth(c *template.Context) bool {
-	return IsAuth(c.Session())
+	return IsAuth(c)
 }
 
 func (p *templatePackage) GetUser(c *template.Context) *User {
-	return GetUser(c.Session())
+	return GetUser(c)
 }
 
 func (p *templatePackage) Group(c *template.Context, groups ...string) bool {
 	// Get the user.
-	u := GetUser(c.Session())
+	u := GetUser(c)
 	if u == nil {
 		return false
 	}

@@ -168,7 +168,7 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		}
 
 		// Execute the template
-		o, _, found, err := TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, opts)
+		o, c, found, err := TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, opts)
 
 		if err != nil {
 			if found {
@@ -183,7 +183,7 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		}
 
 		// Execute the topbar.
-		topBarO, err := topbar.ExecTopBar(s)
+		topBarO, err := topbar.ExecTopBar(c)
 		if err != nil {
 			// Execute the error template.
 			statusCode, body, title = execErrorTemplate(s, fmt.Sprintf("failed to execute the topbar template: %v", err))

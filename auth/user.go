@@ -78,8 +78,8 @@ func (u *User) IsInGroup(groups ...string) bool {
 
 // Update the user data, by retreiving the data from the database.
 func (u *User) Update() error {
-	// Obtain the user value from the cache or database with the user ID.
-	dbUser, err := cacheGetDBUser(u.u.ID)
+	// Obtain the user value from the database with the user ID.
+	dbUser, err := dbGetUserByID(u.u.ID)
 	if err != nil {
 		return err
 	} else if dbUser == nil {

@@ -13,6 +13,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"strconv"
+	"sync"
 )
 
 const (
@@ -40,6 +41,11 @@ type contextData struct {
 
 type contextNamespace struct {
 	s *sessions.Session
+
+	// The execution values lifetime is one complete template
+	// execution with all rendered sub templates.
+	values map[interface{}]interface{}
+	mutex  sync.Mutex
 }
 
 type Context struct {
@@ -50,7 +56,8 @@ type Context struct {
 
 func newContextNamespace(s *sessions.Session) *contextNamespace {
 	return &contextNamespace{
-		s: s,
+		s:      s,
+		values: make(map[interface{}]interface{}),
 	}
 }
 
@@ -277,4 +284,69 @@ func (c *Context) TriggerEvent(eventName string, params ...interface{}) {
 
 	// Send the command to the client
 	c.ns.s.SendCommand(cmd)
+}
+
+//########################//
+//### Execution Values ###//
+//########################//
+
+// Get obtains the execution value. Execution values exist for one complete execution cycle.
+// A single variadic argument is accepted, and it is optional:
+// if a function is set, this function will be called if no value
+// exists for the given key.
+// This operation is thread-safe.
+func (c *Context) Get(key interface{}, vars ...func() interface{}) (value interface{}, ok bool) {
+	// Get the namespace.
+	ns := c.ns
+
+	// Lock the mutex.
+	ns.mutex.Lock()
+	defer ns.mutex.Unlock()
+
+	value, ok = ns.values[key]
+
+	// If no value is found and the create function variable
+	// is set, then call the function and set the new value.
+	if !ok && len(vars) > 0 {
+		value = vars[0]()
+		ns.values[key] = value
+		ok = true
+	}
+
+	return
+}
+
+// Pull does the same as Get(), but additionally removes the value from the map if present.
+// Use this for Flash values...
+func (c *Context) Pull(key interface{}, vars ...func() interface{}) (interface{}, bool) {
+	i, ok := c.Get(key, vars...)
+	if ok {
+		c.Delete(key)
+	}
+
+	return i, ok
+}
+
+// Set sets the execution value with the given key. This operation is thread-safe.
+func (c *Context) Set(key interface{}, value interface{}) {
+	// Get the namespace.
+	ns := c.ns
+
+	// Lock the mutex.
+	ns.mutex.Lock()
+	defer ns.mutex.Unlock()
+
+	ns.values[key] = value
+}
+
+// Delete removes the execution value with the given key. This operation is thread-safe.
+func (c *Context) Delete(key interface{}) {
+	// Get the namespace.
+	ns := c.ns
+
+	// Lock the mutex.
+	ns.mutex.Lock()
+	defer ns.mutex.Unlock()
+
+	delete(ns.values, key)
 }

@@ -246,9 +246,6 @@ func dbUpdateUser(u *dbUser) error {
 		return err
 	}
 
-	// Tell the cache, that the user data has changed.
-	cacheUserOutOfDate(u.ID)
-
 	return nil
 }
 

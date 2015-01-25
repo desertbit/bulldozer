@@ -7,6 +7,7 @@ package bulldozer
 
 import (
 	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
+	templateStore "code.desertbit.com/bulldozer/bulldozer/template/store"
 	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
 	"code.desertbit.com/bulldozer/bulldozer/auth"
@@ -14,11 +15,10 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/database"
 	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/pages"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"code.desertbit.com/bulldozer/bulldozer/store"
 	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/template/store"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 
 	"flag"
@@ -134,6 +134,11 @@ func Init() {
 		log.L.Fatal(err)
 	}
 
+	// Initialize the store package.
+	if err = store.Init(); err != nil {
+		log.L.Fatal(err)
+	}
+
 	// Initialize the authentication package.
 	if err = auth.Init(backend); err != nil {
 		log.L.Fatal(err)
@@ -146,11 +151,6 @@ func Init() {
 
 	// Initialize the topbar package.
 	if err = topbar.Init(); err != nil {
-		log.L.Fatal(err)
-	}
-
-	// Initialize the pages package.
-	if err = pages.Init(); err != nil {
 		log.L.Fatal(err)
 	}
 
@@ -196,7 +196,7 @@ func release() {
 	isReleased = true
 
 	// Stop the filewatchers
-	store.Release()
+	templateStore.Release()
 	scssFileWatcher.Close()
 
 	// Release the bulldozer sub packages

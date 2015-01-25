@@ -28,6 +28,9 @@ const (
 
 	// Session value keys.
 	sessionValueKeyIsAuth = "blzAuthData"
+
+	// Context Execution keys.
+	contextValueKeyIsAuth = "blzAuthData"
 )
 
 var (
@@ -97,29 +100,62 @@ func Init(b bulldozerBackend) (err error) {
 		return err
 	}
 
-	// Start the expire cache loop.
-	startExpireCacheLoop()
-
 	return nil
 }
 
-// Release this package and stop all goroutines.
+// Release this package.
 func Release() {
 	releaseDB()
-	releaseCache()
 }
 
 // IsAuth returns a boolean if the current session is authenticated
 // by a user login.
-func IsAuth(s *sessions.Session) bool {
-	return GetUser(s) != nil
+// You can pass a session or context value to this method.
+// If a context value is available, then always pass it instead of the session.
+// This will improve the performance and won't retrieve a user value multiple
+// times from the database during one template execution cycle.
+func IsAuth(i interface{}) bool {
+	return GetUser(i) != nil
 }
 
 // GetUser returns the logged in user value if logged in.
 // Otherwise nil is returned.
 // This user value is not updated, if any user data changes!
 // Call user.Update() to get the latest state.
-func GetUser(s *sessions.Session) *User {
+// You can pass a session or context value to this method.
+// If a context value is available, then always pass it instead of the session.
+// This will improve the performance and won't retrieve a user value multiple
+// times from the database during one template execution cycle.
+func GetUser(i interface{}) *User {
+	var s *sessions.Session
+	var c *template.Context
+
+	switch i.(type) {
+	case *sessions.Session:
+		// Set the session pointer.
+		s = i.(*sessions.Session)
+	case *template.Context:
+		// Assert to context value.
+		c = i.(*template.Context)
+
+		// Set the session pointer.
+		s = c.Session()
+
+		// If the user was already previously obtained and added
+		// to the context execution values, then use this value
+		// instead of getting it again from the database.
+		uI, ok := c.Get(contextValueKeyIsAuth)
+		if ok {
+			user, ok := uI.(*User)
+			if ok {
+				return user
+			}
+		}
+	default:
+		log.L.Error("invalid auth.GetUser call: called method with invalid interface type!")
+		return nil
+	}
+
 	// Get the session data value.
 	i, ok := s.Get(sessionValueKeyIsAuth)
 	if !ok {
@@ -132,8 +168,8 @@ func GetUser(s *sessions.Session) *User {
 		return nil
 	}
 
-	// Obtain the user value from the cache or database with the user ID.
-	u, err := cacheGetDBUser(d.UserID)
+	// Obtain the user from the database.
+	u, err := dbGetUserByID(d.UserID)
 	if err != nil {
 		log.L.Error(err.Error())
 		return nil
@@ -141,7 +177,15 @@ func GetUser(s *sessions.Session) *User {
 		return nil
 	}
 
-	return newUser(u)
+	// Create a new user value.
+	user := newUser(u)
+
+	// If the context exists, then add the user to the execution values.
+	if c != nil {
+		c.Set(contextValueKeyIsAuth, user)
+	}
+
+	return user
 }
 
 // Logout logs out the user if authenticated.

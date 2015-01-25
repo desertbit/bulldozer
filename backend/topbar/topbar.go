@@ -11,6 +11,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"fmt"
 )
 
 const (
@@ -49,16 +50,39 @@ func Init() (err error) {
 	return nil
 }
 
-func ExecTopBar(s *sessions.Session) (string, error) {
+// ExecTopBar executes the topbar.
+// You can pass a session or context value to this method.
+// If a context value is available, then always pass it instead of the session.
+// This will improve the performance and won't retrieve a user value multiple
+// times from the database during one template execution cycle.
+// The context is only used to retrieve the authenticated user information if present.
+// The topbar is executed in it's own context anyway.
+func ExecTopBar(i interface{}) (string, error) {
+	var s *sessions.Session
+
+	switch i.(type) {
+	case *sessions.Session:
+		// Set the session pointer.
+		s = i.(*sessions.Session)
+	case *template.Context:
+		// Assert to context value.
+		c := i.(*template.Context)
+
+		// Set the session pointer.
+		s = c.Session()
+	default:
+		return "", fmt.Errorf("invalid topbar.ExecTopBar call: called method with invalid interface type!")
+	}
+
 	// Get the current user if logged in.
-	user := auth.GetUser(s)
+	user := auth.GetUser(i)
 	if user == nil {
 		return "", nil
 	}
 
 	// TODO: Only show topbar if the user has the specific group set.
 
-	// The render daza.
+	// The render data.
 	data := struct {
 		User *auth.User
 	}{
