@@ -1,6 +1,6 @@
 /*
- *  Goji Framework
- *  Copyright (C) Roland Singer
+ *  Bulldozer Framework
+ *  Copyright (C) DesertBit
  */
 
 package plugin
@@ -133,7 +133,7 @@ func (tp *templatePlugin) Render(c *template.Context, d *template.PluginData) (r
 	id := c.ID() + "~" + data.id
 
 	// Create the plugin template context.
-	pContext := template.NewContext(c.Session(), tp.t, id, c.ParentID(), data.additionalStyleClasses)
+	pContext := c.New(tp.t, id, data.additionalStyleClasses)
 
 	// Get the render data for the template.
 	renderData := tp.plugin.Render(pContext, data)

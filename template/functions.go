@@ -12,13 +12,12 @@ import (
 
 var (
 	bulldozerFuncMap FuncMap = FuncMap{
-		"tr":         tr.S,
-		"plugin":     renderPlugin,
-		"eventKey":   createEventAccessKey,
-		"passValues": passValues,
-		"tmplC":      templateContext,
-		"loadJS":     loadJavaScript,
-		"loadStyle":  loadStyleSheet,
+		"tr":        tr.S,
+		"plugin":    renderPlugin,
+		"eventKey":  createEventAccessKey,
+		"tmplC":     templateContext,
+		"loadJS":    loadJavaScript,
+		"loadStyle": loadStyleSheet,
 	}
 )
 
@@ -39,34 +38,21 @@ func templateContext(templateName string, id string, r *renderData, values ...in
 	// Create the unique sub template ID if present.
 	// Otherwise use the previous ID.
 	if len(id) > 0 {
-		id = c.id + "_" + id
+		id = c.data.ID + "_" + id
 	} else {
-		id = c.id
+		id = c.data.ID
 	}
 
-	// Create the template context.
-	if len(t.globalContextID) == 0 {
-		c = NewContext(c.s, t, id, c.parentID)
-	} else {
-		c = NewContext(c.s, t, t.globalContextID, t.globalContextID)
-	}
+	// Create the new sub template context.
+	c = c.New(t, id)
 
 	// Create a new render data for the sub template.
-	subR := &renderData{
+	data := &renderData{
 		Context: c,
-		Data:    r.Data,
 		Pkg:     r.Pkg,
 	}
 
-	return passValues(subR, values...)
-}
-
-// passValues passes multiple values to a pipe. This requires as first argument the template render data.
-func passValues(r *renderData, values ...interface{}) (*renderData, error) {
-	// Create a new render data value
-	data := &renderData{
-		Context: r.Context,
-	}
+	//### Pass the values to the new sub render data.
 
 	// Get the length of the values
 	valuesLen := len(values)
@@ -101,14 +87,14 @@ func passValues(r *renderData, values ...interface{}) (*renderData, error) {
 
 func loadJavaScript(c *Context, url string) string {
 	// Load the javascript
-	c.s.LoadJavaScript(url)
+	c.ns.s.LoadJavaScript(url)
 
 	return ""
 }
 
 func loadStyleSheet(c *Context, url string) string {
 	// Load the javascript
-	c.s.LoadStyleSheet(url)
+	c.ns.s.LoadStyleSheet(url)
 
 	return ""
 }

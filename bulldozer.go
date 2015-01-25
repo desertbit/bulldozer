@@ -14,6 +14,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/database"
 	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/pages"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
@@ -145,6 +146,11 @@ func Init() {
 
 	// Initialize the topbar package.
 	if err = topbar.Init(); err != nil {
+		log.L.Fatal(err)
+	}
+
+	// Initialize the pages package.
+	if err = pages.Init(); err != nil {
 		log.L.Fatal(err)
 	}
 

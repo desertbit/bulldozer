@@ -114,9 +114,8 @@ func (d *Dialog) Parse(text string) (err error) {
 func (d *Dialog) Show(s *sessions.Session, data interface{}) (*template.Context, error) {
 	// Create the optional options for the template.
 	opts := template.ExecOpts{
-		ID: s.NewUniqueId(),
-		// TODO: Uncomment this if the context bug is fixed.
-		//DomID: s.NewUniqueDomID(),
+		ID:    s.NewUniqueId(),
+		DomID: s.NewUniqueDomID(),
 	}
 
 	// Execute the template
@@ -126,9 +125,7 @@ func (d *Dialog) Show(s *sessions.Session, data interface{}) (*template.Context,
 	}
 
 	// Create the dialog DOM ID.
-	// TODO: Uncomment this if the context bug is fixed.
-	//dialogDomID := opts.DomID + "__d"
-	dialogDomID := c.DomID() + "__d"
+	dialogDomID := opts.DomID + "__d"
 
 	// Transform to string
 	closableStr := strconv.FormatBool(d.closable)

@@ -61,7 +61,7 @@ func newNameSpace(uid string) *nameSpace {
 	defer nameSpacesMutex.Unlock()
 
 	// Print a error message if the UID is not unique!
-	/* TODO: Sometimes a template overwrite is required and desired. Don't alwayd show this message...
+	/* TODO: Sometimes a template overwrite is required and desired. Don't always show this message...
 	if _, ok := nameSpaces[uid]; ok {
 		log.L.Warning("template: the template UID '%s' is not unique! Overwriting already present namespace! The previous namespace is not more accessible through events,...", uid)
 	}*/

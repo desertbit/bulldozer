@@ -15,9 +15,16 @@ import (
 	"io"
 )
 
-const (
-	GlobalID = "global"
-)
+//#############//
+//### Types ###//
+//#############//
+
+// renderData holds the template context and the execution data.
+type renderData struct {
+	Context *Context
+	Pkg     map[string]interface{}
+	Data    interface{}
+}
 
 //##########################//
 //### Optional Data type ###//
@@ -41,7 +48,16 @@ type ExecOpts struct {
 // A template may be executed safely in parallel.
 // Optional options can be passed.
 func (t *Template) Execute(s *sessions.Session, wr io.Writer, data interface{}, optArgs ...ExecOpts) (*Context, error) {
-	return execute(t, s, wr, data, optArgs...)
+	// Create a new context.
+	c := newContext(s, t, optArgs...)
+
+	// Execute the context.
+	err := ExecuteContext(c, wr, data)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }
 
 // ExecuteTemplate applies the template associated with t that has the given
@@ -58,8 +74,16 @@ func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name strin
 		return nil, false, fmt.Errorf("failed to execute template: template not found with name '%s'", name)
 	}
 
-	c, err := execute(tt, s, wr, data, optArgs...)
-	return c, true, err
+	// Create a new context.
+	c := newContext(s, tt, optArgs...)
+
+	// Execute the context.
+	err := ExecuteContext(c, wr, data)
+	if err != nil {
+		return nil, true, err
+	}
+
+	return c, true, nil
 }
 
 // ExecuteToString does the same as Execute, but instead writes the output to a string.
@@ -102,7 +126,7 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) (err error) {
 
 	// Remove all previously registered session events for the current DOM ID.
 	// They will be registered by the following template execution.
-	releaseSessionTemplateEvents(c.s, c.domID)
+	c.Release()
 
 	// Return the last parse error if present.
 	if t.hasParseError != nil {
@@ -115,12 +139,12 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) (err error) {
 		if action.action == actionError {
 			// Execute the error template without logging the error
 			// and write it to the io writer.
-			_, out, _ := backend.ExecErrorTemplate(c.s, action.data, false)
+			_, out, _ := backend.ExecErrorTemplate(c.ns.s, action.data, false)
 			wr.Write([]byte(out))
 			return nil
 		} else if action.action == actionRedirect {
 			// Navigate to the path.
-			backend.NavigateToPath(c.s, action.data)
+			backend.NavigateToPath(c.ns.s, action.data)
 			return nil
 		} else {
 			return fmt.Errorf("invalid template action type: %v", action.action)
@@ -141,63 +165,4 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) (err error) {
 	}
 
 	return t.template.Execute(wr, &d)
-}
-
-//###############//
-//### Private ###//
-//###############//
-
-// renderData holds the template context and the execution data.
-type renderData struct {
-	Context *Context
-	Pkg     map[string]interface{}
-	Data    interface{}
-}
-
-// Execute executes the passed template.
-// First optional string is an ID string, which is added to the unique context ID.
-// All further optional strings are additional template style classes.
-func execute(t *Template, s *sessions.Session, wr io.Writer, data interface{}, optArgs ...ExecOpts) (*Context, error) {
-	var id string
-
-	// Apply the optional options.
-	var opts *ExecOpts
-	if len(optArgs) > 0 {
-		opts = &optArgs[0]
-
-		// Add the custom ID.
-		if len(opts.ID) != 0 {
-			id = opts.ID
-		}
-	}
-
-	// Prepare the ID.
-	if len(id) == 0 {
-		id = GlobalID
-	}
-
-	// Create a new context with the unique ID. The parent ID is the current ID,
-	// because this is the executing template.
-	// If the global context ID is set, then use this as ID.
-	var c *Context
-	if len(t.globalContextID) == 0 {
-		c = NewContext(s, t, id, id)
-	} else {
-		c = NewContext(s, t, t.globalContextID, t.globalContextID)
-	}
-
-	// Apply the optional options.
-	if opts != nil {
-		// Set the custom DOM ID if set.
-		if len(opts.DomID) != 0 {
-			c.domID = opts.DomID
-		}
-
-		// Add additional style classes if present.
-		if len(opts.StyleClasses) > 0 {
-			c.styleClasses = append(c.styleClasses, opts.StyleClasses...)
-		}
-	}
-
-	return c, ExecuteContext(c, wr, data)
 }

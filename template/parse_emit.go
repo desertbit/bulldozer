@@ -33,14 +33,14 @@ const (
 )
 
 func init() {
-	// Register the custom types to gob
+	// Register the custom types to gob.
 	gob.Register(&sessionEvents{})
 	gob.Register(&sessionEvent{})
 
-	// Register the emit template parse function
+	// Register the emit template parse function.
 	registerParseFunc("emit", parseEmit)
 
-	// Register the emit server request
+	// Register the emit server request.
 	err := sessions.Request(requestTypeEmit, sessionRequestEmit)
 	if err != nil {
 		log.L.Fatalf("failed to register session emit request: %v", err)
@@ -204,12 +204,9 @@ func newSessionEvents() *sessionEvents {
 }
 
 type sessionEvent struct {
-	UID              string
-	FuncNameSpace    string
-	FuncName         string
-	TemplateName     string
-	TemplateID       string
-	TemplateParentID string
+	FuncNameSpace string
+	FuncName      string
+	ContextData   *contextData
 }
 
 //##############//
@@ -297,8 +294,8 @@ func parseEmit(typeStr string, token string, d *parseData) error {
 }
 
 func createEventAccessKey(c *Context, namespace string, funcName string) (string, error) {
-	// Get the template namespace.
 	ns := c.t.ns
+	s := c.ns.s
 
 	// Check if the function exists.
 	events, ok := func() (e *events, ok bool) {
@@ -326,27 +323,24 @@ func createEventAccessKey(c *Context, namespace string, funcName string) (string
 
 	// Create a new session event value.
 	event := &sessionEvent{
-		UID:              ns.uid,
-		FuncName:         funcName,
-		FuncNameSpace:    namespace,
-		TemplateName:     c.t.Name(),
-		TemplateID:       c.id,
-		TemplateParentID: c.parentID,
+		FuncName:      funcName,
+		FuncNameSpace: namespace,
+		ContextData:   c.data,
 	}
 
 	// Get the session events.
-	sEvents := getSessionEvents(c.s)
+	sEvents := getSessionEvents(s)
 
 	// Lock the mutex.
 	sEvents.mutex.Lock()
 	defer sEvents.mutex.Unlock()
 
 	// Get the template events map.
-	templateEvents, ok := sEvents.Events[c.domID]
+	templateEvents, ok := sEvents.Events[c.data.DomID]
 	if !ok {
 		// Create a map for the current template.
 		templateEvents = make(map[string]*sessionEvent)
-		sEvents.Events[c.domID] = templateEvents
+		sEvents.Events[c.data.DomID] = templateEvents
 	}
 
 	// Create a unique event access key.
@@ -365,7 +359,7 @@ func createEventAccessKey(c *Context, namespace string, funcName string) (string
 
 	// Mark the session as dirty, because template events
 	// were registered to the session instance values.
-	c.s.Dirty()
+	s.Dirty()
 
 	// Return the new event access key.
 	return key, nil
@@ -446,11 +440,17 @@ func sessionRequestEmit(s *sessions.Session, data map[string]string) error {
 		return fmt.Errorf("invalid emit call from client: domID '%s' key '%s' parameters '%v': no session event registered.", domID, key, params)
 	}
 
-	// Get the template namespace
-	ns, ok := getNameSpace(sEvent.UID)
-	if !ok {
-		return fmt.Errorf("invalid emit call from client: domID '%s' key '%s' parameters '%v': no template namespace found '%s'", domID, key, params, sEvent.UID)
+	// Get the context data.
+	cData := sEvent.ContextData
+
+	// Create the template context.
+	c, err := newContextFromData(s, cData)
+	if err != nil {
+		return fmt.Errorf("invalid emit call from client: domID '%s' key '%s' parameters '%v': %v", domID, key, params, err)
 	}
+
+	// Get the template namespace pointer.
+	ns := c.t.ns
 
 	// Get the event functions of the given namespace.
 	events, ok := func() (e *events, ok bool) {
@@ -474,15 +474,6 @@ func sessionRequestEmit(s *sessions.Session, data map[string]string) error {
 
 	// Get the type of the function.
 	t := event.method.Type()
-
-	// Get the template.
-	tmpl := ns.Get(sEvent.TemplateName)
-	if tmpl == nil {
-		return fmt.Errorf("invalid emit call from client: domID '%s' key '%s' parameters '%v': no template '%s' in namespace!", domID, key, params, sEvent.TemplateName)
-	}
-
-	// Create the template context.
-	c := NewContext(s, tmpl, sEvent.TemplateID, sEvent.TemplateParentID)
 
 	// Get the number of parameters.
 	funcNumIn := t.NumIn()

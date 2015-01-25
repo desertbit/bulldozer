@@ -22,7 +22,7 @@ func init() {
 	plugin.MustFatal(plugin.Register(new(Plugin), &plugin.Opts{
 		Type:       "text",
 		HasSection: true,
-		RequireID:  false,
+		RequireID:  true,
 	}))
 }
 

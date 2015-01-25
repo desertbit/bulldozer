@@ -4,8 +4,6 @@
 
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
-* Fix the context bug, where static set DOM IDs and style classes are not reused on function events. If this is fixed, then uncomment the commented lines in dialog.go
-* Browser navigation back to index page gives an web session error and reinitializes the session....
 
 IMPORTANT
 =========

@@ -10,105 +10,221 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"encoding/gob"
+	"fmt"
 	"strconv"
 )
 
-//######################//
-//### Context struct ###//
-//######################//
+const (
+	GlobalID = "global"
+)
 
-type Context struct {
-	id           string
-	parentID     string
-	domID        string
-	styleClasses []string
-
-	s *sessions.Session
-	t *Template
+func init() {
+	// Register the custom types.
+	gob.Register(&contextData{})
 }
 
-// NewContext creates a new context.
-// One optional argument can be passed, which defines additional style classes.
-func NewContext(s *sessions.Session, t *Template, id string, parentID string, vars ...[]string) *Context {
-	// Create a new context
+//#####################//
+//### Context types ###//
+//#####################//
+
+// This data can be stored in the session store (ex.: template events).
+type contextData struct {
+	ID           string
+	RootID       string
+	DomID        string
+	TemplateUID  string
+	TemplateName string
+	StyleClasses []string
+}
+
+type contextNamespace struct {
+	s *sessions.Session
+}
+
+type Context struct {
+	data *contextData
+	ns   *contextNamespace
+	t    *Template
+}
+
+func newContextNamespace(s *sessions.Session) *contextNamespace {
+	return &contextNamespace{
+		s: s,
+	}
+}
+
+// newContext creates a new context.
+func newContext(s *sessions.Session, t *Template, optArgs ...ExecOpts) *Context {
+	// Create a new context data value.
+	data := &contextData{
+		ID:           GlobalID,      // Set the global ID as default value.
+		DomID:        t.staticDomID, // Use the static DOM ID by default. If emtpy, a new DOM ID will be calculated...
+		TemplateUID:  t.ns.uid,
+		TemplateName: t.Name(),
+		StyleClasses: t.styleClasses,
+	}
+
+	// Apply the optional options.
+	if len(optArgs) > 0 {
+		opts := &optArgs[0]
+
+		// Set the custom ID if set.
+		if len(opts.ID) > 0 {
+			data.ID = opts.ID
+		}
+
+		// Set the custom DOM ID if set.
+		if len(opts.DomID) > 0 {
+			data.DomID = opts.DomID
+		}
+
+		// Append the additional style classes if present.
+		if len(opts.StyleClasses) > 0 {
+			data.StyleClasses = append(data.StyleClasses, opts.StyleClasses...)
+		}
+	}
+
+	// If the global context ID is set, then use this as ID.
+	if len(t.globalContextID) > 0 {
+		data.ID = t.globalContextID
+	}
+
+	// Calculate and set the unique DOM ID with
+	// the context ID and session encryption key if the DOM ID is emtpy.
+	if len(data.DomID) == 0 {
+		data.DomID = utils.EncryptDomId(s.DomEncryptionKey(), "c_"+data.ID)
+	}
+
+	// This is the root context. Set the root ID to the ID.
+	data.RootID = data.ID
+
+	// Create a new context value.
 	c := &Context{
-		id:       id,
-		parentID: parentID,
-		s:        s,
-		t:        t,
-	}
-
-	// Set the DOM ID
-	if len(t.staticDomID) == 0 {
-		// Calculate and set the unique DOM ID with the session encryption key
-		c.domID = utils.EncryptDomId(c.s.DomEncryptionKey(), "i_"+c.id)
-	} else {
-		// Use the static DOM ID.
-		c.domID = t.staticDomID
-	}
-
-	// Add the additional style classes if present.
-	if len(vars) >= 1 {
-		c.styleClasses = vars[0]
+		data: data,
+		t:    t,
+		ns:   newContextNamespace(s),
 	}
 
 	return c
 }
 
+func newContextFromData(s *sessions.Session, data *contextData) (*Context, error) {
+	// Get the template namespace with the template UID.
+	ns, ok := getNameSpace(data.TemplateUID)
+	if !ok {
+		return nil, fmt.Errorf("no template namespace found '%s'!", data.TemplateUID)
+	}
+
+	// Get the template.
+	t := ns.Get(data.TemplateName)
+	if t == nil {
+		return nil, fmt.Errorf("no template with name '%s' in namespace '%s'!", data.TemplateName, data.TemplateUID)
+	}
+
+	// Create a new context value.
+	c := &Context{
+		data: data,
+		t:    t,
+		ns:   newContextNamespace(s),
+	}
+
+	return c, nil
+}
+
+// New creates a new sub context.
+// One optional slice can be passed, which defines additional style classes.
+func (c *Context) New(t *Template, id string, vars ...[]string) *Context {
+	// Create a new context data value.
+	data := &contextData{
+		ID:           id,
+		RootID:       c.data.RootID, // Use the root ID of the parent context.
+		DomID:        t.staticDomID, // Use the static DOM ID by default. If emtpy, a new DOM ID will be calculated...
+		TemplateUID:  t.ns.uid,
+		TemplateName: t.Name(),
+		StyleClasses: t.styleClasses,
+	}
+
+	// If the global context ID is set, then use this as new ID and Root ID.
+	if len(t.globalContextID) > 0 {
+		data.ID = t.globalContextID
+		data.RootID = t.globalContextID
+	}
+
+	// Calculate and set the unique DOM ID with
+	// the context ID and session encryption key if the DOM ID is emtpy.
+	if len(data.DomID) == 0 {
+		data.DomID = utils.EncryptDomId(c.ns.s.DomEncryptionKey(), "c_"+data.ID)
+	}
+
+	// Add the additional style classes if present.
+	if len(vars) > 0 {
+		data.StyleClasses = append(data.StyleClasses, vars[0]...)
+	}
+
+	// Create a new context value.
+	subC := &Context{
+		data: data,
+		t:    t,
+		ns:   c.ns, // Contexts share the same namespace.
+	}
+
+	return subC
+}
+
 // ID returns the unique ID of this execution context.
 // Use this for example as database access keys...
 func (c *Context) ID() string {
-	return c.id
+	return c.data.ID
 }
 
-// ParentID returns the main template executing unique ID.
-func (c *Context) ParentID() string {
-	return c.parentID
+// RootID returns the unique ID of the root template.
+func (c *Context) RootID() string {
+	return c.data.RootID
 }
 
-// DomID returns the DOM ID of the current context
+// DomID returns the DOM ID of the current context.
 func (c *Context) DomID() string {
-	return c.domID
+	return c.data.DomID
 }
 
 // GenDomID generates the real DOM ID of id.
 // This is equivalent to the following template call: {{id "YOUR_ID"}}
 func (c *Context) GenDomID(id string) string {
 	// Create the DOM ID
-	domId := "i_" + c.id + "+" + id
+	domId := "c_" + c.data.ID + "+" + id
 
-	// Calculate the unique DOM ID with the session encryption key
-	return utils.EncryptDomId(c.s.DomEncryptionKey(), domId)
+	// Calculate the unique DOM ID with the session encryption key.
+	return utils.EncryptDomId(c.ns.s.DomEncryptionKey(), domId)
 }
 
-// Session resturns the current context session
+// Session resturns the current context session.
 func (c *Context) Session() *sessions.Session {
-	return c.s
+	return c.ns.s
 }
 
-// Template returns the current context template
+// Template returns the current context template.
 func (c *Context) Template() *Template {
 	return c.t
 }
 
-// Styles returns a slice of all template styles
+// Styles returns a slice of all template styles.
 func (c *Context) Styles() []string {
-	// Return a merged slice of template styles and context styles.
-	return append(append([]string(nil), c.t.styleClasses...), c.styleClasses...)
+	return c.data.StyleClasses
 }
 
-// StylesString returns a string of all template styles
+// StylesString returns a string of all template styles.
 func (c *Context) StylesString() (str string) {
-	// Get the styles as slice
-	styles := c.Styles()
+	// Get the slice.
+	styles := c.data.StyleClasses
 
 	// Add the styles to a string separated by one emtpy space.
-	if styles != nil && len(styles) > 0 {
+	if len(styles) > 0 {
 		for _, sc := range styles {
 			str += sc + " "
 		}
 
-		// Remove the last emtpy space
+		// Remove the last emtpy space.
 		str = str[:len(str)-1]
 	}
 
@@ -119,10 +235,10 @@ func (c *Context) StylesString() (str string) {
 // and releases the current context.
 func (c *Context) Release() {
 	// Remove all registered session events for the current DOM ID.
-	releaseSessionTemplateEvents(c.s, c.domID)
+	releaseSessionTemplateEvents(c.ns.s, c.data.DomID)
 }
 
-// Update executes the template and updates the new DOM content
+// Update executes the template and updates the new DOM content.
 func (c *Context) Update(data interface{}) error {
 	// Execute the template
 	var b bytes.Buffer
@@ -132,14 +248,14 @@ func (c *Context) Update(data interface{}) error {
 	}
 
 	// Update the current div wrapper of this template.
-	c.s.SendCommand(`Bulldozer.render.updateTemplate("` + c.domID + `",'` + utils.EscapeJS(b.String()) + `');`)
+	c.ns.s.SendCommand(`Bulldozer.render.updateTemplate("` + c.data.DomID + `",'` + utils.EscapeJS(b.String()) + `');`)
 
 	return nil
 }
 
 // TriggerEvent triggers the event on the client side defined with the template event syntax.
 func (c *Context) TriggerEvent(eventName string, params ...interface{}) {
-	cmd := `Bulldozer.core.emitServerEvent("` + c.domID + `",'` + utils.EscapeJS(eventName) + `'`
+	cmd := `Bulldozer.core.emitServerEvent("` + c.data.DomID + `",'` + utils.EscapeJS(eventName) + `'`
 
 	// Append all the parameters
 	for i, param := range params {
@@ -160,5 +276,5 @@ func (c *Context) TriggerEvent(eventName string, params ...interface{}) {
 	cmd += ");"
 
 	// Send the command to the client
-	c.s.SendCommand(cmd)
+	c.ns.s.SendCommand(cmd)
 }
