@@ -85,13 +85,14 @@ func (tp *templatePlugin) Prepare(d *template.PluginData) (err error) {
 
 		// Remove it from the arguments map.
 		delete(data.Args, "id")
-	} else {
+	} else if tp.opts.RequireID {
 		// Return an error if the ID is required
-		if tp.opts.RequireID {
-			return fmt.Errorf("an unique ID is required!")
-		}
+		return fmt.Errorf("an unique ID is required!")
+	}
 
-		// Fallback to the plugin type string as ID.
+	if len(id) > 0 {
+		id = tp.opts.Type + "@" + id
+	} else {
 		id = tp.opts.Type
 	}
 
