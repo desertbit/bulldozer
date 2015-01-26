@@ -11,6 +11,7 @@
 
 IMPORTANT
 =========
+* Template parse: return an error if an ID for ex.: plugins is used multiple times! This is not allowed. Try testing this by declaring text plugins with the same ID.
 * Add a bulldoze init hook for packages.
 * Implement utils.SendMail and send the registration mail...
 * bulldoze: don't initialize the project folder automatically. Implement a init command.
