@@ -6,6 +6,8 @@
 package editmode
 
 import (
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 )
 
@@ -42,6 +44,9 @@ func Start(s *sessions.Session) {
 	// Set the edit mode session data value.
 	s.InstanceSet(sessionValueKeyIsActive, true)
 
+	// Confirm on exit.
+	s.SetExitMessage(tr.S("blz.core.exitMessage"))
+
 	// Reload the current page.
 	backend.ReloadPage(s)
 }
@@ -50,6 +55,9 @@ func Start(s *sessions.Session) {
 func Stop(s *sessions.Session) {
 	// Remove the edit mode session data value.
 	s.InstanceDelete(sessionValueKeyIsActive)
+
+	// Remove the confirm message on exit.
+	s.ResetExitMessage()
 
 	// Reload the current page.
 	backend.ReloadPage(s)

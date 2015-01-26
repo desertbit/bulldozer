@@ -2,3 +2,5 @@
 
 {"ID": "blz.core.connectionLost.title", "Text": "Connection lost."}
 {"ID": "blz.core.connectionLost.text", "Text": "Please reconnect to the internet and click here to retry."}
+
+{"ID": "blz.core.exitMessage", "Text": "Do you really want to leave this page?"}

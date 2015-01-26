@@ -1,0 +1,76 @@
+/*
+ * Bulldozer Popup Widget and click to edit hover effects.
+ */
+
+// TODO: Use the Kepler mixins to style the popup widget!
+
+.bulldozer_popover {
+	margin: 10px 0 0 0 !important;
+	padding: 8px 10px !important;
+	width: auto !important;
+	max-width: 600px !important;
+	background-color: #333 !important;
+	border: none !important;
+	-webkit-border-radius: 4px !important;
+	-moz-border-radius: 4px !important;
+	border-radius: 4px !important;
+
+	// TODO: Add the arrows again!
+	&:before {
+		border: none !important;
+	}
+
+	&:after {
+		border: none !important;
+	}
+
+	a {
+		float: left;
+		position: relative;
+		display: inline-block;
+		padding: 0 10px;
+		margin: 0;
+		cursor: pointer;
+		height: 30px;
+		line-height: 30px;
+		white-space: nowrap;
+		vertical-align: middle;
+		font-size: 16px;
+		color: #F3F3F3;
+
+		&:hover {
+			color: #FF5400;
+		}
+	}
+
+	i {
+		display: inline-block;
+	}
+
+	span {
+		display: inline;
+		white-space: nowrap;
+	}
+}
+
+
+
+/*
+ * Click to edit styles
+ */
+
+.bulldozer_click_to_edit_border,
+.bulldozer_click_to_edit_hover_border:hover
+{
+	outline-style: dashed;
+	outline-width: 2px;
+	outline-color: #ED4715;
+	cursor: pointer;
+}
+
+.bulldozer_click_to_edit_hover_border
+{
+	outline-style: dashed;
+	outline-width: 1px;
+	outline-color: #ED4715;
+}

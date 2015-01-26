@@ -10,11 +10,11 @@ import (
 	r "github.com/dancannon/gorethink"
 
 	"fmt"
-	"sync"
 )
 
 const (
-	dbStoreTable = "store"
+	dbStoreTable    = "store"
+	dbTmpStoreTable = "store_tmp"
 )
 
 //#######################//
@@ -22,14 +22,34 @@ const (
 //#######################//
 
 type dbStore struct {
-	ID    string `gorethink:"id"`
-	Data  map[string]*dbStoreData
-	mutex sync.Mutex
+	ID     string `gorethink:"id"`
+	Values map[string]*dbStoreData
 }
 
 type dbStoreData struct {
-	Data  map[string]interface{}
-	mutex sync.Mutex
+	Data interface{}
+
+	// Unexported.
+	isDecoded bool
+}
+
+func newDBStoreData(data interface{}) *dbStoreData {
+	return &dbStoreData{
+		Data:      data,
+		isDecoded: true,
+	}
+}
+
+func newDBStore(id string) *dbStore {
+	return &dbStore{
+		ID: id,
+	}
+}
+
+func (s *dbStore) createMapIfNil() {
+	if s.Values == nil {
+		s.Values = make(map[string]*dbStoreData)
+	}
 }
 
 //###############//
@@ -43,22 +63,45 @@ func initDB() error {
 		return err
 	}
 
+	// Create the temporary store table.
+	err = db.CreateTableIfNotExists(dbTmpStoreTable)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func dbGetStore(id string) (*dbStore, error) {
+// dbGetStore retrieves the store for the given ID from the database.
+// One variadic boolean can be passed. If true and temporary store data
+// exists, then this temporary data is returned instead.
+func dbGetStore(id string, vars ...bool) (*dbStore, error) {
 	if len(id) == 0 {
 		return nil, fmt.Errorf("failed to get database page store: ID is empty!")
 	}
 
-	rows, err := r.Table(dbStoreTable).Get(id).Run(db.Session)
+	var dbTable = dbStoreTable
+	useTemporaryData := false
+
+	if len(vars) > 0 && vars[0] {
+		dbTable = dbTmpStoreTable
+		useTemporaryData = true
+	}
+
+	rows, err := r.Table(dbTable).Get(id).Run(db.Session)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database page store by ID '%s': %v", id, err)
 	}
 
 	// Check if nothing was found.
 	if rows.IsNil() {
-		return nil, fmt.Errorf("failed to get database page store by ID '%s': no entry was found!", id)
+		// If nothing was found in the temporary table,
+		// then try to get the data from the default table.
+		if useTemporaryData {
+			return dbGetStore(id)
+		}
+
+		return nil, nil
 	}
 
 	var s dbStore
@@ -68,4 +111,38 @@ func dbGetStore(id string) (*dbStore, error) {
 	}
 
 	return &s, nil
+}
+
+// dbInsertStore inserts the store to the database.
+// One variadic boolean can be passed.
+// If true, then the store is saved to the temporary table.
+func dbInsertStore(s *dbStore, vars ...bool) error {
+	var dbTable = dbStoreTable
+	if len(vars) > 0 && vars[0] {
+		dbTable = dbTmpStoreTable
+	}
+
+	_, err := r.Table(dbTable).Insert(s).RunWrite(db.Session)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// dbUpdateStore updates the store in the database.
+// One variadic boolean can be passed.
+// If true, then the store is saved to the temporary table.
+func dbUpdateStore(s *dbStore, vars ...bool) error {
+	var dbTable = dbStoreTable
+	if len(vars) > 0 && vars[0] {
+		dbTable = dbTmpStoreTable
+	}
+
+	_, err := r.Table(dbTable).Update(s).RunWrite(db.Session)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
