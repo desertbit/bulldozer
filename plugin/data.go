@@ -33,14 +33,12 @@ type storeData struct {
 }
 
 type Data struct {
-	data       *storeData
-	value      interface{}
-	isPrepared bool
+	data  *storeData
+	value interface{}
 }
 
 func newData(id string, pluginType string) *Data {
 	return &Data{
-		isPrepared: false,
 		data: &storeData{
 			ID:         id,
 			PluginType: pluginType,
@@ -64,12 +62,6 @@ func (d *Data) Value() interface{} {
 }
 
 func (d *Data) prepareValue(vars ...Plugin) error {
-	// If the value was already obtained
-	// with Prepare, then just return.
-	if d.isPrepared {
-		return nil
-	}
-
 	// Obtain the plugin interface.
 	var plugin Plugin
 	if len(vars) > 0 {
@@ -94,9 +86,6 @@ func (d *Data) prepareValue(vars ...Plugin) error {
 	// Call the plugin interface prepare method to
 	// obtain the value.
 	d.value = plugin.Prepare(d)
-
-	// Update the flag
-	d.isPrepared = true
 
 	return nil
 }
@@ -125,8 +114,7 @@ func getDataFromContext(c *template.Context) (*Data, error) {
 
 	// Create a new data value.
 	data := &Data{
-		data:       d,
-		isPrepared: false,
+		data: d,
 	}
 
 	// Obtain the value by calling the prepare method.

@@ -163,6 +163,11 @@ func getContextStore(s *sessions.Session) *contextStore {
 		return nil
 	}
 
+	// Set the session. This might be nil,
+	// if this store is obtained from the store
+	// after a fresh application restart.
+	store.s = s
+
 	return store
 }
 

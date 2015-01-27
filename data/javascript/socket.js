@@ -64,6 +64,9 @@ Bulldozer.fn.socket = new function () {
             clearTimeout(timeoutConnectionLost);
         }
 
+        // Hide the connection lost widget if shown.
+        Bulldozer.connectionLost.hide();
+
         // Start the timer again.
         // A Ping message should arrive each 30 seconds from the server.
         // If nothing happens for 40 seconds, then show the connection lost widget.
@@ -77,6 +80,9 @@ Bulldozer.fn.socket = new function () {
     };
 
     var handleReceivedData = function(data) {
+        // Reset the timeout timer
+        resetConnectionLostTimeout();
+
         // Check if data is not empty
         if (data) {
             // Check if the server has send an invalid request notification
@@ -99,9 +105,6 @@ Bulldozer.fn.socket = new function () {
             // Set the new token and the data variable
             token = data.substring(0, i);
             data = data.substr(i + 1);
-
-            // Reset the timeout timer
-            resetConnectionLostTimeout();
 
             // Check if the server requests a pong reply
             if (data === SocketData.Ping) {
@@ -292,9 +295,7 @@ Bulldozer.fn.socket = new function () {
                 }
 
                 // On success update the callback which handles incomming messages
-                socket.onMessage = function(data) {
-                    handleReceivedData(data);
-                };
+                socket.onMessage = handleReceivedData;
             };
 
 
