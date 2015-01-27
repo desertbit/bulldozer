@@ -40,6 +40,15 @@ func (p *templatePackage) GetUser(c *template.Context) *User {
 	return GetUser(c)
 }
 
+func (p *templatePackage) LoginName(c *template.Context) string {
+	u := GetUser(c)
+	if u == nil {
+		return ""
+	}
+
+	return u.LoginName()
+}
+
 func (p *templatePackage) Group(c *template.Context, groups ...string) bool {
 	// Get the user.
 	u := GetUser(c)

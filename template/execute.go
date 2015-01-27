@@ -31,9 +31,10 @@ type renderData struct {
 //##########################//
 
 type ExecOpts struct {
-	ID           string   // This is added to the unique context ID.
-	DomID        string   // Set this, to set a custom DOM ID.
-	StyleClasses []string // Additional style classes.
+	Data         interface{} // If the data is passed with the execute method call, then the onGetData function is not called.
+	ID           string      // This is added to the unique context ID.
+	DomID        string      // Set this, to set a custom DOM ID.
+	StyleClasses []string    // Additional style classes.
 }
 
 //###############################//
@@ -47,17 +48,31 @@ type ExecOpts struct {
 // the output writer.
 // A template may be executed safely in parallel.
 // Optional options can be passed.
-func (t *Template) Execute(s *sessions.Session, wr io.Writer, data interface{}, optArgs ...ExecOpts) (*Context, error) {
+func (t *Template) Execute(s *sessions.Session, wr io.Writer, optArgs ...ExecOpts) (c *Context, err error) {
+	// Recover panics and return the error message.
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("bulldozer execute template panic: %v", e)
+		}
+	}()
+
 	// Create a new context.
-	c := newContext(s, t, optArgs...)
+	c = newContext(s, t, optArgs...)
+
+	// Obtain the data from the execute options if present
+	var data interface{}
+
+	if len(optArgs) > 0 {
+		data = optArgs[0].Data
+	}
 
 	// Execute the context.
-	err := ExecuteContext(c, wr, data)
+	err = ExecuteContext(c, wr, data)
 	if err != nil {
 		return nil, err
 	}
 
-	return c, nil
+	return
 }
 
 // ExecuteTemplate applies the template associated with t that has the given
@@ -68,17 +83,31 @@ func (t *Template) Execute(s *sessions.Session, wr io.Writer, data interface{}, 
 // A template may be executed safely in parallel.
 // A boolean is returned, defining if the template exists...
 // Optional options can be passed.
-func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name string, data interface{}, optArgs ...ExecOpts) (*Context, bool, error) {
+func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name string, optArgs ...ExecOpts) (c *Context, found bool, err error) {
+	// Recover panics and return the error message.
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("bulldozer execute template panic: %v", e)
+		}
+	}()
+
 	tt := t.Lookup(name)
 	if tt == nil {
 		return nil, false, fmt.Errorf("failed to execute template: template not found with name '%s'", name)
 	}
 
 	// Create a new context.
-	c := newContext(s, tt, optArgs...)
+	c = newContext(s, tt, optArgs...)
+
+	// Obtain the data from the execute options if present
+	var data interface{}
+
+	if len(optArgs) > 0 {
+		data = optArgs[0].Data
+	}
 
 	// Execute the context.
-	err := ExecuteContext(c, wr, data)
+	err = ExecuteContext(c, wr, data)
 	if err != nil {
 		return nil, true, err
 	}
@@ -87,9 +116,9 @@ func (t *Template) ExecuteTemplate(s *sessions.Session, wr io.Writer, name strin
 }
 
 // ExecuteToString does the same as Execute, but instead writes the output to a string.
-func (t *Template) ExecuteToString(s *sessions.Session, data interface{}, optArgs ...ExecOpts) (string, *Context, error) {
+func (t *Template) ExecuteToString(s *sessions.Session, optArgs ...ExecOpts) (string, *Context, error) {
 	var b bytes.Buffer
-	c, err := t.Execute(s, &b, data, optArgs...)
+	c, err := t.Execute(s, &b, optArgs...)
 	if err != nil {
 		return "", nil, err
 	}
@@ -98,9 +127,9 @@ func (t *Template) ExecuteToString(s *sessions.Session, data interface{}, optArg
 }
 
 // ExecuteTemplateToString does the same as ExecuteTemplate, but instead writes the output to a string.
-func (t *Template) ExecuteTemplateToString(s *sessions.Session, name string, data interface{}, optArgs ...ExecOpts) (string, *Context, bool, error) {
+func (t *Template) ExecuteTemplateToString(s *sessions.Session, name string, optArgs ...ExecOpts) (string, *Context, bool, error) {
 	var b bytes.Buffer
-	c, found, err := t.ExecuteTemplate(s, &b, name, data, optArgs...)
+	c, found, err := t.ExecuteTemplate(s, &b, name, optArgs...)
 	if err != nil {
 		return "", nil, found, err
 	}
@@ -113,20 +142,13 @@ func (t *Template) ExecuteTemplateToString(s *sessions.Session, name string, dat
 //##############//
 
 // ExecuteContext executes the template context.
-func ExecuteContext(c *Context, wr io.Writer, data interface{}) (err error) {
-	// Recover panics and return the error message.
-	defer func() {
-		if e := recover(); e != nil {
-			err = fmt.Errorf("bulldozer execute template panic: %v", e)
-		}
-	}()
-
+func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
 	// Get the template pointer.
 	t := c.t
 
 	// Remove all previously registered session events for the current DOM ID.
 	// They will be registered by the following template execution.
-	c.Release()
+	releaseSessionTemplateEvents(c.ns.s, c.data.DomID)
 
 	// Return the last parse error if present.
 	if t.hasParseError != nil {
@@ -148,6 +170,17 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) (err error) {
 			return nil
 		} else {
 			return fmt.Errorf("invalid template action type: %v", action.action)
+		}
+	}
+
+	// If no data was passed, then call the get data function if present.
+	if data == nil && t.getDataFunc != nil {
+		data = t.getDataFunc(c)
+
+		// If an error is returned, then abort the execution.
+		switch data.(type) {
+		case error:
+			return fmt.Errorf("failed to get template data from getData function: %v", data.(error))
 		}
 	}
 

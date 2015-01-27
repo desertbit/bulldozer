@@ -9,6 +9,8 @@ import (
 	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
+	"code.desertbit.com/bulldozer/bulldozer/template"
+	"sync"
 )
 
 const (
@@ -18,6 +20,10 @@ const (
 
 var (
 	backend bulldozerBackend
+
+	// Sessions active in editmode.
+	activeSessions      map[string]*sessions.Session = make(map[string]*sessions.Session)
+	activeSessionsMutex sync.Mutex
 )
 
 //###################################//
@@ -44,8 +50,14 @@ func Start(s *sessions.Session) {
 	// Set the edit mode session data value.
 	s.InstanceSet(sessionValueKeyIsActive, true)
 
+	// Enable the session context store.
+	template.EnableSessionContextStore(s)
+
 	// Confirm on exit.
 	s.SetExitMessage(tr.S("blz.core.exitMessage"))
+
+	// Add the session to the active sessions.
+	addSession(s)
 
 	// Reload the current page.
 	backend.ReloadPage(s)
@@ -56,8 +68,14 @@ func Stop(s *sessions.Session) {
 	// Remove the edit mode session data value.
 	s.InstanceDelete(sessionValueKeyIsActive)
 
+	// Disable the session context store again.
+	template.DisableSessionContextStore(s)
+
 	// Remove the confirm message on exit.
 	s.ResetExitMessage()
+
+	// Remove the session from the active sessions.
+	removeSession(s)
 
 	// Reload the current page.
 	backend.ReloadPage(s)
@@ -78,4 +96,50 @@ func IsActive(s *sessions.Session) bool {
 	}
 
 	return active
+}
+
+// GetSessions returns a slice of all active edit mode sessions.
+func GetSessions() []*sessions.Session {
+	// Lock the mutex.
+	activeSessionsMutex.Lock()
+	defer activeSessionsMutex.Unlock()
+
+	// Create the slice.
+	l := make([]*sessions.Session, len(activeSessions))
+
+	i := 0
+	for _, s := range activeSessions {
+		l[i] = s
+		i++
+	}
+
+	return l
+}
+
+//###############//
+//### Private ###//
+//###############//
+
+func addSession(s *sessions.Session) {
+	// Remove the session if closed from the map.
+	s.OnClose(removeSession)
+
+	// Lock the mutex.
+	activeSessionsMutex.Lock()
+	defer activeSessionsMutex.Unlock()
+
+	// Add the session to the map.
+	activeSessions[s.SessionID()] = s
+}
+
+func removeSession(s *sessions.Session) {
+	// Detach the event again.
+	s.OffClose(removeSession)
+
+	// Lock the mutex.
+	activeSessionsMutex.Lock()
+	defer activeSessionsMutex.Unlock()
+
+	// Remove the session from the map.
+	delete(activeSessions, s.SessionID())
 }

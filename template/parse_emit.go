@@ -56,7 +56,7 @@ func init() {
 // They are called from the client-side without this prefix.
 // One optional parameter can be set, to define the events namespace.
 // If no namespace is defined, then the event is registered in the global namespace.
-func (t *Template) RegisterEvents(i interface{}, vars ...string) {
+func (t *Template) RegisterEvents(i interface{}, vars ...string) *Template {
 	// Get the namespace
 	var namespace string
 	if len(vars) > 0 {
@@ -120,6 +120,8 @@ func (t *Template) RegisterEvents(i interface{}, vars ...string) {
 	if noMethods {
 		log.L.Warning("template: RegisterEvents: registered interface event methods, but no event methods where found!")
 	}
+
+	return t
 }
 
 //###########################//
@@ -209,19 +211,13 @@ type sessionEvent struct {
 	ContextData   *contextData
 }
 
-//##############//
-//### Public ###//
-//##############//
-
-// ReleaseSessionEvents releases all registered session events.
-// All previously registered client event calls will be invalid.
-func ReleaseSessionEvents(s *sessions.Session) {
-	s.InstanceDelete(instanceKeyEvents)
-}
-
 //###############//
 //### Private ###//
 //###############//
+
+func releaseAllSessionEvents(s *sessions.Session) {
+	s.InstanceDelete(instanceKeyEvents)
+}
 
 func releaseSessionTemplateEvents(s *sessions.Session, domID string) {
 	// Get the session events.

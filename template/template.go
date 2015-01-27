@@ -12,6 +12,7 @@ import (
 	htmlTemplate "html/template"
 
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"errors"
 	"fmt"
 	"github.com/chuckpreslar/emission"
@@ -94,6 +95,11 @@ func (ns *nameSpace) Get(name string) *Template {
 //### Template struct ###//
 //#######################//
 
+// GetDataFunc is called during template execution
+// if no data is specified with the optional execute option.
+// Return the template render data.
+type GetDataFunc func(c *Context) interface{}
+
 type Template struct {
 	// We could embed the text/template field, but it's safer not to because
 	// we need to keep our version of the name space and the underlying
@@ -108,6 +114,9 @@ type Template struct {
 
 	// Store the parse error
 	hasParseError error
+
+	// On render function pointer
+	getDataFunc GetDataFunc
 
 	// DOM specific stuff
 	staticDomID  string
@@ -145,6 +154,13 @@ func (t *Template) New(name string) *Template {
 	tt.ns.Set(tt)
 
 	return tt
+}
+
+// OnGetData set the function which is called during template execution
+// if no data is specified with the optional execute option.
+// Return the template render data.
+func (t *Template) OnGetData(f GetDataFunc) {
+	t.getDataFunc = f
 }
 
 // Lookup returns the template with the given name that is associated with t,
@@ -381,6 +397,14 @@ func ParseFiles(uid string, filenames ...string) (*Template, error) {
 // ParseFiles with the list of files matched by the pattern.
 func ParseGlob(uid string, pattern string) (*Template, error) {
 	return parseGlob(uid, nil, pattern)
+}
+
+// ResetEnvironment releases all registered session events.
+// All previously registered client event calls will be invalid.
+// If a context store is present, then this is also resetted.
+func ResetEnvironment(s *sessions.Session) {
+	releaseAllSessionEvents(s)
+	resetContextStore(s)
 }
 
 //###############//

@@ -81,6 +81,11 @@ func (d *Dialog) RegisterEvents(i interface{}, vars ...string) {
 	d.t.RegisterEvents(i, vars...)
 }
 
+// OnGetData is the same as template.OnGetData...
+func (d *Dialog) OnGetData(f template.GetDataFunc) {
+	d.t.OnGetData(f)
+}
+
 // ParseFile parses a template file.
 func (d *Dialog) ParseFile(filename string) (err error) {
 	b, err := ioutil.ReadFile(filename)
@@ -110,16 +115,22 @@ func (d *Dialog) Parse(text string) (err error) {
 	return nil
 }
 
-// Create and show a new Dialog. The data interface is passed to the template execution call.
-func (d *Dialog) Show(s *sessions.Session, data interface{}) (*template.Context, error) {
+// Create and show a new Dialog.
+// The data interface is passed to the template execution call if passed.
+func (d *Dialog) Show(s *sessions.Session, data ...interface{}) (*template.Context, error) {
 	// Create the optional options for the template.
 	opts := template.ExecOpts{
 		ID:    s.NewUniqueId(),
 		DomID: s.NewUniqueDomID(),
 	}
 
+	// Set the data if present.
+	if len(data) > 0 {
+		opts.Data = data[0]
+	}
+
 	// Execute the template
-	o, c, err := d.t.ExecuteToString(s, data, opts)
+	o, c, err := d.t.ExecuteToString(s, opts)
 	if err != nil {
 		return nil, err
 	}

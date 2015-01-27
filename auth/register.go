@@ -108,7 +108,7 @@ func routeRegisterPage(s *sessions.Session, routeData *router.Data) (string, str
 	}
 
 	// Execute the login template.
-	o, _, _, err := templates.ExecuteTemplateToString(s, registerTemplate, nil)
+	o, _, _, err := templates.ExecuteTemplateToString(s, registerTemplate)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to execute register template: %v", err)
 	}

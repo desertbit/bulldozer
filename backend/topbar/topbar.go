@@ -82,15 +82,8 @@ func ExecTopBar(i interface{}) (string, error) {
 
 	// TODO: Only show topbar if the user has the specific group set.
 
-	// The render data.
-	data := struct {
-		User *auth.User
-	}{
-		user,
-	}
-
 	// Execute the topbar template.
-	body, _, _, err := templates.ExecuteTemplateToString(s, topbarTemplate, data)
+	body, _, _, err := templates.ExecuteTemplateToString(s, topbarTemplate)
 	if err != nil {
 		return "", err
 	}

@@ -33,23 +33,8 @@ type Opts struct {
 
 type Plugin interface {
 	Initialize() *template.Template                  // Called only once during plugin initialization.
-	Prepare(d *Data)                                 // Prepare is called for each plugin context. Settings should be parsed...
+	Prepare(d *Data) interface{}                     // Prepare is called for each plugin context. Settings should be parsed...
 	Render(c *template.Context, d *Data) interface{} // Render is called during each plugin template rendering request. Template render data can be returned.
-}
-
-//##########################//
-//### Plugin data struct ###//
-//##########################//
-
-type Data struct {
-	// Private
-	id                     string
-	additionalStyleClasses []string
-
-	// Public
-	Value   interface{}
-	Section string
-	Args    Args
 }
 
 //##############################//
@@ -70,21 +55,15 @@ func (tp *templatePlugin) Prepare(d *template.PluginData) (err error) {
 		}
 	}()
 
-	// Create the plugin data value.
-	data := &Data{
-		Args:    Args(d.Args),
-		Section: d.Section,
-	}
-
 	// Obtain the plugin ID from the arguments.
-	id, ok := data.Args["id"]
+	id, ok := d.Args["id"]
 	if ok {
 		if len(id) == 0 {
 			return fmt.Errorf("the passed ID is emtpy!")
 		}
 
 		// Remove it from the arguments map.
-		delete(data.Args, "id")
+		delete(d.Args, "id")
 	} else if tp.opts.RequireID {
 		// Return an error if the ID is required
 		return fmt.Errorf("an unique ID is required!")
@@ -96,24 +75,29 @@ func (tp *templatePlugin) Prepare(d *template.PluginData) (err error) {
 		id = tp.opts.Type
 	}
 
-	// Set the ID.
-	data.id = id
+	// Create the plugin data value.
+	data := newData(id, tp.opts.Type)
+	data.data.Args = Args(d.Args)
+	data.data.Section = d.Section
 
 	// Parse for core plugin arguments.
 	// Check if the class argument is set.
-	if classes, ok := data.Args["class"]; ok {
+	if classes, ok := data.data.Args["class"]; ok {
 		// Add the style classes to the data value.
-		data.additionalStyleClasses = strings.Fields(classes)
+		data.data.AdditionalStyleClasses = strings.Fields(classes)
 
 		// Remove the class argument from the argument map
-		delete(data.Args, "class")
+		delete(data.data.Args, "class")
 	}
 
 	// Save the plugin data.
 	d.Value = data
 
-	// Call the plugin interface prepare method.
-	tp.plugin.Prepare(data)
+	// Call the plugin interface prepare method to set the data value.
+	err = data.prepareValue(tp.plugin)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -130,13 +114,21 @@ func (tp *templatePlugin) Render(c *template.Context, d *template.PluginData) (r
 	data := d.Value.(*Data)
 
 	// Create the unique plugin template ID.
-	id := c.ID() + "~" + data.id
+	id := c.ID() + "~" + data.data.ID
 
 	// Create the plugin template context.
-	pContext := c.New(tp.t, id, data.additionalStyleClasses)
+	pContext := c.New(tp.t, id, data.data.AdditionalStyleClasses)
 
-	// Get the render data for the template.
-	renderData := tp.plugin.Render(pContext, data)
+	// Save the plugin data to the context store.
+	setDataToContext(pContext, data)
+
+	// Get the render data, by manually calling the get data function.
+	// The get data function is only called by the template,
+	// if a plugin context requests an update.
+	// Passing the data directly to the execute method if
+	// possible will save some overhead, because we don't need
+	// to get the plugin data twice.
+	renderData := tp.getTemplateData(pContext, data)
 
 	// Execute the plugin template.
 	var b bytes.Buffer
@@ -148,6 +140,28 @@ func (tp *templatePlugin) Render(c *template.Context, d *template.PluginData) (r
 	// Return the final html text.
 	// By casting to a html template, we effectively unescape this portion.
 	return htemplate.HTML(b.String()), nil
+}
+
+func (tp *templatePlugin) getTemplateDataFunc(c *template.Context) interface{} {
+	return tp.getTemplateData(c)
+}
+
+func (tp *templatePlugin) getTemplateData(c *template.Context, vars ...*Data) interface{} {
+	var data *Data
+
+	// Get the plugin data.
+	if len(vars) > 0 {
+		data = vars[0]
+	} else {
+		var err error
+		data, err = getDataFromContext(c)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Get the render data for the template.
+	return tp.plugin.Render(c, data)
 }
 
 //##############//
@@ -196,6 +210,9 @@ func Register(p Plugin, o *Opts) (err error) {
 		opts:   o,
 		t:      t,
 	}
+
+	// Set get data function.
+	t.OnGetData(tp.getTemplateDataFunc)
 
 	// Conversion.
 	templateOpts := template.PluginOpts(*o)

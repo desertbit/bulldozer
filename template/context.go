@@ -25,9 +25,9 @@ func init() {
 	gob.Register(&contextData{})
 }
 
-//#####################//
-//### Context types ###//
-//#####################//
+//#########################//
+//### Context Data type ###//
+//#########################//
 
 // This data can be stored in the session store (ex.: template events).
 type contextData struct {
@@ -37,10 +37,27 @@ type contextData struct {
 	TemplateUID  string
 	TemplateName string
 	StyleClasses []string
+
+	// Optional values which are stored in the session store.
+	// They survive application restarts.
+	// Values have to be encodable by gob. Don't store pointers!
+	Values      map[interface{}]interface{}
+	valuesMutex sync.Mutex
 }
 
+func (c *contextData) createValuesMapIfNil() {
+	if c.Values == nil {
+		c.Values = make(map[interface{}]interface{})
+	}
+}
+
+//#########################//
+//### Context Namespace ###//
+//#########################//
+
 type contextNamespace struct {
-	s *sessions.Session
+	s     *sessions.Session
+	store *contextStore
 
 	// The execution values lifetime is one complete template
 	// execution with all rendered sub templates.
@@ -48,17 +65,34 @@ type contextNamespace struct {
 	mutex  sync.Mutex
 }
 
+func newContextNamespace(s *sessions.Session) *contextNamespace {
+	return &contextNamespace{
+		s:      s,
+		store:  getContextStore(s), // Get the context store if present or nil.
+		values: make(map[interface{}]interface{}),
+	}
+}
+
+func (ns *contextNamespace) AddToStore(d *contextData) {
+	if ns.store != nil {
+		ns.store.Set(d)
+	}
+}
+
+func (ns *contextNamespace) RemoveFromStore(d *contextData) {
+	if ns.store != nil {
+		ns.store.Remove(d)
+	}
+}
+
+//####################//
+//### Context type ###//
+//####################//
+
 type Context struct {
 	data *contextData
 	ns   *contextNamespace
 	t    *Template
-}
-
-func newContextNamespace(s *sessions.Session) *contextNamespace {
-	return &contextNamespace{
-		s:      s,
-		values: make(map[interface{}]interface{}),
-	}
 }
 
 // newContext creates a new context.
@@ -113,10 +147,14 @@ func newContext(s *sessions.Session, t *Template, optArgs ...ExecOpts) *Context 
 		ns:   newContextNamespace(s),
 	}
 
+	// Add the context data to the store if present.
+	c.ns.AddToStore(data)
+
 	return c
 }
 
-func newContextFromData(s *sessions.Session, data *contextData) (*Context, error) {
+// One variadiv boolean can be set. If false, the context won't be added to the context store.
+func newContextFromData(s *sessions.Session, data *contextData, vars ...bool) (*Context, error) {
 	// Get the template namespace with the template UID.
 	ns, ok := getNameSpace(data.TemplateUID)
 	if !ok {
@@ -134,6 +172,11 @@ func newContextFromData(s *sessions.Session, data *contextData) (*Context, error
 		data: data,
 		t:    t,
 		ns:   newContextNamespace(s),
+	}
+
+	if len(vars) == 0 || vars[0] {
+		// Add the context data to the store if present.
+		c.ns.AddToStore(data)
 	}
 
 	return c, nil
@@ -175,6 +218,9 @@ func (c *Context) New(t *Template, id string, vars ...[]string) *Context {
 		t:    t,
 		ns:   c.ns, // Contexts share the same namespace.
 	}
+
+	// Add the context data to the store if present.
+	c.ns.AddToStore(data)
 
 	return subC
 }
@@ -243,10 +289,20 @@ func (c *Context) StylesString() (str string) {
 func (c *Context) Release() {
 	// Remove all registered session events for the current DOM ID.
 	releaseSessionTemplateEvents(c.ns.s, c.data.DomID)
+
+	// Remove context data from the store.
+	c.ns.RemoveFromStore(c.data)
 }
 
 // Update executes the template and updates the new DOM content.
-func (c *Context) Update(data interface{}) error {
+// One optional argument can be passed. This is the render data for the template.
+// If omitted, the data is obtained through the template.OnGetData function.
+func (c *Context) Update(vars ...interface{}) error {
+	var data interface{}
+	if len(vars) > 0 {
+		data = vars[0]
+	}
+
 	// Execute the template
 	var b bytes.Buffer
 	err := ExecuteContext(c, &b, data)
@@ -284,6 +340,96 @@ func (c *Context) TriggerEvent(eventName string, params ...interface{}) {
 
 	// Send the command to the client
 	c.ns.s.SendCommand(cmd)
+}
+
+//############################//
+//### Context Store Values ###//
+//############################//
+
+// StoreGet obtains the store value, which are stored in the session store.
+// They survive application restarts.
+// Values have to be encodable by gob. Don't store pointers!
+// A single variadic argument is accepted, and it is optional:
+// if a function is set, this function will be called if no value
+// exists for the given key.
+// This operation is thread-safe.
+func (c *Context) StoreGet(key interface{}, vars ...func() interface{}) (value interface{}, ok bool) {
+	// Get the data pointer.
+	data := c.data
+
+	// Lock the mutex.
+	data.valuesMutex.Lock()
+	defer data.valuesMutex.Unlock()
+
+	// Get the value if the map is not nil.
+	ok = false
+	if data.Values != nil {
+		value, ok = data.Values[key]
+	}
+
+	// If no value is found and the create function variable
+	// is set, then call the function and set the new value.
+	if !ok && len(vars) > 0 {
+		value = vars[0]()
+
+		data.createValuesMapIfNil()
+
+		data.Values[key] = value
+		ok = true
+
+		// Tell the session, that data might have changed.
+		c.ns.s.Dirty()
+	}
+
+	return
+}
+
+// StorePull does the same as Get(), but additionally removes the value from the store if present.
+// Use this for Flash values...
+func (c *Context) StorePull(key interface{}, vars ...func() interface{}) (interface{}, bool) {
+	i, ok := c.StoreGet(key, vars...)
+	if ok {
+		c.StoreDelete(key)
+	}
+
+	return i, ok
+}
+
+// StoreSet sets the store value with the given key. This operation is thread-safe.
+func (c *Context) StoreSet(key interface{}, value interface{}) {
+	// Get the data pointer.
+	data := c.data
+
+	// Lock the mutex.
+	data.valuesMutex.Lock()
+	defer data.valuesMutex.Unlock()
+
+	// Set the value.
+	data.createValuesMapIfNil()
+	data.Values[key] = value
+
+	// Tell the session, that data might have changed.
+	c.ns.s.Dirty()
+}
+
+// StoreDelete removes the store value with the given key.
+// This operation is thread-safe.
+func (c *Context) StoreDelete(key interface{}) {
+	// Get the data pointer.
+	data := c.data
+
+	// Lock the mutex.
+	data.valuesMutex.Lock()
+	defer data.valuesMutex.Unlock()
+
+	if data.Values == nil {
+		return
+	}
+
+	delete(data.Values, key)
+
+	// Tell the session, that data might have changed.
+	c.ns.s.Dirty()
 }
 
 //########################//

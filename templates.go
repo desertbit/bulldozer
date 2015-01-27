@@ -65,7 +65,7 @@ func loadTemplates() (err error) {
 
 func execNotFoundTemplate(s *sessions.Session) (int, string, string) {
 	// Execute the not found page
-	out, _, _, err := coreTemplates.ExecuteTemplateToString(s, notFoundTemplate, nil)
+	out, _, _, err := coreTemplates.ExecuteTemplateToString(s, notFoundTemplate)
 	if err != nil {
 		return execErrorTemplate(s, err.Error())
 	}
@@ -89,8 +89,13 @@ func execErrorTemplate(s *sessions.Session, errorMessage string, vars ...bool) (
 		log.L.Error(errorMessage)
 	}
 
+	// Custom template options.
+	opts := template.ExecOpts{
+		Data: data,
+	}
+
 	// Execute the template.
-	out, _, _, err := coreTemplates.ExecuteTemplateToString(s, errorTemplate, data)
+	out, _, _, err := coreTemplates.ExecuteTemplateToString(s, errorTemplate, opts)
 	if err != nil {
 		log.L.Error("failed to execute error core template: %v", err)
 		return 500, "Internal Server Error", tr.S("blz.page.error.pageTitle")

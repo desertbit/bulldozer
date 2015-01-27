@@ -131,8 +131,8 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 	// Set the default status code value.
 	statusCode = 200
 
-	// Release the previous temmplate session events.
-	template.ReleaseSessionEvents(s)
+	// Reset the template environment.
+	template.ResetEnvironment(s)
 
 	// Transform the path to a valid path.
 	path = utils.ToPath(requestedPath)
@@ -168,7 +168,7 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		}
 
 		// Execute the template
-		o, c, found, err := TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, nil, opts)
+		o, c, found, err := TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, opts)
 
 		if err != nil {
 			if found {

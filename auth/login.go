@@ -110,18 +110,12 @@ func (e *loginEvents) EventLogin(c *template.Context, loginName string, password
 //### Private ###//
 //###############//
 
-func routeLoginPage(s *sessions.Session, routeData *router.Data) (string, string, error) {
-	// If already authenticated, then redirect to the default page.
-	if IsAuth(s) {
-		backend.NavigateToPath(s, "/")
-		return "", "", nil
-	}
-
+func onLoginTemplateGetData(c *template.Context) interface{} {
 	// Generate a new random password token.
 	passwordToken := utils.RandomString(passwordTokenLength)
 
 	// Save the password token to the session.
-	s.InstanceSet(sessionValueKeyPasswordToken, passwordToken)
+	c.Session().InstanceSet(sessionValueKeyPasswordToken, passwordToken)
 
 	// Create the template render data.
 	data := struct {
@@ -132,8 +126,18 @@ func routeLoginPage(s *sessions.Session, routeData *router.Data) (string, string
 		PasswordToken:        passwordToken,
 	}
 
+	return data
+}
+
+func routeLoginPage(s *sessions.Session, routeData *router.Data) (string, string, error) {
+	// If already authenticated, then redirect to the default page.
+	if IsAuth(s) {
+		backend.NavigateToPath(s, "/")
+		return "", "", nil
+	}
+
 	// Execute the login template.
-	o, _, _, err := templates.ExecuteTemplateToString(s, loginTemplate, data)
+	o, _, _, err := templates.ExecuteTemplateToString(s, loginTemplate)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to execute login template: %v", err)
 	}

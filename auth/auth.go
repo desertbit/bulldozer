@@ -85,7 +85,8 @@ func Init(b bulldozerBackend) (err error) {
 	// Customize the templates.
 	templates.LookupFatal(loginTemplate).
 		AddStyleClass("bulldozer-page").
-		RegisterEvents(new(loginEvents))
+		RegisterEvents(new(loginEvents)).
+		OnGetData(onLoginTemplateGetData)
 
 	templates.LookupFatal(registerTemplate).
 		AddStyleClass("bulldozer-page").

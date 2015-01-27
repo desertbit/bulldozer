@@ -86,6 +86,17 @@ func RegisterPlugin(p Plugin, opts *PluginOpts) error {
 	return nil
 }
 
+// GetPlugin returns the plugin defined by the type.
+// if not found, nil is returned.
+func GetPlugin(typeStr string) Plugin {
+	p, ok := plugins[typeStr]
+	if !ok {
+		return nil
+	}
+
+	return p.i
+}
+
 //###############//
 //### Private ###//
 //###############//

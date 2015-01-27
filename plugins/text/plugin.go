@@ -35,9 +35,9 @@ func init() {
 	}))
 }
 
-// ############## //
-// ### Plugin ### //
-// ############## //
+//##############//
+//### Plugin ###//
+//##############//
 
 type Plugin struct {
 }
@@ -50,8 +50,9 @@ func (p *Plugin) Initialize() *template.Template {
 	return t
 }
 
-func (p *Plugin) Prepare(d *plugin.Data) {
+func (p *Plugin) Prepare(d *plugin.Data) interface{} {
 	// TODO: Parse settings.
+	return nil
 }
 
 func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
@@ -98,9 +99,9 @@ func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
 	}
 }
 
-// ############## //
-// ### Events ### //
-// ############## //
+//##############//
+//### Events ###//
+//##############//
 
 func (p *Plugin) EventLock(c *template.Context) {
 	// Lock the context.

@@ -140,7 +140,7 @@ func New() *MessageBox {
 // RegisterCallback registers a callback. This is necessary, because
 // otherwise callbacks could not be called after application restarts.
 // They have to be registered globally...
-// One optional booleam can be passed, to force a overwrite of
+// One optional boolean can be passed, to force a overwrite of
 // a previous registered callback with the same name.
 func RegisterCallback(name string, cb Callback, vars ...bool) {
 	// Register the callback.

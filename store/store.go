@@ -172,6 +172,9 @@ func Get(c *template.Context, vars ...func() interface{}) (interface{}, bool, er
 			return nil, false, err
 		}
 
+		// Broadcast changes to other sessions in edit mode.
+		broadcastChangedContext(c)
+
 		return value, true, nil
 	}
 
@@ -204,7 +207,15 @@ func Set(c *template.Context, value interface{}) error {
 	s.data.Values[c.ID()] = newDBStoreData(value)
 
 	// Update data to the database.
-	return flushUpdatesToDB(s)
+	err = flushUpdatesToDB(s)
+	if err != nil {
+		return err
+	}
+
+	// Broadcast changes to other sessions in edit mode.
+	broadcastChangedContext(c)
+
+	return nil
 }
 
 // Delete removes the context value from the store.
@@ -234,7 +245,15 @@ func Delete(c *template.Context) error {
 	delete(s.data.Values, c.ID())
 
 	// Update data to the database.
-	return flushUpdatesToDB(s)
+	err = flushUpdatesToDB(s)
+	if err != nil {
+		return err
+	}
+
+	// Broadcast changes to other sessions in edit mode.
+	broadcastChangedContext(c)
+
+	return nil
 }
 
 //###############//
@@ -313,4 +332,43 @@ func flushUpdatesToDB(s *store) error {
 	}
 
 	return nil
+}
+
+func broadcastChangedContext(c *template.Context) {
+	// Get the session ID of the current session.
+	curSid := c.Session().SessionID()
+
+	// Get the current context ID.
+	id := c.ID()
+
+	// Get all sessions which are in the edit mode.
+	activeSessions := editmode.GetSessions()
+
+	var err error
+	for _, s := range activeSessions {
+		// Skip if this is the current session.
+		if s.SessionID() == curSid {
+			continue
+		}
+
+		// Get the context store of the session.
+		store := template.GetSessionContextStore(s)
+		if store == nil {
+			// TODO: log error and refresh the sessions page!
+			continue
+		}
+
+		cc, ok := store.Get(id)
+		if !ok {
+			// TODO: log error and refresh the sessions page!
+			continue
+		}
+
+		err = cc.Update()
+		if err != nil {
+			log.L.Error("failed to update context with ID '%s': %v", id, err)
+			// TODO: log error and refresh the sessions page!
+			continue
+		}
+	}
 }
