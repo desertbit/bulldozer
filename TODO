@@ -12,6 +12,7 @@ IMPORTANT
 * store: convert map if struct... Provide a function for this.
 * text plugin: auto save content after timeout.
 * Edit mode: If multiple users are in edit mode, ask all other sessions before save, to confirm save.
+* Implement store backup.
 * Template parse: return an error if an ID for ex.: plugins is used multiple times! This is not allowed. Try testing this by declaring text plugins with the same ID.
 * Add a bulldoze init hook for packages.
 * Implement utils.SendMail and send the registration mail...

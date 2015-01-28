@@ -36,11 +36,11 @@ func templateContext(templateName string, id string, r *renderData, values ...in
 	}
 
 	// Create the unique sub template ID if present.
-	// Otherwise use the previous ID.
+	// Otherwise use the template name as ID.
 	if len(id) > 0 {
 		id = c.data.ID + "_" + id
 	} else {
-		id = c.data.ID
+		id = c.data.ID + "^" + templateName
 	}
 
 	// Create the new sub template context.
