@@ -3,13 +3,15 @@
 ===========================
 
 
-* store: convert map if struct... Provide a function for this.
-* text plugin: auto save content after timeout.
+
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
 
 IMPORTANT
 =========
+* store: convert map if struct... Provide a function for this.
+* text plugin: auto save content after timeout.
+* Edit mode: If multiple users are in edit mode, ask all other sessions before save, to confirm save.
 * Template parse: return an error if an ID for ex.: plugins is used multiple times! This is not allowed. Try testing this by declaring text plugins with the same ID.
 * Add a bulldoze init hook for packages.
 * Implement utils.SendMail and send the registration mail...
