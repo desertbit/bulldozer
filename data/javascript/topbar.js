@@ -20,12 +20,6 @@ Bulldozer.fn.topbar = new function () {
     	}
 
 		$("body").css("margin-top", space);
-
-		$("*").filter(function() {
-			return $(this).css("position") === "fixed"
-				&& $(this).attr("id") !== "bulldozer-topbar"
-				&& $(this).attr("id") !== "bulldozer-loading-indicator"
-				&& $(this).attr("id") !== "bulldozer-connection-lost";
-		}).css("margin-top", space);
+		$(".bulldozer-topbar-auto-move").css("margin-top", space);
     };
 };
