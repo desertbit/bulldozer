@@ -14,7 +14,6 @@ Bulldozer.fn.socket = new function () {
      */
 
     var reconnectAttempts = 3;
-    var sendQueue = [];
 
     var SocketKey = {
         Task: "tsk"
@@ -33,11 +32,13 @@ Bulldozer.fn.socket = new function () {
      * Private Variables
      */
 
-    var documentReady = false;
-    var socket;
-    var sid, instanceID, token;
-    var timeoutConnectionLost = false;
-    var reconnectCount = 0;
+    var documentReady = false,
+        socket,
+        sid, instanceID, token,
+        timeoutConnectionLost = false,
+        reconnectCount = 0,
+        sendQueue = [],
+        sendQueueTimeout = false;
 
 
 
@@ -56,6 +57,26 @@ Bulldozer.fn.socket = new function () {
             clearTimeout(timeoutConnectionLost);
             timeoutConnectionLost = false;
         }
+    };
+
+    var stopSendQueueTimeout = function() {
+        // Stop the timeout timer
+        if (sendQueueTimeout !== false) {
+            clearTimeout(sendQueueTimeout);
+            sendQueueTimeout = false;
+        }
+    };
+
+    var clearSendQueueOnTimeout = function() {
+        stopSendQueueTimeout();
+
+        sendQueueTimeout = setTimeout(function () {
+            // Update the flag.
+            sendQueueTimeout = false;
+
+            // Clear the queue.
+            sendQueue = [];
+        }, 6000);
     };
 
     var resetConnectionLostTimeout = function() {
@@ -280,6 +301,9 @@ Bulldozer.fn.socket = new function () {
                     return;
                 }
 
+                // Stop the send queue clear timeout.
+                stopSendQueueTimeout();
+
                 // Send data, which could not be send...
                 var l = sendQueue.length;
                 for (var i = 0; i < l; i++) {
@@ -319,6 +343,9 @@ Bulldozer.fn.socket = new function () {
         if (Bulldozer.connectionLost.connectionLost()) {
             // Add the data to the queue.
             sendQueue.push(str);
+
+            // Clear the send queue after a timeout.
+            clearSendQueueOnTimeout();
 
             // Reconnect.
             Bulldozer.socket.reconnect();

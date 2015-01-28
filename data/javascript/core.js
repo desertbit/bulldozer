@@ -312,6 +312,10 @@ Bulldozer.fn.core = new function () {
         globalServerEvents[key] = func;
     };
 
+    this.clearGlobalServerEvents = function () {
+        globalServerEvents = {};
+    };
+
     this.emitGlobalServerEvent = function (key) {
         // Get the function
         func = globalServerEvents[key];

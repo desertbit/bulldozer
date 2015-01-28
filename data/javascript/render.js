@@ -55,8 +55,9 @@ Bulldozer.fn.render = new function () {
         // Trigger the unload event
         Bulldozer.core.execJsUnload(domId);
 
-        // Replace the template body with the new template body
-        obj.replaceWith(body);
+        // Remove all the data attached to the object
+        // and replace the template body with the new template body
+        obj.removeData().replaceWith(body);
 
         // Execute the kepler init method to apply all new kepler changes
         Kepler.init();
@@ -67,6 +68,9 @@ Bulldozer.fn.render = new function () {
     this.page = function (body, title, url) {
         // Trigger the global js unload event
         $(document).triggerHandler('bulldozer.execJsUnload');
+
+        // Clear all global server events.
+        Bulldozer.core.clearGlobalServerEvents();
 
         var blzBody = $("#bulldozer-body");
 
