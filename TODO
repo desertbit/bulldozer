@@ -2,12 +2,9 @@
 === Bulldozer TODO List ===
 ===========================
 
-* store. refresh page if out-of-date on reconnect.
-* store: check if locks are still valid after socket reconnect!
-* store: convert map if struct...
-* End edit mode: timeout to get all peending event calls!
+
+* store: convert map if struct... Provide a function for this.
 * text plugin: auto save content after timeout.
-* a disconnected session in edit mode holding a store lock has to recheck if the lock is still there on reconnect!
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
 

@@ -6,6 +6,10 @@
 			<i class="fa fa-close"></i>
 			<span>{{tr "blz.topbar.stopEditMode"}}</span>
 		</a></li>
+		<li><a id="{{id "save"}}">
+			<i class="fa fa-save"></i>
+			<span>{{tr "blz.topbar.saveChanges"}}</span>
+		</a></li>
 	</ul>
 {{else}}
 	<ul class="bulldozer-left-menu">
@@ -43,7 +47,13 @@
 	});
 	$("#{{id "stopEdit"}}").click(function() {
 		Bulldozer.loadingIndicator.show();
-		{{emit StopEdit()}}
+		setTimeout(function() {
+			{{emit StopEdit()}}
+		}, 2000);
+	});
+	$("#{{id "save"}}").click(function() {
+		Bulldozer.loadingIndicator.show();
+		{{emit SaveChanges()}}
 	});
 	$("#{{id "logout"}}").click(function() {
 		{{emit Logout()}}

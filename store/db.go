@@ -157,6 +157,54 @@ func dbUpdateStore(s *dbStore, vars ...bool) error {
 	return nil
 }
 
+func dbHasTemporaryChanges() (bool, error) {
+	// Get all changes.
+	rows, err := r.Table(dbTmpStoreTable).Run(db.Session)
+	if err != nil {
+		return false, fmt.Errorf("failed to get temporary store state: %v", err)
+	}
+
+	return !rows.IsNil(), nil
+}
+
+func dbSaveTemporaryChanges() error {
+	// TODO: Merge this into one ReQL command if possible.
+
+	// Get all changes.
+	rows, err := r.Table(dbTmpStoreTable).Run(db.Session)
+	if err != nil {
+		return fmt.Errorf("failed to get temporary store changes: %v", err)
+	}
+
+	// Return if nothing was found.
+	if rows.IsNil() {
+		return nil
+	}
+
+	// Assert
+	var stores []*dbStore
+	err = rows.All(&stores)
+	if err != nil {
+		return fmt.Errorf("failed to get temporary store changes: %v", err)
+	}
+
+	// Insert all temporary stores to the production table.
+	_, err = r.Table(dbStoreTable).Insert(&stores, r.InsertOpts{
+		Conflict: "update",
+	}).RunWrite(db.Session)
+	if err != nil {
+		return fmt.Errorf("failed to save temporary store changes: %v", err)
+	}
+
+	// Remove all temporary changes on success.
+	_, err = r.Table(dbTmpStoreTable).Delete().Run(db.Session)
+	if err != nil {
+		return fmt.Errorf("failed to remove temporary store changes: %v", err)
+	}
+
+	return nil
+}
+
 // dbGetStoreInfo retrieves the store info from the database.
 func dbGetStoreInfo(storeID string) (*dbStoreInfo, error) {
 	rows, err := r.Table(dbStoreInfoTable).Get(storeID).Run(db.Session)

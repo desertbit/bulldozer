@@ -60,7 +60,12 @@ $bulldozer_topbar_sub_menu_color: #444444;
 			padding: 0;
 			margin: 0;
 			border-left: solid 1px $bulldozer_topbar_split_color;
+	
 
+			&:last-child {
+				border-right: solid 1px $bulldozer_topbar_split_color;
+			}	
+			
 			i {
 				font-size: 1em;
 			}
@@ -132,6 +137,10 @@ $bulldozer_topbar_sub_menu_color: #444444;
 
 					a, span {
 						color: $bulldozer_topbar_sub_menu_color;
+					}
+
+					&:last-child {
+						border-right: none;
 					}
 
 					&:hover {

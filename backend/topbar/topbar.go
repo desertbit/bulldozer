@@ -10,6 +10,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"code.desertbit.com/bulldozer/bulldozer/store"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"fmt"
 )
@@ -130,4 +131,15 @@ func (e *events) EventStopEdit(c *template.Context) {
 
 	// Stop the edit mode.
 	editmode.Stop(s)
+}
+
+func (e *events) EventSaveChanges(c *template.Context) {
+	// Get the session pointer.
+	s := c.Session()
+
+	// Hide the loading indicator on return.
+	defer s.HideLoadingIndicator()
+
+	// Stop the edit mode.
+	store.SaveTemporaryChanges(s)
 }

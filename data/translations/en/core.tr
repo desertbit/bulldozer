@@ -1,9 +1,18 @@
 {"ID": "blz.core.noscript.text", "Text": "This page requires JavaScript to run properly. Please enable JavaScript to continue."}
-
 {"ID": "blz.core.connectionLost.title", "Text": "Connection lost."}
 {"ID": "blz.core.connectionLost.text", "Text": "Please reconnect to the internet and click here to retry."}
-
 {"ID": "blz.core.exitMessage", "Text": "Do you really want to leave this page?"}
+
 
 {"ID": "blz.core.sessionOutOfSyncTitle", "Text": "Out of sync"}
 {"ID": "blz.core.sessionOutOfSyncText", "Text": "Some changes from other users could not be syncronized! This page was reloaded to get the last changes."}
+{"ID": "blz.core.saveChangesTitle", "Text": "Save Changes"}
+{"ID": "blz.core.saveChangesText", "Text": "Do you want to save all changes you have made?"}
+{"ID": "blz.core.saveFailedTitle", "Text": "Error"}
+{"ID": "blz.core.saveFailedText", "Text": "Failed to save changes! Please contact the site administrator."}
+{"ID": "blz.core.nothingToSaveTitle", "Text": "No changes"}
+{"ID": "blz.core.nothingToSaveText", "Text": "There is nothing to save."}
+{"ID": "blz.core.objectsLockedTitle", "Text": "Locked"}
+{"ID": "blz.core.objectsLockedText", "Text": "Page objects are still locked. Please close all open dialogs. Other users might also still work on this page..."}
+{"ID": "blz.core.successSaveTitle", "Text": "Success"}
+{"ID": "blz.core.successSaveText", "Text": "Successfully saved changes!"}

@@ -2,3 +2,4 @@
 {"ID": "blz.topbar.controlPanel", "Text": "Control Panel"}
 {"ID": "blz.topbar.startEditMode", "Text": "Edit"}
 {"ID": "blz.topbar.stopEditMode", "Text": "Finish"}
+{"ID": "blz.topbar.saveChanges", "Text": "Save"}

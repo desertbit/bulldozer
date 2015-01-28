@@ -26,6 +26,8 @@ const (
 	// Value keys.
 	clientKeyStoreState        = "blzStoreState"
 	contextValueKeyStorePrefix = "blzStore_"
+
+	saveTemporaryChangesCallback = "blzSaveTmpChanges"
 )
 
 var (
@@ -69,6 +71,9 @@ func Init(b bulldozerBackend) error {
 	// Attach the event listeners.
 	editmode.OnNewSession(onNewEditModeSession)
 	editmode.OnSessionReconnect(onEditModeSessionReconnect)
+
+	// Register the messagebox callback.
+	messagebox.RegisterCallback(saveTemporaryChangesCallback, saveTemporaryChanges)
 
 	// Initialize the database.
 	err := initDB()
@@ -328,9 +333,89 @@ func Delete(c *template.Context) error {
 	return nil
 }
 
+func SaveTemporaryChanges(s *sessions.Session) {
+	// Check if there are temporary changes to save.
+	hasChanges, err := dbHasTemporaryChanges()
+	if err != nil {
+		// Show a messagebox.
+		messagebox.New().
+			SetTitle(tr.S("blz.core.saveFailedTitle")).
+			SetText(tr.S("blz.core.saveFailedText")).
+			SetType(messagebox.TypeAlert).
+			Show(s)
+		return
+	} else if !hasChanges {
+		// Show a messagebox.
+		messagebox.New().
+			SetTitle(tr.S("blz.core.nothingToSaveTitle")).
+			SetText(tr.S("blz.core.nothingToSaveText")).
+			SetType(messagebox.TypeInfo).
+			Show(s)
+		return
+	}
+
+	// Show a messagebox to continue.
+	messagebox.New().
+		SetTitle(tr.S("blz.core.saveChangesTitle")).
+		SetText(tr.S("blz.core.saveChangesText")).
+		SetType(messagebox.TypeQuestion).
+		SetButtons(messagebox.ButtonYes | messagebox.ButtonNo).
+		SetCallback(saveTemporaryChangesCallback).
+		Show(s)
+}
+
 //###############//
 //### Private ###//
 //###############//
+
+func saveTemporaryChanges(s *sessions.Session, b messagebox.Button) {
+	if b != messagebox.ButtonYes {
+		return
+	}
+
+	// Check if anything is
+	locks, err := dbGetLocks()
+	if err != nil {
+		log.L.Error("failed to get all locks: %v", err)
+
+		// Show a messagebox.
+		messagebox.New().
+			SetTitle(tr.S("blz.core.saveFailedTitle")).
+			SetText(tr.S("blz.core.saveFailedText")).
+			SetType(messagebox.TypeAlert).
+			Show(s)
+		return
+	} else if len(locks) > 0 {
+		// Show a messagebox.
+		messagebox.New().
+			SetTitle(tr.S("blz.core.objectsLockedTitle")).
+			SetText(tr.S("blz.core.objectsLockedText")).
+			SetType(messagebox.TypeWarning).
+			Show(s)
+		return
+	}
+
+	// Save all temporary changes
+	err = dbSaveTemporaryChanges()
+	if err != nil {
+		log.L.Error("failed to save temporary changes: %v", err)
+
+		// Show a messagebox.
+		messagebox.New().
+			SetTitle(tr.S("blz.core.saveFailedTitle")).
+			SetText(tr.S("blz.core.saveFailedText")).
+			SetType(messagebox.TypeAlert).
+			Show(s)
+		return
+	}
+
+	// Show a success messagebox.
+	messagebox.New().
+		SetTitle(tr.S("blz.core.successSaveTitle")).
+		SetText(tr.S("blz.core.successSaveText")).
+		SetType(messagebox.TypeSuccess).
+		Show(s)
+}
 
 // getStore returns the store for the current context.
 // This operation is thread-safe.

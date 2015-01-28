@@ -42,7 +42,7 @@ const (
 
 type Button int
 type MessageBoxType int
-type Callback func(button Button)
+type Callback func(s *sessions.Session, button Button)
 
 type MessageBox struct {
 	title          string
@@ -112,12 +112,12 @@ func (r *receiver) EventButtonClicked(c *template.Context, b int) {
 	case string:
 		// Assert and call the callback.
 		name := i.(string)
-		callback.Call(name, Button(b))
+		callback.Call(name, s, Button(b))
 	case Callback:
 		// Assert and call the callback.
 		cb := i.(Callback)
 		if cb != nil {
-			cb(Button(b))
+			cb(s, Button(b))
 		}
 	default:
 		log.L.Error("messagebox: failed to get messagebox callback for id: '%s': unkown callback type!", c.ID())
