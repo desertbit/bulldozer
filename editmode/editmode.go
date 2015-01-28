@@ -103,6 +103,12 @@ func IsActive(s *sessions.Session) bool {
 	return active
 }
 
+// HasActiveSessions returns a boolean if there are
+// active sessions in the edit mode.
+func HasActiveSessions() bool {
+	return len(activeSessions) > 0
+}
+
 // GetSessions returns a slice of all active edit mode sessions.
 func GetSessions() []*sessions.Session {
 	// Lock the mutex.

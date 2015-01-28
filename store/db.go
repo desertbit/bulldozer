@@ -156,7 +156,7 @@ func dbGetLocks() (l []*dbLockData, err error) {
 		return nil, nil
 	}
 
-	err = rows.All(l)
+	err = rows.All(&l)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all locks from database: %v", err)
 	}

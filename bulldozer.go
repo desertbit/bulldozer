@@ -203,6 +203,7 @@ func release() {
 	sessions.Release()
 	tr.Release()
 	auth.Release()
+	store.Release()
 
 	// Close the database
 	database.Close()
