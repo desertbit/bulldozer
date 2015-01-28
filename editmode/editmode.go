@@ -28,7 +28,7 @@ var (
 
 func init() {
 	// Attach the event listener.
-	sessions.OnNewSession(onNewSession)
+	sessions.OnNewSession(onNewSessionFunc)
 }
 
 //###################################//
@@ -62,7 +62,7 @@ func Start(s *sessions.Session) {
 	s.SetExitMessage(tr.S("blz.core.exitMessage"))
 
 	// Add the session to the active sessions.
-	addSession(s)
+	addSession(s, true)
 
 	// Reload the current page.
 	backend.ReloadPage(s)
@@ -131,7 +131,7 @@ func GetSessions() []*sessions.Session {
 //### Private ###//
 //###############//
 
-func addSession(s *sessions.Session) {
+func addSession(s *sessions.Session, triggerEvent bool) {
 	// Remove the session if closed from the map.
 	s.OnClose(removeSession)
 
@@ -141,6 +141,11 @@ func addSession(s *sessions.Session) {
 
 	// Add the session to the map.
 	activeSessions[s.SessionID()] = s
+
+	if triggerEvent {
+		// Trigger the event.
+		triggerOnNewSession(s)
+	}
 }
 
 func removeSession(s *sessions.Session) {
@@ -153,14 +158,20 @@ func removeSession(s *sessions.Session) {
 
 	// Remove the session from the map.
 	delete(activeSessions, s.SessionID())
+
+	// Trigger the event.
+	triggerOnRemoveSession(s)
 }
 
-func onNewSession(s *sessions.Session) {
+func onNewSessionFunc(s *sessions.Session) {
 	// Skip if no edit mode is active.
 	if !IsActive(s) {
 		return
 	}
 
 	// Readd the session to the active session map.
-	addSession(s)
+	addSession(s, false)
+
+	// Trigger the event.
+	triggerOnSessionReconnect(s)
 }

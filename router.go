@@ -15,13 +15,15 @@ import (
 	"fmt"
 )
 
-var (
-	mainRouter *router.Router = router.New()
-
+const (
 	valueKeyCurrentPath = "blzCurrentPath"
 
 	requestTypeRoute = "route"
 	keyRoutePath     = "path"
+)
+
+var (
+	mainRouter *router.Router = router.New()
 )
 
 func init() {

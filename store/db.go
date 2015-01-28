@@ -10,10 +10,12 @@ import (
 	r "github.com/dancannon/gorethink"
 
 	"fmt"
+	"time"
 )
 
 const (
 	dbStoreTable     = "store"
+	dbStoreInfoTable = "store_info"
 	dbTmpStoreTable  = "store_tmp"
 	dbLockStoreTable = "store_lock"
 )
@@ -21,6 +23,11 @@ const (
 //#######################//
 //### Database Struct ###//
 //#######################//
+
+type dbStoreInfo struct {
+	Store      string `gorethink:"id"`
+	LastChange int64
+}
 
 type dbLockData struct {
 	ID    string `gorethink:"id"`
@@ -65,6 +72,12 @@ func (s *dbStore) createMapIfNil() {
 func initDB() error {
 	// Create the store table.
 	err := db.CreateTableIfNotExists(dbStoreTable)
+	if err != nil {
+		return err
+	}
+
+	// Create the temporary store table.
+	err = db.CreateTableIfNotExists(dbStoreInfoTable)
 	if err != nil {
 		return err
 	}
@@ -142,6 +155,47 @@ func dbUpdateStore(s *dbStore, vars ...bool) error {
 	}
 
 	return nil
+}
+
+// dbGetStoreInfo retrieves the store info from the database.
+func dbGetStoreInfo(storeID string) (*dbStoreInfo, error) {
+	rows, err := r.Table(dbStoreInfoTable).Get(storeID).Run(db.Session)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get store info from database: %v", err)
+	}
+
+	// Check if nothing was found.
+	if rows.IsNil() {
+		return nil, nil
+	}
+
+	var s dbStoreInfo
+	err = rows.One(&s)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get store info from database: %v", err)
+	}
+
+	return &s, nil
+}
+
+func dbUpdateStoreInfoLastChanged(storeID string) (int64, error) {
+	// Create a new timestamp.
+	timestamp := time.Now().Unix()
+
+	// Create the store info value.
+	info := dbStoreInfo{
+		Store:      storeID,
+		LastChange: timestamp,
+	}
+
+	_, err := r.Table(dbStoreInfoTable).
+		Insert(&info, r.InsertOpts{Conflict: "update"}).
+		RunWrite(db.Session)
+	if err != nil {
+		return -1, err
+	}
+
+	return timestamp, nil
 }
 
 // dbGetLocks retrieves all locked IDs from the database.

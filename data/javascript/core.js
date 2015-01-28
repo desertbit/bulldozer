@@ -318,7 +318,7 @@ Bulldozer.fn.core = new function () {
 
     this.emitGlobalServerEvent = function (key) {
         // Get the function
-        func = globalServerEvents[key];
+        var func = globalServerEvents[key];
         if (!func) {
             console.log("emitGlobalServerEvent: event with key '" + key + "' does not exists!");
             return;

@@ -135,7 +135,7 @@ func Init() {
 	}
 
 	// Initialize the store package.
-	if err = store.Init(); err != nil {
+	if err = store.Init(backend); err != nil {
 		log.L.Fatal(err)
 	}
 

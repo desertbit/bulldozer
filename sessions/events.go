@@ -1,13 +1,13 @@
 /*
- *  Goji Framework
- *  Copyright (C) Roland Singer
+ *  Bulldozer Framework
+ *  Copyright (C) DesertBit
  */
 
 package sessions
 
 import (
-	"github.com/chuckpreslar/emission"
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"github.com/chuckpreslar/emission"
 )
 
 const (

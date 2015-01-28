@@ -4,3 +4,6 @@
 {"ID": "blz.core.connectionLost.text", "Text": "Please reconnect to the internet and click here to retry."}
 
 {"ID": "blz.core.exitMessage", "Text": "Do you really want to leave this page?"}
+
+{"ID": "blz.core.sessionOutOfSyncTitle", "Text": "Out of sync"}
+{"ID": "blz.core.sessionOutOfSyncText", "Text": "Some changes from other users could not be syncronized! This page was reloaded to get the last changes."}

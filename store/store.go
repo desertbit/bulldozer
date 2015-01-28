@@ -6,11 +6,15 @@
 package store
 
 import (
+	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+
 	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
 	"fmt"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -19,29 +23,38 @@ const (
 	cleanupLocksTimeout            = 30 * time.Second
 	removeExpiredLocksAfterTimeout = 10 * time.Second
 
-	// Context Execution keys.
+	// Value keys.
+	clientKeyStoreState        = "blzStoreState"
 	contextValueKeyStorePrefix = "blzStore_"
 )
 
 var (
+	backend bulldozerBackend
+
 	lockMutex            sync.Mutex
 	stopCleanupLocksLoop chan struct{} = make(chan struct{})
 )
+
+//###################################//
+//### Bulldozer backend interface ###//
+//###################################//
+
+type bulldozerBackend interface {
+	ReloadPage(s *sessions.Session)
+}
 
 //##################//
 //### Store type ###//
 //##################//
 
 type store struct {
-	data           *dbStore
-	mutex          sync.Mutex
-	editModeActive bool
+	data  *dbStore
+	mutex sync.Mutex
 }
 
 func newStore(data *dbStore) *store {
 	return &store{
-		data:           data,
-		editModeActive: false,
+		data: data,
 	}
 }
 
@@ -49,7 +62,14 @@ func newStore(data *dbStore) *store {
 //### Public ###//
 //##############//
 
-func Init() error {
+func Init(b bulldozerBackend) error {
+	// Set the backend.
+	backend = b
+
+	// Attach the event listeners.
+	editmode.OnNewSession(onNewEditModeSession)
+	editmode.OnSessionReconnect(onEditModeSessionReconnect)
+
 	// Initialize the database.
 	err := initDB()
 	if err != nil {
@@ -96,7 +116,7 @@ func Lock(c *template.Context) bool {
 	}
 
 	// Broadcast changes to other sessions in edit mode.
-	go broadcastChangedContext(id, session)
+	broadcastChangedContext(id, session)
 
 	return true
 }
@@ -130,7 +150,7 @@ func Unlock(c *template.Context) {
 	}
 
 	// Broadcast changes to other sessions in edit mode.
-	go broadcastChangedContext(id, session)
+	broadcastChangedContext(id, session)
 }
 
 // IsLocked returns a boolean whenever the context is
@@ -221,7 +241,7 @@ func Get(c *template.Context, vars ...func() interface{}) (interface{}, bool, er
 		}
 
 		// Broadcast changes to other sessions in edit mode.
-		go broadcastChangedContext(id, c.Session())
+		broadcastChangedContext(id, c.Session())
 
 		return value, true, nil
 	}
@@ -263,7 +283,7 @@ func Set(c *template.Context, value interface{}) error {
 	}
 
 	// Broadcast changes to other sessions in edit mode.
-	go broadcastChangedContext(id, c.Session())
+	broadcastChangedContext(id, c.Session())
 
 	return nil
 }
@@ -303,7 +323,7 @@ func Delete(c *template.Context) error {
 	}
 
 	// Broadcast changes to other sessions in edit mode.
-	go broadcastChangedContext(id, c.Session())
+	broadcastChangedContext(id, c.Session())
 
 	return nil
 }
@@ -352,9 +372,6 @@ func getStore(c *template.Context) (st *store, err error) {
 		// Create a new store value.
 		s := newStore(data)
 
-		// Set the flags.
-		s.editModeActive = editModeActive
-
 		return s
 	})
 
@@ -363,8 +380,8 @@ func getStore(c *template.Context) (st *store, err error) {
 }
 
 func flushUpdatesToDB(s *store) error {
-	// Update the store in the database.
-	err := dbUpdateStore(s.data, s.editModeActive)
+	// Update the temporary store in the database.
+	err := dbUpdateStore(s.data, true)
 	if err != nil {
 		return fmt.Errorf("failed to update the store data to the database: %v", err)
 	}
@@ -373,44 +390,112 @@ func flushUpdatesToDB(s *store) error {
 }
 
 func broadcastChangedContext(contextID string, currentSession ...*sessions.Session) {
+	// Update the last changed timestamp.
+	timestamp, err := dbUpdateStoreInfoLastChanged(dbTmpStoreTable)
+	if err != nil {
+		log.L.Error("failed to update session store information in database: %v", err)
+		return
+	}
+
 	// Get the session ID of the current session if passed.
 	var curSid string
 	if len(currentSession) > 0 {
 		curSid = currentSession[0].SessionID()
 	}
 
-	// Get all sessions which are in the edit mode.
-	activeSessions := editmode.GetSessions()
+	// Start this in a new go-routine. Don't block any calling mutexes...
+	go func() {
+		// Get all sessions which are in the edit mode.
+		activeSessions := editmode.GetSessions()
 
-	var err error
-	for _, s := range activeSessions {
-		// Skip if this is the current session.
-		if s.SessionID() == curSid {
-			continue
-		}
+		for _, s := range activeSessions {
+			// Update the store state in the client values.
+			// This way, we can detect, if a session is out-of-sync on reconnect.
+			s.ClientSet(clientKeyStoreState, strconv.FormatInt(timestamp, 10))
 
-		// Get the context store of the session.
-		store := template.GetSessionContextStore(s)
-		if store == nil {
-			log.L.Error("failed to update session context with ID '%s': failed to get context store!", contextID)
-			// TODO: log error and refresh the sessions page!
-			continue
-		}
+			// Skip if this is the current session.
+			if s.SessionID() == curSid {
+				continue
+			}
 
-		cc, ok := store.Get(contextID)
-		if !ok {
-			log.L.Error("failed to update session context with ID '%s': failed to get context!", contextID)
-			// TODO: log error and refresh the sessions page!
-			continue
-		}
+			// Recover panics and log the error message.
+			defer func() {
+				if e := recover(); e != nil {
+					log.L.Warning("update session context with ID '%s': panic: %v", contextID, e)
+				}
+			}()
 
-		err = cc.Update()
-		if err != nil {
-			log.L.Error("failed to update session context with ID '%s': %v", contextID, err)
-			// TODO: log error and refresh the sessions page!
-			continue
+			// Get the context store of the session.
+			store := template.GetSessionContextStore(s)
+			if store == nil {
+				log.L.Warning("failed to update session context with ID '%s': failed to get context store!", contextID)
+				sessionOutOfSync(s)
+				return
+			}
+
+			cc, ok := store.Get(contextID)
+			if !ok {
+				log.L.Warning("failed to update session context with ID '%s': failed to get context!", contextID)
+				sessionOutOfSync(s)
+				return
+			}
+
+			err = cc.Update()
+			if err != nil {
+				log.L.Warning("failed to update session context with ID '%s': %v", contextID, err)
+				sessionOutOfSync(s)
+				return
+			}
 		}
+	}()
+}
+
+func onNewEditModeSession(s *sessions.Session) {
+	// Get the store info.
+	info, err := dbGetStoreInfo(dbTmpStoreTable)
+	if err != nil {
+		log.L.Error("store on new edit mode session: %v", err)
+		return
+	} else if info == nil {
+		// No info data present.
+		return
 	}
+
+	// Update the store state in the client values.
+	// This way, we can detect, if a session is out-of-sync on reconnect.
+	s.ClientSet(clientKeyStoreState, strconv.FormatInt(info.LastChange, 10))
+}
+
+func onEditModeSessionReconnect(s *sessions.Session) {
+	// Get the store info.
+	info, err := dbGetStoreInfo(dbTmpStoreTable)
+	if err != nil {
+		log.L.Error("store on edit mode session reconnect: %v", err)
+		return
+	} else if info == nil {
+		// No info data present.
+		return
+	}
+
+	// Get the session store state.
+	s.ClientGet(clientKeyStoreState, func(data string) {
+		// Check if the session state is out of sync.
+		if data != strconv.FormatInt(info.LastChange, 10) {
+			sessionOutOfSync(s)
+		}
+	})
+}
+
+func sessionOutOfSync(s *sessions.Session) {
+	// Reload the page to get in sync again.
+	backend.ReloadPage(s)
+
+	// Show a messagebox
+	messagebox.New().
+		SetTitle(tr.S("blz.core.sessionOutOfSyncTitle")).
+		SetText(tr.S("blz.core.sessionOutOfSyncText")).
+		SetType(messagebox.TypeWarning).
+		Show(s)
 }
 
 func cleanupLocksLoop() {
@@ -500,6 +585,6 @@ func cleanupLocks() {
 		dbUnlock(lock.ID)
 
 		// Broadcast changes to other sessions in edit mode.
-		go broadcastChangedContext(lock.ID)
+		broadcastChangedContext(lock.ID)
 	}
 }

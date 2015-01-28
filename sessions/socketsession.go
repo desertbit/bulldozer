@@ -151,6 +151,13 @@ func (ss *socketSession) onClose() {
 }
 
 func (ss *socketSession) onRead(data string) {
+	// Recover panics and log the error message.
+	defer func() {
+		if e := recover(); e != nil {
+			log.L.Error("socket session: panic: %v", e)
+		}
+	}()
+
 	// Create a data map from the received message
 	m := getDataMap(data)
 
