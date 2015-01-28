@@ -76,7 +76,7 @@ Bulldozer.fn.socket = new function () {
 
             // Show the connection lost widget.
             Bulldozer.connectionLost.show();
-        }, 40000);
+        }, 60000);
     };
 
     var handleReceivedData = function(data) {

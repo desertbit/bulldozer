@@ -6,6 +6,9 @@
 package text
 
 const templateText = `{{if #.EditModeActive}}
+{{if %.store.IsBlocked}}
+	<div class="bulldozer_blocked_border">{{#.Text}}</div>
+{{else}}
 	<div id="{{id "text"}}" data-kepler-popover="#{{id "pop"}}" data-kepler-popover-options="placement:auto top;">{{#.Text}}</div>
 	<div id="{{id "pop"}}" class="kepler popover radius shadow bulldozer_popover">
 		<a id="{{id "edit"}}">
@@ -94,4 +97,5 @@ const templateText = `{{if #.EditModeActive}}
 			Kepler.popover.close("#{{id "pop"}}");
 		{{end event}}
 	{{end js}}
+{{end}}
 {{else}}{{#.Text}}{{end}}`

@@ -75,6 +75,9 @@ func Lock(c *template.Context) bool {
 		return false
 	}
 
+	// Broadcast changes to other sessions in edit mode.
+	go broadcastChangedContext(c)
+
 	return true
 }
 
@@ -104,6 +107,9 @@ func Unlock(c *template.Context) {
 		log.L.Error("store: failed to unlock context: %v", err)
 		return
 	}
+
+	// Broadcast changes to other sessions in edit mode.
+	go broadcastChangedContext(c)
 }
 
 // IsLocked returns a boolean whenever the context is
@@ -122,6 +128,27 @@ func IsLocked(c *template.Context) bool {
 	if err != nil {
 		log.L.Error("store: failed to get lock state: %v", err)
 		return false
+	}
+
+	return locked
+}
+
+// IsLockedByAnotherSession returns a boolean whenever the context is
+// locked by another session.
+// This operation is thread-safe.
+func IsLockedByAnotherSession(c *template.Context) bool {
+	id := c.ID()
+	instanceID := c.Session().InstanceID()
+
+	// Lock the mutex.
+	lockMutex.Lock()
+	defer lockMutex.Unlock()
+
+	// Check if locked by the current session.
+	locked, err := dbIsLockedByAnotherValue(id, instanceID)
+	if err != nil {
+		log.L.Error("store: failed to get lock state: %v", err)
+		return true
 	}
 
 	return locked
@@ -173,7 +200,7 @@ func Get(c *template.Context, vars ...func() interface{}) (interface{}, bool, er
 		}
 
 		// Broadcast changes to other sessions in edit mode.
-		broadcastChangedContext(c)
+		go broadcastChangedContext(c)
 
 		return value, true, nil
 	}
@@ -213,7 +240,7 @@ func Set(c *template.Context, value interface{}) error {
 	}
 
 	// Broadcast changes to other sessions in edit mode.
-	broadcastChangedContext(c)
+	go broadcastChangedContext(c)
 
 	return nil
 }
@@ -251,7 +278,7 @@ func Delete(c *template.Context) error {
 	}
 
 	// Broadcast changes to other sessions in edit mode.
-	broadcastChangedContext(c)
+	go broadcastChangedContext(c)
 
 	return nil
 }
@@ -340,19 +367,21 @@ func broadcastChangedContext(c *template.Context) {
 		// Get the context store of the session.
 		store := template.GetSessionContextStore(s)
 		if store == nil {
+			log.L.Error("failed to update session context with ID '%s': failed to get context store!", id)
 			// TODO: log error and refresh the sessions page!
 			continue
 		}
 
 		cc, ok := store.Get(id)
 		if !ok {
+			log.L.Error("failed to update session context with ID '%s': failed to get context!", id)
 			// TODO: log error and refresh the sessions page!
 			continue
 		}
 
 		err = cc.Update()
 		if err != nil {
-			log.L.Error("failed to update context with ID '%s': %v", id, err)
+			log.L.Error("failed to update session context with ID '%s': %v", id, err)
 			// TODO: log error and refresh the sessions page!
 			continue
 		}

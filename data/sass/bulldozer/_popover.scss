@@ -74,3 +74,11 @@
 	outline-width: 1px;
 	outline-color: #ED4715;
 }
+
+.bulldozer_blocked_border,
+.bulldozer_blocked_border:hover {
+	outline-style: solid;
+	outline-width: 2px;
+	outline-color: #FF4646;
+	cursor: not-allowed;
+}
