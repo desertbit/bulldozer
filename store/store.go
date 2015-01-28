@@ -8,7 +8,6 @@ package store
 import (
 	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"fmt"
 	"sync"
@@ -20,8 +19,7 @@ const (
 )
 
 var (
-	lockedContextIDs      map[string]string = make(map[string]string)
-	lockedContextIDsMutex sync.Mutex
+	lockMutex sync.Mutex
 )
 
 //##################//
@@ -32,14 +30,12 @@ type store struct {
 	data           *dbStore
 	mutex          sync.Mutex
 	editModeActive bool
-	existsInDB     bool
 }
 
 func newStore(data *dbStore) *store {
 	return &store{
 		data:           data,
 		editModeActive: false,
-		existsInDB:     false,
 	}
 }
 
@@ -57,30 +53,27 @@ func Init() error {
 // This operation is thread-safe.
 func Lock(c *template.Context) bool {
 	id := c.ID()
-	currentSid := c.Session().SessionID()
+	instanceID := c.Session().InstanceID()
 
 	// Lock the mutex.
-	lockedContextIDsMutex.Lock()
-	defer lockedContextIDsMutex.Unlock()
+	lockMutex.Lock()
+	defer lockMutex.Unlock()
 
 	// Check if already locked by another session.
-	sid, ok := lockedContextIDs[id]
-	if ok {
-		// Check if already locked by the current session.
-		if sid == currentSid {
-			return true
-		}
-
-		// Check if the session which is holding the lock
-		// is still active. Otherwise just take over the lock.
-		_, ok = sessions.GetSession(sid)
-		if ok {
-			return false
-		}
+	locked, err := dbIsLockedByAnotherValue(id, instanceID)
+	if err != nil {
+		log.L.Error("store: failed to lock context: %v", err)
+		return false
+	} else if locked {
+		return false
 	}
 
 	// Lock the context ID for the current session.
-	lockedContextIDs[id] = currentSid
+	err = dbLock(id, instanceID)
+	if err != nil {
+		log.L.Error("store: failed to lock context: %v", err)
+		return false
+	}
 
 	return true
 }
@@ -89,23 +82,27 @@ func Lock(c *template.Context) bool {
 // This operation is thread-safe.
 func Unlock(c *template.Context) {
 	id := c.ID()
-	currentSid := c.Session().SessionID()
+	instanceID := c.Session().InstanceID()
 
 	// Lock the mutex.
-	lockedContextIDsMutex.Lock()
-	defer lockedContextIDsMutex.Unlock()
+	lockMutex.Lock()
+	defer lockMutex.Unlock()
 
-	// Get the locked session ID.
-	sid, ok := lockedContextIDs[id]
-	if ok {
-		// Check if locked by the current session.
-		if sid != currentSid {
-			log.L.Error("store: failed to unlock store cotext: the calling session is not the session which holds the lock!")
-			return
-		}
+	// Check if locked by another session.
+	locked, err := dbIsLockedByAnotherValue(id, instanceID)
+	if err != nil {
+		log.L.Error("store: failed to unlock context: %v", err)
+		return
+	} else if locked {
+		log.L.Error("store: failed to unlock store context: the calling session is not the session which holds the lock!")
+		return
+	}
 
-		// Unlock the lock.
-		delete(lockedContextIDs, id)
+	// Unlock the lock.
+	err = dbUnlock(id)
+	if err != nil {
+		log.L.Error("store: failed to unlock context: %v", err)
+		return
 	}
 }
 
@@ -113,18 +110,21 @@ func Unlock(c *template.Context) {
 // locked by the current session.
 // This operation is thread-safe.
 func IsLocked(c *template.Context) bool {
+	id := c.ID()
+	instanceID := c.Session().InstanceID()
+
 	// Lock the mutex.
-	lockedContextIDsMutex.Lock()
-	defer lockedContextIDsMutex.Unlock()
+	lockMutex.Lock()
+	defer lockMutex.Unlock()
 
 	// Check if locked by the current session.
-	sid, ok := lockedContextIDs[c.ID()]
-	if !ok {
+	locked, err := dbIsLocked(id, instanceID)
+	if err != nil {
+		log.L.Error("store: failed to get lock state: %v", err)
 		return false
 	}
 
-	// The locked session ID has to match.
-	return sid == c.Session().SessionID()
+	return locked
 }
 
 // Get obtains the store value for the context.
@@ -289,14 +289,12 @@ func getStore(c *template.Context) (st *store, err error) {
 
 		// The store was not found in the context
 		// execution values. Obtain it...
-		existsInDB := true
 		data, err := dbGetStore(id, editModeActive)
 		if err != nil {
 			panic(err)
 		} else if data == nil {
 			// Create a new db store.
 			data = newDBStore(id)
-			existsInDB = false
 		}
 
 		// Create a new store value.
@@ -304,7 +302,6 @@ func getStore(c *template.Context) (st *store, err error) {
 
 		// Set the flags.
 		s.editModeActive = editModeActive
-		s.existsInDB = existsInDB
 
 		return s
 	})
@@ -314,21 +311,10 @@ func getStore(c *template.Context) (st *store, err error) {
 }
 
 func flushUpdatesToDB(s *store) error {
-	if s.existsInDB {
-		// Update the store in the database.
-		err := dbUpdateStore(s.data, s.editModeActive)
-		if err != nil {
-			return fmt.Errorf("failed to update the store data to the database: %v", err)
-		}
-	} else {
-		// Insert the store to the database.
-		err := dbInsertStore(s.data, s.editModeActive)
-		if err != nil {
-			return fmt.Errorf("failed to insert the store data to the database: %v", err)
-		}
-
-		// Update the flag.
-		s.existsInDB = true
+	// Update the store in the database.
+	err := dbUpdateStore(s.data, s.editModeActive)
+	if err != nil {
+		return fmt.Errorf("failed to update the store data to the database: %v", err)
 	}
 
 	return nil

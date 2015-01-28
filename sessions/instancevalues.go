@@ -8,8 +8,8 @@ package sessions
 import (
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
+	"github.com/satori/go.uuid"
 	"sync"
 	"time"
 )
@@ -122,29 +122,9 @@ func (s *Session) InstanceDelete(key interface{}) {
 //### Private ###//
 //###############//
 
-func newUniqueInstanceID(s *Session) (id string) {
-	// Get the session instances.
-	ii := getInstances(s)
-
-	// Lock the mutex.
-	ii.mutex.Lock()
-	defer ii.mutex.Unlock()
-
-	// Obtain a new unique instance Id
-	for {
-		// Get a new instance ID
-		id = utils.RandomString(instanceIDLength)
-
-		// Check if the ID is already present.
-		// This is very unlikely, but we have to check this!
-		_, ok := ii.Set[id]
-		if !ok {
-			// Break the loop if the ID is unique
-			break
-		}
-	}
-
-	return
+func newUniqueInstanceID(s *Session) string {
+	// Creating UUID Version 4.
+	return uuid.NewV4().String()
 }
 
 func getInstance(s *Session) *instance {

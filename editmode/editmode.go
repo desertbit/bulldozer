@@ -26,6 +26,11 @@ var (
 	activeSessionsMutex sync.Mutex
 )
 
+func init() {
+	// Attach the event listener.
+	sessions.OnNewSession(onNewSession)
+}
+
 //###################################//
 //### Bulldozer backend interface ###//
 //###################################//
@@ -142,4 +147,14 @@ func removeSession(s *sessions.Session) {
 
 	// Remove the session from the map.
 	delete(activeSessions, s.SessionID())
+}
+
+func onNewSession(s *sessions.Session) {
+	// Skip if no edit mode is active.
+	if !IsActive(s) {
+		return
+	}
+
+	// Readd the session to the active session map.
+	addSession(s)
 }

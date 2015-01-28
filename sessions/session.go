@@ -26,7 +26,6 @@ const (
 	cleanupInstancesCount     = maxInstancesPerSession / 1.5
 
 	sessionIDLength         = 15
-	instanceIDLength        = 15
 	socketAccessTokenLength = 40
 	domEncryptionKeyLength  = 40
 
@@ -464,7 +463,7 @@ func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, s
 	if len(vars) > 0 {
 		s.instanceID = vars[0]
 	}
-	if len(s.instanceID) != instanceIDLength {
+	if len(s.instanceID) == 0 {
 		s.instanceID = newUniqueInstanceID(s)
 	}
 

@@ -2,6 +2,7 @@
 === Bulldozer TODO List ===
 ===========================
 
+* store: check if locks are still valid after socket reconnect!
 * store: convert map if struct...
 * End edit mode: timeout to get all peending event calls!
 * text plugin: auto save content after timeout.

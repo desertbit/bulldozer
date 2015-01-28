@@ -7,4 +7,4 @@
 {"ID": "blz.plugin.text.error.alreadyLockedTitle", "Text": "Already Locked"}
 {"ID": "blz.plugin.text.error.alreadyLockedText", "Text": "The object is currently being edited by another user!"}
 {"ID": "blz.plugin.text.error.saveChangesTitle", "Text": "Error"}
-{"ID": "blz.plugin.text.error.saveChangesText", "Text": "Failed to save your changes! Please contact the site administrator!"}
+{"ID": "blz.plugin.text.error.saveChangesText", "Text": "Failed to save your changes! It might be locked by another user."}
