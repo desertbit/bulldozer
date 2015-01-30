@@ -73,7 +73,8 @@ func init() {
 		ListenAddress:     ":9000",
 		ServeFiles:        true,
 
-		DatabaseAddress:     "localhost:28015",
+		DatabaseAddr:        "localhost",
+		DatabasePort:        "28015",
 		DatabaseName:        "test",
 		DatabaseMaxIdle:     50,
 		DatabaseMaxActive:   50,
@@ -273,8 +274,9 @@ type settings struct {
 	ListenAddress string
 	ServeFiles    bool
 
-	DatabaseAddress string
-	DatabaseName    string
+	DatabaseAddr string
+	DatabasePort string
+	DatabaseName string
 
 	// Maximum number of idle connections in the pool.
 	DatabaseMaxIdle int

@@ -21,9 +21,12 @@ var (
 //##############//
 
 func Connect() (err error) {
+	// Create the database address string.
+	addr := settings.Settings.DatabaseAddr + ":" + settings.Settings.DatabasePort
+
 	// Connext to the database server.
 	Session, err = r.Connect(r.ConnectOpts{
-		Address:     settings.Settings.DatabaseAddress,
+		Address:     addr,
 		Database:    settings.Settings.DatabaseName,
 		MaxIdle:     settings.Settings.DatabaseMaxIdle,
 		MaxActive:   settings.Settings.DatabaseMaxActive,
