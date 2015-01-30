@@ -16,6 +16,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/store"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
+	"strings"
 )
 
 const (
@@ -24,6 +25,8 @@ const (
 
 	ckEditorBaseUrl   = settings.UrlBulldozerResources + "libs/ckeditor/"
 	ckEditorScriptUrl = ckEditorBaseUrl + "ckeditor.js"
+
+	emptyTextPlaceholder = "<p><br></p>"
 )
 
 func init() {
@@ -125,6 +128,11 @@ func (p *Plugin) EventUnlock(c *template.Context) {
 }
 
 func (p *Plugin) EventSetText(c *template.Context, text string) {
+	// Set the empty text placeholder if the text is empty.
+	if len(strings.TrimSpace(text)) == 0 {
+		text = emptyTextPlaceholder
+	}
+
 	err := store.Set(c, text)
 	if err != nil {
 		// Log the error.

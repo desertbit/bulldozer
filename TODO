@@ -3,15 +3,14 @@
 ===========================
 
 
-
+* Server database backups
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
 
 IMPORTANT
 =========
 * implement discard option in edit mode.
-* store: convert map if struct... Provide a function for this.
-* text plugin: auto save content after timeout.
+* store: convert map if struct... Provide a function for this.s
 * Edit mode: If multiple users are in edit mode, ask all other sessions before save, to confirm save.
 * Implement store backup.
 * Template parse: return an error if an ID for ex.: plugins is used multiple times! This is not allowed. Try testing this by declaring text plugins with the same ID.
@@ -93,6 +92,7 @@ BULLDOZE
 
 Features
 ========
+* Move automatic created files (compiled SASS files) to a separate directory, not in the project folder. This way, we could make the complete project folder read-only in production mode.
 * Reload dialog templates automatically on file changes if loaded with dialog.ParseFile.
 * Add optional arg to template.Glob to load recursive templates.
 * Add a template js load which does not wait for the socket connection?

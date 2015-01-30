@@ -62,8 +62,7 @@ const templateText = `{{if #.EditModeActive}}
 							{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
 							{ name: 'paragraph',   groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
 							{ name: 'styles' },
-							{ name: 'colors' },
-							{ name: 'about' }
+							{ name: 'colors' }
 						],
 						removeButtons: 'Underline,Subscript,Superscript'
 					{{/*{{else if $.IsModeMinimal}}
@@ -78,14 +77,20 @@ const templateText = `{{if #.EditModeActive}}
 				});
 
 				el.data("ckeditor", editor);
-				
-				editor.on("blur", function(e) {
+
+				editor.on("change", Kepler.utils.throttle(function() {
+					if (el.data("isActive")) {
+						{{emit SetText(editor.getData())}}
+					}
+				}, 5000));
+
+				editor.on("blur", function() {
+					el.data("isActive", false);
 					$("#{{id "text"}}").attr("contenteditable", "false")
 						.addClass("bulldozer_click_to_edit_hover_border")
 						.removeClass("bulldozer_text_plugin_edit_border");
-					{{emit SetText(e.editor.getData())}}
-					$(e.editor).data("focusManagerLocked", true);
-					e.editor.focusManager.lock();
+					{{emit SetText(editor.getData())}}
+					editor.focusManager.lock();
 					{{emit Unlock()}}
 				});
 			}
@@ -94,6 +99,7 @@ const templateText = `{{if #.EditModeActive}}
 				editor.focus();
 			}
 
+			el.data("isActive", true);
 			Kepler.popover.close("#{{id "pop"}}");
 		{{end event}}
 	{{end js}}
