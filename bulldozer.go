@@ -104,8 +104,8 @@ func Init() {
 		}
 	}
 
-	// Check if the settings are valid
-	err = settings.Check()
+	// Prepare the settings.
+	err = settings.Prepare()
 	if err != nil {
 		log.L.Fatal(err)
 	}

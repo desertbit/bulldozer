@@ -10,6 +10,10 @@
 			<i class="fa fa-save"></i>
 			<span>{{tr "blz.topbar.saveChanges"}}</span>
 		</a></li>
+		{{/*<li><a id="{{id "discard"}}">
+			<i class="fa fa-trash-o"></i>
+			<span>{{tr "blz.topbar.discardChanges"}}</span>
+		</a></li>*/}}
 	</ul>
 {{else}}
 	<ul class="bulldozer-left-menu">
@@ -54,6 +58,10 @@
 	$("#{{id "save"}}").click(function() {
 		Bulldozer.loadingIndicator.show();
 		{{emit SaveChanges()}}
+	});
+	$("#{{id "discard"}}").click(function() {
+		Bulldozer.loadingIndicator.show();
+		{{emit DiscardChanges()}}
 	});
 	$("#{{id "logout"}}").click(function() {
 		{{emit Logout()}}

@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -24,6 +25,10 @@ const (
 	ScssSuffix     = ".scss"
 
 	DefaultSettingsFileName = "settings.toml"
+
+	// If this prefix is set to string values, then
+	// the value is obtained from the environment variables.
+	ParseEnvVarPrefix = "ENV:"
 
 	// The socket types
 	TypeTcpSocket  SocketType = 1 << iota
@@ -142,8 +147,38 @@ func init() {
 //### Public ###//
 //##############//
 
-// Check checks if the settings are correct and valid
-func Check() error {
+// Prepare checks if the settings are correct and valid and initializes some values.
+func Prepare() error {
+	// Get environment variable values if the environment prefix is set on struct field strings.
+	s := reflect.ValueOf(&Settings).Elem()
+	for x := 0; x < s.NumField(); x++ {
+		f := s.Field(x)
+
+		if !f.CanSet() || f.Kind() != reflect.String {
+			continue
+		}
+
+		// Get the struct field string value.
+		v := f.String()
+
+		// Skip if no environment prefix is set.
+		if !strings.HasPrefix(v, ParseEnvVarPrefix) {
+			continue
+		}
+
+		// Remove the prefix.
+		v = strings.TrimPrefix(v, ParseEnvVarPrefix)
+
+		// Get the value from the environment variable.
+		envV := os.Getenv(v)
+		if len(envV) == 0 {
+			log.L.Warning("settings environment variable '%s' is not set!", v)
+		}
+
+		// Set the new value.
+		f.SetString(envV)
+	}
+
 	// Check if the Site url is valid
 	if !strings.HasPrefix(Settings.SiteUrl, "http://") &&
 		!strings.HasPrefix(Settings.SiteUrl, "https://") {

@@ -140,6 +140,17 @@ func (e *events) EventSaveChanges(c *template.Context) {
 	// Hide the loading indicator on return.
 	defer s.HideLoadingIndicator()
 
-	// Stop the edit mode.
+	// Save all temporary changes.
 	store.SaveTemporaryChanges(s)
+}
+
+func (e *events) EventDiscardChanges(c *template.Context) {
+	// Get the session pointer.
+	s := c.Session()
+
+	// Hide the loading indicator on return.
+	defer s.HideLoadingIndicator()
+
+	// Remove all temporary changes.
+	//store.DiscardTemporaryChanges(s)
 }

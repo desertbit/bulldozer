@@ -3,3 +3,4 @@
 {"ID": "blz.topbar.startEditMode", "Text": "Edit"}
 {"ID": "blz.topbar.stopEditMode", "Text": "Finish"}
 {"ID": "blz.topbar.saveChanges", "Text": "Save"}
+{"ID": "blz.topbar.discardChanges", "Text": "Discard"}

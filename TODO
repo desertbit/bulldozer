@@ -9,6 +9,7 @@
 
 IMPORTANT
 =========
+* implement discard option in edit mode.
 * store: convert map if struct... Provide a function for this.
 * text plugin: auto save content after timeout.
 * Edit mode: If multiple users are in edit mode, ask all other sessions before save, to confirm save.
@@ -75,6 +76,7 @@ Session & Socket
 
 General
 =======
+* Check for not more used and old store values. (Deleted IDs...)
 * Check if bulldoze is rebuilding the app if a directory is removed from the source folder.
 * Add the site administrators e-mail to the error page.
 * Add a bulldoze parameter to manually copy desired core templates to the project folder, so they can be edited.
