@@ -82,6 +82,7 @@ General
 * Add a bulldoze parameter to manually copy desired core templates to the project folder, so they can be edited.
 * Log sass build errors to a gui page...
 * Do some performance testing to check for bottlenecks (session store?)
+* logging: add an option to log to a file.
 
 
 

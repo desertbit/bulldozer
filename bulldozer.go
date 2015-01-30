@@ -27,6 +27,7 @@ import (
 	"os/signal"
 	"runtime"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -72,7 +73,7 @@ func Init() {
 		go func() {
 			// Wait for the signal
 			sigchan := make(chan os.Signal, 10)
-			signal.Notify(sigchan, os.Interrupt)
+			signal.Notify(sigchan, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGKILL)
 			<-sigchan
 
 			fmt.Println("Exiting...")
