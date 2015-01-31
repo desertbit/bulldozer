@@ -89,11 +89,11 @@ $loading-secondary-color: #eee;
             transform: rotate(0deg);
          }
          to {
-            -webkit-transform: rotate(559deg);
-            -moz-transform: rotate(559deg);
-            -o-transform: rotate(559deg);
-            -ms-transform: rotate(559deg);
-            transform: rotate(559deg);
+            -webkit-transform: rotate(360deg);
+            -moz-transform: rotate(360deg);
+            -o-transform: rotate(360deg);
+            -ms-transform: rotate(360deg);
+            transform: rotate(360deg);
          }
         }
 
@@ -103,8 +103,8 @@ $loading-secondary-color: #eee;
            transform: rotate(0deg);
          }
          to {
-           -moz-transform: rotate(559deg);
-           transform: rotate(559deg);
+           -moz-transform: rotate(360deg);
+           transform: rotate(360deg);
          }
         }
 
@@ -114,8 +114,8 @@ $loading-secondary-color: #eee;
            transform: rotate(0deg);
          }
          to {
-           -webkit-transform: rotate(559deg);
-           transform: rotate(559deg);
+           -webkit-transform: rotate(360deg);
+           transform: rotate(360deg);
          }
         }
 
@@ -125,8 +125,8 @@ $loading-secondary-color: #eee;
            transform: rotate(0deg);
          }
          to {
-           -ms-transform: rotate(559deg);
-           transform: rotate(559deg);
+           -ms-transform: rotate(360deg);
+           transform: rotate(360deg);
          }
         }
 
@@ -136,8 +136,8 @@ $loading-secondary-color: #eee;
            transform: rotate(0deg);
          }
          to {
-           -o-transform: rotate(559deg);
-           transform: rotate(559deg);
+           -o-transform: rotate(360deg);
+           transform: rotate(360deg);
          }
         }
     }
