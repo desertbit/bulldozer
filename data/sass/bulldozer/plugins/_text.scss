@@ -10,5 +10,6 @@
 }
 
 .bulldozer_text_plugin_edit {
-	overflow: auto;
+	// Prevent collapsible margins.
+	overflow: hidden;
 }
