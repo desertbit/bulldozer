@@ -6,6 +6,7 @@
 * Server database backups
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
+* CaptchaCode
 
 IMPORTANT
 =========
@@ -77,6 +78,7 @@ Session & Socket
 
 General
 =======
+* Check if the browser is supported.
 * Check for not more used and old store values. (Deleted IDs...)
 * Check if bulldoze is rebuilding the app if a directory is removed from the source folder.
 * Add the site administrators e-mail to the error page.

@@ -130,11 +130,6 @@ func Init() {
 		log.L.Fatal(err)
 	}
 
-	// Load the templates.
-	if err = loadTemplates(); err != nil {
-		log.L.Fatal(err)
-	}
-
 	// Initialize the store package.
 	if err = store.Init(backend); err != nil {
 		log.L.Fatal(err)
@@ -152,6 +147,16 @@ func Init() {
 
 	// Initialize the topbar package.
 	if err = topbar.Init(); err != nil {
+		log.L.Fatal(err)
+	}
+
+	// Call the init hooks.
+	if err = triggerOnInit(); err != nil {
+		log.L.Fatalf("init hook error: %v", err)
+	}
+
+	// Load the templates.
+	if err = loadTemplates(); err != nil {
 		log.L.Fatal(err)
 	}
 

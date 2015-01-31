@@ -7,9 +7,9 @@ package tr
 
 import (
 	"bufio"
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"encoding/json"
 	"fmt"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"io"
 	"io/ioutil"
 	"os"
@@ -210,12 +210,20 @@ func _reload() {
 
 	// Go through all directories
 	for _, d := range directories {
-		// Skip if the base translation directory is empty
+		// Skip if the base translation directory contains no directories.
 		entries, err := ioutil.ReadDir(d)
 		if err != nil {
 			log.L.Error("failed to obtain entry list of directory '%s': %v", d, err)
 			continue
-		} else if len(entries) == 0 {
+		}
+		empty := true
+		for _, e := range entries {
+			if e.IsDir() {
+				empty = false
+				break
+			}
+		}
+		if empty {
 			continue
 		}
 
