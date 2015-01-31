@@ -120,14 +120,18 @@ Kepler.utils = {
         return this;
     },
 
-    // Center an element vertical with the top and bottom margin
-    centerElementVerticalMargin : function(el, container) {
+    // Center an element vertical with the top and bottom margin.
+    // If a callback function is passed, then this is executed,
+    // if the element does not fit into the container.
+    centerElementVerticalMargin : function(el, container, cb) {
         var elHeight = el.height();
         var containerHeight = container.height();
 
         // Only position if the element is smaller than the container
         if (elHeight <= containerHeight) {
             el.css("margin-top",(containerHeight - elHeight)/2 + 'px');
+        } else if (cb) {
+            cb(el)
         }
 
         return this;
@@ -1155,7 +1159,13 @@ Kepler.module.modal = new function() {
 		}
 
         // Center the element
-        Kepler.utils.centerElementVerticalMargin(modalObj, backdrop);
+        Kepler.utils.centerElementVerticalMargin(modalObj, backdrop, function() {
+            // The element is bigger than the backdrop.
+            // Scroll to the top as soon as the modal is shown.
+            modalObj.one("kepler.modal.opened", function() {
+               modalObj.parent().scrollTop(0);
+            });
+        });
 
         // Set the new z-index by incrementing the global z-index
         var zIndex;

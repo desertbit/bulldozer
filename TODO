@@ -24,6 +24,8 @@ IMPORTANT
   -> grep -R "Bulldozer.core.loadPage" ./
   -> grep -R "Bulldozer.core.loadDefaultPage" ./
 * Remove old removed $.DialogId...
+* editable popovers: make the popover styles non changeable from the project styles.
+* Kepler modal no scrollbars bug: open the imprint dialog, close it, save changes and reopen the imrpint dialog. the scrollbars are gone.
 
 
 STYLE

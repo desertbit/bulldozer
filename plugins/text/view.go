@@ -20,6 +20,11 @@ const templateText = `{{if #.EditModeActive}}
 		$("#{{id "text"}}").attr("contenteditable", "false")
 			.addClass('bulldozer_click_to_edit_hover_border');
 
+		$("#{{$.Context.DomID}}").click(function(e) {
+		    e.stopPropagation();
+		    return false;
+		});
+
 		Kepler.popover.openRequested("#{{id "pop"}}", function() {
 			return !($("#{{id "text"}}").hasClass("bulldozer_text_plugin_edit_border"));
 		});
