@@ -48,7 +48,7 @@ const templateText = `{{if #.EditModeActive}}
 			if(!editor){
 				editor = CKEDITOR.inline("{{id "text"}}",{
 					startupFocus: true,
-					{{/*{{if $.IsModeFull}}*/}}
+					{{if eq #.Mode "` + ModeFull + `"}}
 						toolbarGroups: [
 							{ name: 'clipboard',   groups: [ 'clipboard', 'undo' ] },
 							{ name: 'editing',     groups: [ 'find', 'selection', 'spellchecker' ] },
@@ -65,7 +65,7 @@ const templateText = `{{if #.EditModeActive}}
 							{ name: 'colors' }
 						],
 						removeButtons: 'Underline,Subscript,Superscript'
-					{{/*{{else if $.IsModeMinimal}}
+					{{else}}
 						toolbar: [
 						    [ 'Bold', 'Italic', 'Underline', 'Strike', '-', 'Link', 'Unlink' ],
 						    [ 'TextColor', 'BGColor' ],
@@ -73,7 +73,7 @@ const templateText = `{{if #.EditModeActive}}
 						    [ 'Undo', 'Redo' ],
 						    [ 'Cut', 'Copy', 'Paste' ]
 						]
-					{{end}}*/}}
+					{{end}}
 				});
 
 				el.data("ckeditor", editor);

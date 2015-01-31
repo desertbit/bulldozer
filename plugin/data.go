@@ -52,7 +52,7 @@ func (d *Data) Section() interface{} {
 }
 
 // Args returns the plugin template arguments.
-func (d *Data) Args() interface{} {
+func (d *Data) Args() Args {
 	return d.data.Args
 }
 

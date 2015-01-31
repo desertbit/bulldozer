@@ -16,6 +16,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/store"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
+	"fmt"
 	"strings"
 )
 
@@ -29,6 +30,11 @@ const (
 	emptyTextPlaceholder = "<p><br></p>"
 )
 
+const (
+	ModeMinimal = "minimal"
+	ModeFull    = "full"
+)
+
 func init() {
 	// Register the plugin.
 	plugin.MustFatal(plugin.Register(new(Plugin), &plugin.Opts{
@@ -36,6 +42,14 @@ func init() {
 		HasSection: false,
 		RequireID:  true,
 	}))
+}
+
+//#######################//
+//### Plugin Settings ###//
+//#######################//
+
+type Settings struct {
+	Mode string
 }
 
 //##############//
@@ -54,11 +68,38 @@ func (p *Plugin) Initialize() *template.Template {
 }
 
 func (p *Plugin) Prepare(d *plugin.Data) interface{} {
-	// TODO: Parse settings.
-	return nil
+	// Default settings
+	s := &Settings{
+		Mode: ModeMinimal,
+	}
+
+	// Parse the arguments
+	for k, v := range d.Args() {
+		switch k {
+		case "mode":
+			// Set the editor mode
+			v = strings.TrimSpace(v)
+
+			switch v {
+			case ModeFull:
+				s.Mode = ModeFull
+			case ModeMinimal:
+				s.Mode = ModeMinimal
+			default:
+				panic(fmt.Errorf("invalid text plugin mode argument: %s", v))
+			}
+		default:
+			panic(fmt.Errorf(`invalid text plugin argument: %s="%s"`, k, v))
+		}
+	}
+
+	return s
 }
 
 func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
+	// Get the settings.
+	settings := d.Value().(*Settings)
+
 	// Get the session pointer.
 	s := c.Session()
 
@@ -96,9 +137,11 @@ func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
 	return struct {
 		Text           htmlT.HTML
 		EditModeActive bool // We won't use the buildin %.editmode.IsActive function, because we already obtained the state here. This is one method call less...
+		Mode           string
 	}{
 		Text:           htmlT.HTML(text),
 		EditModeActive: editModeActive,
+		Mode:           settings.Mode,
 	}
 }
 
