@@ -9,7 +9,7 @@ const templateText = `{{if #.EditModeActive}}
 {{if %.store.IsBlocked}}
 	<div class="bulldozer_blocked_border">{{#.Text}}</div>
 {{else}}
-	<div id="{{id "text"}}" data-kepler-popover="#{{id "pop"}}" data-kepler-popover-options="placement:auto top;">{{#.Text}}</div>
+	<div id="{{id "text"}}" class="bulldozer_text_plugin_edit" data-kepler-popover="#{{id "pop"}}" data-kepler-popover-options="placement:auto top;">{{#.Text}}</div>
 	<div id="{{id "pop"}}" class="kepler popover radius shadow bulldozer_popover">
 		<a id="{{id "edit"}}">
 			<i class="fa fa-pencil"></i>
@@ -60,19 +60,35 @@ const templateText = `{{if #.EditModeActive}}
 							{ name: 'others' },
 							'/',
 							{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
-							{ name: 'paragraph',   groups: [ 'list', 'indent', 'blocks', 'align', 'bidi' ] },
-							{ name: 'styles' },
+							{ name: 'paragraph',   groups: [ 'list', 'indent', 'blocks' ] },
+							{ name: 'paragraph',   groups: [ 'align', 'bidi' ] },
+							{ name: 'colors' },
+							'/',
+							{ name: 'styles' }
+						],
+						removeButtons: 'Subscript,Superscript'
+					{{else if eq #.Mode "` + ModePlain + `"}}
+						toolbar: [ [ 'Undo', 'Redo' ] ]
+					{{else if eq #.Mode "` + ModeMinimal + `"}}
+						toolbarGroups: [
+							{ name: 'undo' },
+							{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+							{ name: 'paragraph',   groups: [ 'align' ] },
 							{ name: 'colors' }
 						],
-						removeButtons: 'Underline,Subscript,Superscript'
+						removeButtons: 'Subscript,Superscript'
 					{{else}}
-						toolbar: [
-						    [ 'Bold', 'Italic', 'Underline', 'Strike', '-', 'Link', 'Unlink' ],
-						    [ 'TextColor', 'BGColor' ],
-						    [ 'Format' ],
-						    [ 'Undo', 'Redo' ],
-						    [ 'Cut', 'Copy', 'Paste' ]
-						]
+						toolbarGroups: [
+							{ name: 'undo' },
+							{ name: 'links' },
+							{ name: 'basicstyles', groups: [ 'basicstyles', 'cleanup' ] },
+							{ name: 'paragraph',   groups: [ 'align' ] },
+							'/',
+							{ name: 'styles' },
+							{ name: 'colors' },
+							{ name: 'paragraph',   groups: [ 'list', 'blocks' ] }
+						],
+						removeButtons: 'Subscript,Superscript,Font,Styles'
 					{{end}}
 				});
 

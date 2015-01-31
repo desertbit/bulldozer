@@ -35,7 +35,7 @@ func init() {
 //### Public ###//
 //##############//
 
-// New should create and return a new session.
+// New will create and return a new session.
 // This operation is thread-safe.
 func New() (*Session, error) {
 	// Lock the mutex
@@ -68,7 +68,7 @@ func New() (*Session, error) {
 	return s, nil
 }
 
-// Get should return a session fitting to the session ID.
+// Get will return a session fitting to the session ID.
 // This operation is thread-safe.
 func Get(id string) (*Session, error) {
 	// Lock the mutex

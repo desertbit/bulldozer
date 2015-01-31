@@ -31,8 +31,10 @@ const (
 )
 
 const (
-	ModeMinimal = "minimal"
 	ModeFull    = "full"
+	ModeDefault = "default"
+	ModeMinimal = "minimal"
+	ModePlain   = "plain"
 )
 
 func init() {
@@ -70,7 +72,7 @@ func (p *Plugin) Initialize() *template.Template {
 func (p *Plugin) Prepare(d *plugin.Data) interface{} {
 	// Default settings
 	s := &Settings{
-		Mode: ModeMinimal,
+		Mode: ModeDefault,
 	}
 
 	// Parse the arguments
@@ -85,6 +87,10 @@ func (p *Plugin) Prepare(d *plugin.Data) interface{} {
 				s.Mode = ModeFull
 			case ModeMinimal:
 				s.Mode = ModeMinimal
+			case ModePlain:
+				s.Mode = ModePlain
+			case ModeDefault:
+				s.Mode = ModeDefault
 			default:
 				panic(fmt.Errorf("invalid text plugin mode argument: %s", v))
 			}
