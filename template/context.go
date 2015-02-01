@@ -326,6 +326,8 @@ func (c *Context) TriggerEvent(eventName string, params ...interface{}) {
 		switch v := param.(type) {
 		case int:
 			cmd += "," + strconv.Itoa(v)
+		case int64:
+			cmd += "," + strconv.FormatInt(v, 10)
 		case bool:
 			cmd += "," + strconv.FormatBool(v)
 		case string:

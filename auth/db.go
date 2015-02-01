@@ -65,18 +65,20 @@ type dbGroup struct {
 
 func initDB() error {
 	// Create the users table.
-	err := db.CreateTableIfNotExists(dbUserTable, func() {
+	err := db.CreateTableIfNotExists(dbUserTable, func() error {
 		// Create a secondary index on the LoginName attribute.
 		_, err := r.Table(dbUserTable).IndexCreate(dbUserTableIndex).Run(db.Session)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		// Wait for the index to be ready to use.
 		_, err = r.Table(dbUserTable).IndexWait(dbUserTableIndex).Run(db.Session)
 		if err != nil {
-			panic(err)
+			return err
 		}
+
+		return nil
 	})
 	if err != nil {
 		return err

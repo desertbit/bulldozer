@@ -71,7 +71,7 @@ func UUID() (string, error) {
 
 // CreateTableIfNotExists creates the table if it does not exists
 // and calls the function f if passed.
-func CreateTableIfNotExists(tableName string, f ...func()) error {
+func CreateTableIfNotExists(tableName string, f ...func() error) error {
 	// Get a table list.
 	res, err := r.Db(settings.Settings.DatabaseName).TableList().Run(Session)
 	if err != nil {
@@ -99,7 +99,10 @@ func CreateTableIfNotExists(tableName string, f ...func()) error {
 
 	// Call the callback if present
 	if len(f) > 0 {
-		f[0]()
+		err = f[0]()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

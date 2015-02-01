@@ -59,6 +59,7 @@ AUTHENTICATION
 
 SECURITY
 ========
+* Authentication: create a match regexp for usernames and e-mails.
 * Nginx no sniff headers in configuration.
 * Implement better database password hash encryption.
 * Set cookie max age to settings.Settings.SessionMaxAge if authenticated.

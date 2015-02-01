@@ -513,6 +513,14 @@ func sessionRequestEmit(s *sessions.Session, data map[string]string) error {
 			}
 
 			in[funcIndex] = reflect.ValueOf(i)
+		case reflect.Int64:
+			// Convert the string to an 64-bit integer
+			i, err := strconv.ParseInt(param, 10, 64)
+			if err != nil {
+				return fmt.Errorf("invalid emit call from client: domID '%s' key '%s' parameters '%v'", domID, key, params)
+			}
+
+			in[funcIndex] = reflect.ValueOf(i)
 		case reflect.Bool:
 			// Convert the string to a boolean
 			b, err := strconv.ParseBool(param)
