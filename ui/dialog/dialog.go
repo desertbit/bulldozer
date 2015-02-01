@@ -65,25 +65,35 @@ func New(uid string) *Dialog {
 	return d
 }
 
+// AddStyleClass adds one style classes.
+func (d *Dialog) AddStyleClass(class string) *Dialog {
+	d.t.AddStyleClass(class)
+	return d
+}
+
 // Size sets the dialog size specified by a dialog.Size value.
 // The defaut size is SizeMedium.
-func (d *Dialog) SetSize(size Size) {
+func (d *Dialog) SetSize(size Size) *Dialog {
 	d.size = size
+	return d
 }
 
 // Whenever the modal is closable with a backdrop click or x button
-func (d *Dialog) SetClosable(closable bool) {
+func (d *Dialog) SetClosable(closable bool) *Dialog {
 	d.closable = closable
+	return d
 }
 
 // RegisterEvents is the same as template.RegisterEvents...
-func (d *Dialog) RegisterEvents(i interface{}, vars ...string) {
+func (d *Dialog) RegisterEvents(i interface{}, vars ...string) *Dialog {
 	d.t.RegisterEvents(i, vars...)
+	return d
 }
 
 // OnGetData is the same as template.OnGetData...
-func (d *Dialog) OnGetData(f template.GetDataFunc) {
+func (d *Dialog) OnGetData(f template.GetDataFunc) *Dialog {
 	d.t.OnGetData(f)
+	return d
 }
 
 // ParseFile parses a template file.
