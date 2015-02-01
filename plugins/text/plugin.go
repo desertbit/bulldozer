@@ -158,6 +158,9 @@ func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
 func (p *Plugin) EventLock(c *template.Context) {
 	// Lock the context.
 	if !store.Lock(c) {
+		// Notify the client.
+		c.TriggerEvent("lockFailed")
+
 		// Show a messagebox.
 		messagebox.New().
 			SetTitle(tr.S("blz.plugin.text.error.alreadyLockedTitle")).
@@ -166,9 +169,6 @@ func (p *Plugin) EventLock(c *template.Context) {
 			Show(c.Session())
 		return
 	}
-
-	// Start editing.
-	c.TriggerEvent("edit")
 }
 
 func (p *Plugin) EventUnlock(c *template.Context) {

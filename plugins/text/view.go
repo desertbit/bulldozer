@@ -9,13 +9,7 @@ const templateText = `{{if #.EditModeActive}}
 {{if %.store.IsBlocked}}
 	<div class="bulldozer_blocked_border">{{#.Text}}</div>
 {{else}}
-	<div id="{{id "text"}}" class="bulldozer_text_plugin_edit" data-kepler-popover="#{{id "pop"}}" data-kepler-popover-options="placement:auto top;">{{#.Text}}</div>
-	<div id="{{id "pop"}}" class="kepler popover radius shadow bulldozer_popover">
-		<a id="{{id "edit"}}">
-			<i class="fa fa-pencil"></i>
-			<span>{{tr "blz.plugin.text.edit"}}</span>
-		</a>
-	</div>
+	<div id="{{id "text"}}" class="bulldozer_text_plugin_edit">{{#.Text}}</div>
 	{{js load}}
 		$("#{{id "text"}}").attr("contenteditable", "false")
 			.addClass('bulldozer_click_to_edit_hover_border');
@@ -25,23 +19,7 @@ const templateText = `{{if #.EditModeActive}}
 		    return false;
 		});
 
-		Kepler.popover.openRequested("#{{id "pop"}}", function() {
-			return !($("#{{id "text"}}").hasClass("bulldozer_text_plugin_edit_border"));
-		});
-
-		Kepler.popover.opened("#{{id "pop"}}", function() {
-			$("#{{id "text"}}").addClass("bulldozer_click_to_edit_border");
-		});
-
-		Kepler.popover.closed("#{{id "pop"}}", function() {
-			$("#{{id "text"}}").removeClass("bulldozer_click_to_edit_border");
-		});
-
-		$("#{{id "edit"}}").click(function() {
-			{{emit Lock()}}
-		});
-
-		{{event edit()}}
+		$("#{{id "text"}}").click(function() {
 			var el = $("#{{id "text"}}");
 
 			el.attr("contenteditable", "true")
@@ -99,29 +77,50 @@ const templateText = `{{if #.EditModeActive}}
 
 				el.data("ckeditor", editor);
 
+				var updateText = function() {
+					if (editor.checkDirty()) {
+						{{emit SetText(editor.getData())}}
+						editor.resetDirty();
+					}
+				};
+
 				editor.on("change", Kepler.utils.throttle(function() {
 					if (el.data("isActive")) {
-						{{emit SetText(editor.getData())}}
+						updateText();
 					}
 				}, 5000));
+
+				editor.on("focus", function() {
+					{{emit Lock()}}
+				});
 
 				editor.on("blur", function() {
 					el.data("isActive", false);
 					$("#{{id "text"}}").attr("contenteditable", "false")
 						.addClass("bulldozer_click_to_edit_hover_border")
 						.removeClass("bulldozer_text_plugin_edit_border");
-					{{emit SetText(editor.getData())}}
-					editor.focusManager.lock();
+					if (el.data("lockFailed")) {return;}
+					updateText();
 					{{emit Unlock()}}
 				});
 			}
 			else {
-				editor.focusManager.unlock();
 				editor.focus();
+				editor;
 			}
 
 			el.data("isActive", true);
-			Kepler.popover.close("#{{id "pop"}}");
+		});
+
+		{{event lockFailed()}}
+			var el = $("#{{id "text"}}");
+			el.data("lockFailed", true);
+			setTimeout(function() {
+				el.data("lockFailed", false);
+			}, 1000);
+			var editor = $("#{{id "text"}}").data("ckeditor");
+			if (!editor) {return;}
+			editor.focusManager.blur();
 		{{end event}}
 	{{end js}}
 {{end}}

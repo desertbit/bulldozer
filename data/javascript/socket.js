@@ -136,7 +136,12 @@ Bulldozer.fn.socket = new function () {
 
             // Execute the received javascript code if not empty
             if (data) {
-                jQuery.globalEval(data);
+                try {
+                    jQuery.globalEval(data);
+                }
+                catch(err) {
+                    console.log("failed to execute request: " + err.message);
+                }  
             }
         }
     };

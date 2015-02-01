@@ -302,9 +302,14 @@ Bulldozer.fn.core = new function () {
             return;
         }
 
-        // Get the arguments and call the function
-        var args = Array.prototype.slice.call(arguments, 2);
-        func.apply(el, args);
+        // Get the arguments and call the function.
+        try {
+            var args = Array.prototype.slice.call(arguments, 2);
+            func.apply(el, args);
+        }
+        catch(err) {
+            console.log("execute server event error: " + err.message);
+        }
     };
 
     this.addGlobalServerEvent = function (key, func) {
@@ -325,7 +330,12 @@ Bulldozer.fn.core = new function () {
         }
 
         // Get the arguments and call the function
-        var args = Array.prototype.slice.call(arguments, 1);
-        func.apply(document, args);
+        try {
+            var args = Array.prototype.slice.call(arguments, 1);
+            func.apply(document, args);
+        }
+        catch(err) {
+            console.log("execute global server event error: " + err.message);
+        }
     };
 };
