@@ -154,7 +154,7 @@ func (tp *templatePlugin) getTemplateData(c *template.Context, vars ...*Data) in
 		data = vars[0]
 	} else {
 		var err error
-		data, err = getDataFromContext(c)
+		data, err = GetData(c)
 		if err != nil {
 			return err
 		}

@@ -110,7 +110,7 @@ func (t *Template) RegisterEvents(i interface{}, vars ...string) *Template {
 		// Add the method to the events
 		if overwritten := events.Set(name, e); overwritten {
 			// Print a warning message.
-			log.L.Error("template: RegisterEvents: overwritting event function: '%s.%s'!", namespace, name)
+			log.L.Error("template '%s': RegisterEvents: overwritting event function: '%s.%s'!", t.Name(), namespace, name)
 		}
 
 		// Set the flag
@@ -118,7 +118,7 @@ func (t *Template) RegisterEvents(i interface{}, vars ...string) *Template {
 	}
 
 	if noMethods {
-		log.L.Warning("template: RegisterEvents: registered interface event methods, but no event methods where found!")
+		log.L.Warning("template '%s': RegisterEvents: registered interface event methods, but no event methods where found!", t.Name())
 	}
 
 	return t

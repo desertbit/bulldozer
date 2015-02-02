@@ -2,6 +2,8 @@
 ##  Bulldozer Settings
 ##
 
+# SiteUrl="http://your-site"
+
 # StaticStyleSheets = [ "public/css/style_1.css", "public/css/style_2.css" ]
 # StaticJavaScripts = [ "public/js/script_1.js", "public/js/script_2.js" ]
 

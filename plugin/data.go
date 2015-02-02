@@ -90,16 +90,13 @@ func (d *Data) prepareValue(vars ...Plugin) error {
 	return nil
 }
 
-//###############//
-//### Private ###//
-//###############//
+//##############//
+//### Public ###//
+//##############//
 
-func setDataToContext(c *template.Context, data *Data) {
-	// Save the plugin store data to the context store.
-	c.StoreSet(contextStoreKeyData, data.data)
-}
-
-func getDataFromContext(c *template.Context) (*Data, error) {
+// GetData obtains the plugin data from the context.
+// The context has to be a plugin context.
+func GetData(c *template.Context) (*Data, error) {
 	// Get the plugin store data from the context store.
 	i, ok := c.StoreGet(contextStoreKeyData)
 	if !ok {
@@ -124,4 +121,13 @@ func getDataFromContext(c *template.Context) (*Data, error) {
 	}
 
 	return data, nil
+}
+
+//###############//
+//### Private ###//
+//###############//
+
+func setDataToContext(c *template.Context, data *Data) {
+	// Save the plugin store data to the context store.
+	c.StoreSet(contextStoreKeyData, data.data)
 }

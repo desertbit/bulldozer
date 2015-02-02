@@ -20,6 +20,10 @@ const (
 	dbLockStoreTable = "store_lock"
 )
 
+func init() {
+	db.OnSetup(setupDB)
+}
+
 //#######################//
 //### Database Struct ###//
 //#######################//
@@ -69,27 +73,9 @@ func (s *dbStore) createMapIfNil() {
 //### Private ###//
 //###############//
 
-func initDB() error {
-	// Create the store table.
-	err := db.CreateTableIfNotExists(dbStoreTable)
-	if err != nil {
-		return err
-	}
-
-	// Create the temporary store table.
-	err = db.CreateTableIfNotExists(dbStoreInfoTable)
-	if err != nil {
-		return err
-	}
-
-	// Create the temporary store table.
-	err = db.CreateTableIfNotExists(dbTmpStoreTable)
-	if err != nil {
-		return err
-	}
-
-	// Create the temporary store table.
-	err = db.CreateTableIfNotExists(dbLockStoreTable)
+func setupDB() error {
+	// Create the tables.
+	err := db.CreateTables(dbStoreTable, dbStoreInfoTable, dbTmpStoreTable, dbLockStoreTable)
 	if err != nil {
 		return err
 	}

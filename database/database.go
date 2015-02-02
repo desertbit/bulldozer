@@ -33,7 +33,7 @@ func Connect() (err error) {
 		IdleTimeout: settings.Settings.DatabaseIdleTimeout,
 	})
 	if err != nil {
-		return
+		return fmt.Errorf("failed to connect to database: %v", err)
 	}
 
 	return
@@ -69,6 +69,23 @@ func UUID() (string, error) {
 	return id, nil
 }
 
+func CreateTables(tableNames ...string) (err error) {
+	for _, t := range tableNames {
+		err = CreateTable(t)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func CreateTable(tableName string) (err error) {
+	// Create the table.
+	_, err = r.Db(settings.Settings.DatabaseName).TableCreate(tableName).RunWrite(Session)
+	return
+}
+
 // CreateTableIfNotExists creates the table if it does not exists
 // and calls the function f if passed.
 func CreateTableIfNotExists(tableName string, f ...func() error) error {
@@ -92,7 +109,7 @@ func CreateTableIfNotExists(tableName string, f ...func() error) error {
 	}
 
 	// Create the table.
-	_, err = r.Db(settings.Settings.DatabaseName).TableCreate(tableName).RunWrite(Session)
+	err = CreateTable(tableName)
 	if err != nil {
 		return err
 	}

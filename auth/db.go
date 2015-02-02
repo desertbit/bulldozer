@@ -38,6 +38,11 @@ var (
 	stopCleanupLoop chan struct{} = make(chan struct{})
 )
 
+func init() {
+	db.OnSetup(setupDB)
+	db.OnCreateIndexes(createIndexes)
+}
+
 //########################//
 //### Database Structs ###//
 //########################//
@@ -63,37 +68,41 @@ type dbGroup struct {
 //### Private Methods ###//
 //#######################//
 
-func initDB() error {
+func setupDB() error {
 	// Create the users table.
-	err := db.CreateTableIfNotExists(dbUserTable, func() error {
-		// Create a secondary index on the LoginName attribute.
-		_, err := r.Table(dbUserTable).IndexCreate(dbUserTableIndex).Run(db.Session)
-		if err != nil {
-			return err
-		}
-
-		// Wait for the index to be ready to use.
-		_, err = r.Table(dbUserTable).IndexWait(dbUserTableIndex).Run(db.Session)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	})
+	err := db.CreateTable(dbUserTable)
 	if err != nil {
 		return err
 	}
 
 	// Create the groups table.
-	err = db.CreateTableIfNotExists(dbGroupTable)
+	err = db.CreateTable(dbGroupTable)
 	if err != nil {
 		return err
 	}
 
-	// Start the cleanup loop in a new goroutine.
-	go cleanupLoop()
+	return nil
+}
+
+func createIndexes() error {
+	// Create a secondary index on the LoginName attribute.
+	_, err := r.Table(dbUserTable).IndexCreate(dbUserTableIndex).Run(db.Session)
+	if err != nil {
+		return err
+	}
+
+	// Wait for the index to be ready to use.
+	_, err = r.Table(dbUserTable).IndexWait(dbUserTableIndex).Run(db.Session)
+	if err != nil {
+		return err
+	}
 
 	return nil
+}
+
+func initDB() {
+	// Start the cleanup loop in a new goroutine.
+	go cleanupLoop()
 }
 
 func releaseDB() {

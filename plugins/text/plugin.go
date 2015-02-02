@@ -51,7 +51,8 @@ func init() {
 //#######################//
 
 type Settings struct {
-	Mode string
+	Mode    string
+	Protect bool
 }
 
 //##############//
@@ -80,8 +81,6 @@ func (p *Plugin) Prepare(d *plugin.Data) interface{} {
 		switch k {
 		case "mode":
 			// Set the editor mode
-			v = strings.TrimSpace(v)
-
 			switch v {
 			case ModeFull:
 				s.Mode = ModeFull
@@ -93,6 +92,15 @@ func (p *Plugin) Prepare(d *plugin.Data) interface{} {
 				s.Mode = ModeDefault
 			default:
 				panic(fmt.Errorf("invalid text plugin mode argument: %s", v))
+			}
+		case "protect":
+			switch v {
+			case "true":
+				s.Protect = true
+			case "false":
+				s.Protect = false
+			default:
+				panic(fmt.Errorf("invalid text plugin protect argument: %s", v))
 			}
 		default:
 			panic(fmt.Errorf(`invalid text plugin argument: %s="%s"`, k, v))
@@ -122,32 +130,19 @@ func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
 		s.LoadJavaScript(ckEditorScriptUrl, "CKEDITOR.disableAutoInline = true;")
 	}
 
-	// This will panic on error.
-	var text string
-	i, ok, err := store.Get(c)
-	if err != nil {
-		log.L.Error("plugin text: failed to get data from database: %v", err)
-		text = tr.S("blz.plugin.text.error.getDataFromDatabase")
-	}
-
-	if !ok {
-		text = tr.S("blz.plugin.text.placeholder")
-	} else {
-		text, ok = i.(string)
-		if !ok {
-			log.L.Error("plugin text: failed to cast database data to string!")
-			text = tr.S("blz.plugin.text.placeholder")
-		}
-	}
+	// Get the text.
+	text := getText(c)
 
 	return struct {
 		Text           htmlT.HTML
 		EditModeActive bool // We won't use the buildin %.editmode.IsActive function, because we already obtained the state here. This is one method call less...
 		Mode           string
+		Protect        bool
 	}{
 		Text:           htmlT.HTML(text),
 		EditModeActive: editModeActive,
 		Mode:           settings.Mode,
+		Protect:        settings.Protect,
 	}
 }
 
@@ -195,4 +190,36 @@ func (p *Plugin) EventSetText(c *template.Context, text string) {
 			Show(c.Session())
 		return
 	}
+}
+
+func (p *Plugin) EventGetProtectedData(c *template.Context) {
+	// Get the text.
+	text := getText(c)
+
+	// Send the text to the client.
+	c.TriggerEvent("setProtectedData", text)
+}
+
+//###############//
+//### Private ###//
+//###############//
+
+func getText(c *template.Context) (text string) {
+	i, ok, err := store.Get(c)
+	if err != nil {
+		log.L.Error("plugin text: failed to get data from database: %v", err)
+		text = tr.S("blz.plugin.text.error.getDataFromDatabase")
+	}
+
+	if !ok {
+		text = tr.S("blz.plugin.text.placeholder")
+	} else {
+		text, ok = i.(string)
+		if !ok {
+			log.L.Error("plugin text: failed to cast database data to string!")
+			text = tr.S("blz.plugin.text.placeholder")
+		}
+	}
+
+	return
 }

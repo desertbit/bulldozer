@@ -124,4 +124,13 @@ const templateText = `{{if #.EditModeActive}}
 		{{end event}}
 	{{end js}}
 {{end}}
-{{else}}{{#.Text}}{{end}}`
+{{else}}
+	{{if #.Protect}}
+	{{js load}}
+		{{emit GetProtectedData()}}
+		{{event setProtectedData(data)}}
+			$('#{{$.Context.DomID}}').html(data);
+		{{end event}}
+	{{end js}}
+	{{else}}{{#.Text}}{{end}}
+{{end}}`

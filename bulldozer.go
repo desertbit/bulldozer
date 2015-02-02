@@ -51,12 +51,14 @@ var (
 func Init() {
 	// Parameters.
 	var paramSettingsPath string
+	var setupDB bool
 
 	// Set the isInitialized flag to true
 	isInitialized = true
 
 	// Bind the variables to the flags.
 	flag.StringVar(&paramSettingsPath, "settings", paramSettingsPath, "set the path to an additional settings file.")
+	flag.BoolVar(&setupDB, "setup", false, "setup the database structure.")
 
 	// Set the maximum number of CPUs that can be executing simultaneously.
 	if settings.Settings.AutoSetGOMAXPROCS {
@@ -128,6 +130,16 @@ func Init() {
 	// Connect to the database server.
 	if err = database.Connect(); err != nil {
 		log.L.Fatal(err)
+	}
+
+	// Setup the database structure if requested.
+	if setupDB {
+		if err = database.Setup(); err != nil {
+			log.L.Fatal(err)
+		}
+
+		// Exit the application.
+		os.Exit(0)
 	}
 
 	// Initialize the store package.

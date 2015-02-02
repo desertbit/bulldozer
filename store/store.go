@@ -75,12 +75,6 @@ func Init(b bulldozerBackend) error {
 	// Register the messagebox callback.
 	messagebox.RegisterCallback(saveTemporaryChangesCallback, saveTemporaryChanges)
 
-	// Initialize the database.
-	err := initDB()
-	if err != nil {
-		return err
-	}
-
 	// Start the cleanup loop in a new goroutine.
 	go cleanupLocksLoop()
 

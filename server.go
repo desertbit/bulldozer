@@ -255,7 +255,7 @@ const htmlBody = `
 	{{end}}
 </head>
 <body>
-	{{if not .IsWebCrawler}}<noscript><div id="bulldozer-noscript">{{template "` + noScriptTemplate + `"}}</div></noscript>{{end}}
+	{{if not .IsWebCrawler}}<noscript><div id="bulldozer-noscript">{{template "` + noScriptTemplate + `"}}</div></noscript>
 	<div id="bulldozer-script"><script>
 		$(document).ready(function() {
 			Bulldozer.init("{{.Session.SessionID}}","{{.AccessToken}}");
@@ -263,7 +263,7 @@ const htmlBody = `
 		});
 	</script></div>
 	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplate + `"}}</div>
-	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplate + `"}}</div>
+	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplate + `"}}</div>{{end}}
 	<div id="bulldozer-body">{{.Body}}</div>
 </body>
 </html>`

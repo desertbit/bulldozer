@@ -97,9 +97,7 @@ func Init(b bulldozerBackend) (err error) {
 	backend.Route(RegisterPageUrl, routeRegisterPage)
 
 	// Initialize the database.
-	if err = initDB(); err != nil {
-		return err
-	}
+	initDB()
 
 	return nil
 }

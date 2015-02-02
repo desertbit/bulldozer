@@ -3,10 +3,13 @@
 ===========================
 
 
+
 * Server database backups
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
 * CaptchaCode
+* NGINX serve bulldozer files also
+
 
 IMPORTANT
 =========
@@ -27,6 +30,12 @@ IMPORTANT
 * Remove old removed $.DialogId...
 * editable popovers: make the popover styles non changeable from the project styles.
 * Kepler modal no scrollbars bug: open the imprint dialog, close it, save changes and reopen the imrpint dialog. the scrollbars are gone.
+
+
+IMPROVEMENT
+===========
+- https://developers.google.com/speed/docs/insights/rules
+- http://seositecheckup.com/
 
 
 STYLE
@@ -75,6 +84,11 @@ SECURITY
 Session & Socket
 =============
 * If a session connects after serveral retries with a different socket type, then a endless loop occurres. This is currently fixed temporary, by disabling automatic fallback in the client javascript code.
+
+
+Database
+========
+* Database migration with version number...
 
 
 General
