@@ -6,14 +6,17 @@
 package sessions
 
 import (
+	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions/socket"
 	"code.desertbit.com/bulldozer/bulldozer/sessions/store"
 	"code.desertbit.com/bulldozer/bulldozer/sessions/stream"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"fmt"
+
 	"github.com/chuckpreslar/emission"
 	"github.com/gorilla/securecookie"
+
+	"fmt"
 	"net/http"
 	"strings"
 	"sync"
@@ -35,6 +38,9 @@ const (
 	keyUniqueDomID      = "blzUniqueDomID"
 	keyCookieToken      = "blzCookieToken"
 	keyDomEncryptionKey = "blzDomEncryptionKey"
+
+	// Instance keys
+	instanceKeyCurrentPath = "blzCurrentPath"
 
 	// Cache value keys
 	cacheKeyCookieToken = "blzCookieToken"
@@ -59,9 +65,9 @@ func init() {
 	socket.OnNewSocketConnection(onNewSocketConnection)
 }
 
-//####################################//
-//### Socket Access Gateway Struct ###//
-//####################################//
+//#############//
+//### Types ###//
+//#############//
 
 type socketAccessGateway struct {
 	Token      string
@@ -102,6 +108,8 @@ type Session struct {
 
 	loadedStyleSheets      []string
 	loadedStyleSheetsMutex sync.Mutex
+
+	navigateMutex sync.Mutex
 }
 
 // SessionID returns the session ID.
@@ -290,6 +298,58 @@ func (s *Session) StyleSheets() []string {
 	defer s.loadedStyleSheetsMutex.Unlock()
 
 	return s.loadedStyleSheets
+}
+
+// CurrentPath returns the current session route path.
+func (s *Session) CurrentPath() string {
+	// Get the session current path. Create and add it, if not present.
+	i, _ := s.InstanceGet(instanceKeyCurrentPath, func() interface{} {
+		return "/"
+	})
+
+	// Assertion
+	path, ok := i.(string)
+	if !ok {
+		// Log the error
+		log.L.Error("get currrent session path: failed to assert session value to string!")
+
+		// Just set it to the session.
+		path = "/"
+		s.InstanceSet(instanceKeyCurrentPath, path)
+	}
+
+	return path
+}
+
+// SetCurrentPath sets the path to the current session path.
+func (s *Session) SetCurrentPath(path string) {
+	s.InstanceSet(instanceKeyCurrentPath, path)
+}
+
+// Reload the current session page.
+func (s *Session) Reload() {
+	s.Navigate(s.CurrentPath())
+}
+
+// Navigate the session to the given route path.
+func (s *Session) Navigate(path string) {
+	// Start the navigation request in a new goroutine
+	// and lock the mutex.
+	// This will handle multiple nested navigate calls in a correct order,
+	go func() {
+		// Lock the mutex.
+		s.navigateMutex.Lock()
+		defer s.navigateMutex.Unlock()
+
+		// Call the navigate hook.
+		navigateFunc(s, path)
+	}()
+}
+
+// Navigate the session to the default route path.
+// This is equivalent to: s.Navigate("/")
+func (s *Session) NavigateHome() {
+	s.Navigate("/")
 }
 
 //######################//

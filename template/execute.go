@@ -166,7 +166,7 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
 			return nil
 		} else if action.action == actionRedirect {
 			// Navigate to the path.
-			backend.NavigateToPath(c.ns.s, action.data)
+			c.ns.s.Navigate(action.data)
 			return nil
 		} else {
 			return fmt.Errorf("invalid template action type: %v", action.action)

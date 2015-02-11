@@ -16,8 +16,6 @@ import (
 )
 
 const (
-	valueKeyCurrentPath = "blzCurrentPath"
-
 	requestTypeRoute = "route"
 	keyRoutePath     = "path"
 )
@@ -27,6 +25,9 @@ var (
 )
 
 func init() {
+	// Set the session navigate function hook.
+	sessions.SetNavigateFunc(sessionNavigateRequest)
+
 	// Register the route server request.
 	err := sessions.Request(requestTypeRoute, sessionRequestRoute)
 	if err != nil {
@@ -75,34 +76,12 @@ func RoutePaths() []string {
 	return mainRouter.Paths()
 }
 
-// GetCurrentPath returns the current session route path.
-func GetCurrentPath(s *sessions.Session) string {
-	// Get the session current path. Create and add it, if not present.
-	i, _ := s.Get(valueKeyCurrentPath, func() interface{} {
-		return "/"
-	})
+//###############//
+//### Private ###//
+//###############//
 
-	// Assertion
-	path, ok := i.(string)
-	if !ok {
-		// Log the error
-		log.L.Error("get currrent session path: failed to assert session value to string!")
-
-		// Just set it to the session.
-		path = "/"
-		s.Set(valueKeyCurrentPath, path)
-	}
-
-	return path
-}
-
-// ReloadPage reloads the current session page.
-func ReloadPage(s *sessions.Session) {
-	Navigate(s, GetCurrentPath(s))
-}
-
-// Navigate navigates the session to the given route path.
-func Navigate(s *sessions.Session, path string) {
+// sessionNavigateRequest navigates the session to the given route path.
+func sessionNavigateRequest(s *sessions.Session, path string) {
 	// Execute the route.
 	_, body, title, path := execRoute(s, path)
 
@@ -115,10 +94,6 @@ func Navigate(s *sessions.Session, path string) {
 	// Send the new render request to the client.
 	s.SendCommand(cmd)
 }
-
-//###############//
-//### Private ###//
-//###############//
 
 // execRoute executes the routes and returns the status code
 // with the body string, the title and the current path. The path might have changed...
@@ -139,8 +114,8 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 	// Transform the path to a valid path.
 	path = utils.ToPath(requestedPath)
 
-	// Set the path to the current session path.
-	s.Set(valueKeyCurrentPath, path)
+	// Set the current session path.
+	s.SetCurrentPath(path)
 
 	// Execute the route.
 	data := mainRouter.Match(path)
@@ -212,7 +187,7 @@ func sessionRequestRoute(s *sessions.Session, data map[string]string) error {
 	}
 
 	// Navigate to the path.
-	Navigate(s, path)
+	s.Navigate(path)
 
 	return nil
 }

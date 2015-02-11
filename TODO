@@ -3,7 +3,8 @@
 ===========================
 
 
-
+* html minifier
+* remove the template store completly
 * Server database backups
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
@@ -13,6 +14,8 @@
 
 IMPORTANT
 =========
+* Implement detection if the tab is in the background. If so, disconnect the websocket after a specific timeout: https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
+* Detect prerendering/prefetching: http://stackoverflow.com/questions/9852257/http-header-to-detect-a-preload-request-by-google-chrome
 * implement discard option in edit mode.
 * store: convert map if struct... Provide a function for this.s
 * Edit mode: If multiple users are in edit mode, ask all other sessions before save, to confirm save.

@@ -132,7 +132,7 @@ func onLoginTemplateGetData(c *template.Context) interface{} {
 func routeLoginPage(s *sessions.Session, routeData *router.Data) (string, string, error) {
 	// If already authenticated, then redirect to the default page.
 	if IsAuth(s) {
-		backend.NavigateToPath(s, "/")
+		s.NavigateHome()
 		return "", "", nil
 	}
 
@@ -173,7 +173,7 @@ func finishLogin(s *sessions.Session, u *dbUser) {
 	s.Set(sessionValueKeyIsAuth, d)
 
 	// Redirect to the default page.
-	backend.NavigateToPath(s, "/")
+	s.NavigateHome()
 
 	// Trigger the event
 	triggerOnNewAuthenticatedSession(s)

@@ -80,7 +80,7 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 	fmt.Printf("TODO: send password '%s' to e-mail '%s'", password, email)
 
 	// Redirect to the login page.
-	backend.NavigateToPath(s, LoginPageUrl)
+	NavigateToLoginPage(s)
 
 	// Show a success message box.
 	messagebox.New().
@@ -97,13 +97,13 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 func routeRegisterPage(s *sessions.Session, routeData *router.Data) (string, string, error) {
 	// If already authenticated, then redirect to the default page.
 	if IsAuth(s) {
-		backend.NavigateToPath(s, "/")
+		s.NavigateHome()
 		return "", "", nil
 	}
 
 	// If the registration is disabled, then redirect to the login page.
 	if settings.Settings.RegistrationDisabled {
-		backend.NavigateToPath(s, LoginPageUrl)
+		NavigateToLoginPage(s)
 		return "", "", nil
 	}
 

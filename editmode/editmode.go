@@ -19,8 +19,6 @@ const (
 )
 
 var (
-	backend bulldozerBackend
-
 	// Sessions active in editmode.
 	activeSessions      map[string]*sessions.Session = make(map[string]*sessions.Session)
 	activeSessionsMutex sync.Mutex
@@ -31,24 +29,9 @@ func init() {
 	sessions.OnNewSession(onNewSessionFunc)
 }
 
-//###################################//
-//### Bulldozer backend interface ###//
-//###################################//
-
-type bulldozerBackend interface {
-	ReloadPage(s *sessions.Session)
-}
-
 //##############//
 //### Public ###//
 //##############//
-
-func Init(b bulldozerBackend) error {
-	// Set the backend.
-	backend = b
-
-	return nil
-}
 
 // Start the edit mode.
 func Start(s *sessions.Session) {
@@ -65,7 +48,7 @@ func Start(s *sessions.Session) {
 	addSession(s, true)
 
 	// Reload the current page.
-	backend.ReloadPage(s)
+	s.Reload()
 }
 
 // Stop the edit mode.
@@ -83,7 +66,7 @@ func Stop(s *sessions.Session) {
 	removeSession(s)
 
 	// Reload the current page.
-	backend.ReloadPage(s)
+	s.Reload()
 }
 
 // IsActive returns a boolean whenever the edit mode is active.

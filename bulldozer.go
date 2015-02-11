@@ -13,7 +13,6 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/auth"
 	"code.desertbit.com/bulldozer/bulldozer/backend/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/database"
-	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
@@ -143,17 +142,10 @@ func Init() {
 	}
 
 	// Initialize the store package.
-	if err = store.Init(backend); err != nil {
-		log.L.Fatal(err)
-	}
+	store.Init()
 
 	// Initialize the authentication package.
 	if err = auth.Init(backend); err != nil {
-		log.L.Fatal(err)
-	}
-
-	// Initialize the editmode package.
-	if err = editmode.Init(backend); err != nil {
 		log.L.Fatal(err)
 	}
 

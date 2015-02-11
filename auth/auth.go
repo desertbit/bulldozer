@@ -50,7 +50,6 @@ func init() {
 //###################################//
 
 type bulldozerBackend interface {
-	NavigateToPath(s *sessions.Session, path string)
 	Route(path string, f func(*sessions.Session, *router.Data) (string, string, error))
 }
 
@@ -193,8 +192,16 @@ func Logout(s *sessions.Session) {
 	s.Delete(sessionValueKeyIsAuth)
 
 	// Redirect to the default page.
-	backend.NavigateToPath(s, "/")
+	s.NavigateHome()
 
 	// Trigger the event
 	triggerOnEndAuthenticatedSession(s)
+}
+
+func NavigateToLoginPage(s *sessions.Session) {
+	s.Navigate(LoginPageUrl)
+}
+
+func NavigateToRegisterPage(s *sessions.Session) {
+	s.Navigate(RegisterPageUrl)
 }

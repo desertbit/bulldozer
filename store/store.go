@@ -31,19 +31,9 @@ const (
 )
 
 var (
-	backend bulldozerBackend
-
 	lockMutex            sync.Mutex
 	stopCleanupLocksLoop chan struct{} = make(chan struct{})
 )
-
-//###################################//
-//### Bulldozer backend interface ###//
-//###################################//
-
-type bulldozerBackend interface {
-	ReloadPage(s *sessions.Session)
-}
 
 //##################//
 //### Store type ###//
@@ -64,10 +54,7 @@ func newStore(data *dbStore) *store {
 //### Public ###//
 //##############//
 
-func Init(b bulldozerBackend) error {
-	// Set the backend.
-	backend = b
-
+func Init() {
 	// Attach the event listeners.
 	editmode.OnNewSession(onNewEditModeSession)
 	editmode.OnSessionReconnect(onEditModeSessionReconnect)
@@ -77,8 +64,6 @@ func Init(b bulldozerBackend) error {
 
 	// Start the cleanup loop in a new goroutine.
 	go cleanupLocksLoop()
-
-	return nil
 }
 
 func Release() {
@@ -567,7 +552,7 @@ func onEditModeSessionReconnect(s *sessions.Session) {
 
 func sessionOutOfSync(s *sessions.Session) {
 	// Reload the page to get in sync again.
-	backend.ReloadPage(s)
+	s.Reload()
 
 	// Show a messagebox
 	messagebox.New().

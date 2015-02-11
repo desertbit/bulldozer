@@ -60,7 +60,7 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 		if err != nil {
 			// This is not a fatal error. Just log it and create a new session.
 			// The new session is created automatically, if cookie session ID is emtpy or invalid.
-			log.L.Error("failed to decode session cookie: %v", err)
+			log.L.Warning("failed to decode session cookie: %v", err)
 		}
 	} else if err != http.ErrNoCookie {
 		// Return the error if this is not the not found cookie error.
@@ -74,7 +74,7 @@ func getStoreSession(rw http.ResponseWriter, req *http.Request) (*store.Session,
 			// Just log the error and create a new session.
 			// This should not prevent a client from connecting...
 			storeSession = nil
-			log.L.Error("failed to get session with ID '%s' from session store: %v", sCookie.ID, err)
+			log.L.Warning("failed to get session with ID '%s' from session store: %v", sCookie.ID, err)
 		}
 
 		if storeSession != nil {
