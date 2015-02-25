@@ -19,18 +19,18 @@ const (
 	LoginPageUrl    = "/login"
 	RegisterPageUrl = "/register"
 
-	authTemplatesUID = "blzAuth"
+	authTemplatesUID = "budAuth"
 	authTemplatesDir = "auth/"
 
 	// Template names:
-	loginTemplate    = "login" + settings.TemplateSuffix
-	registerTemplate = "register" + settings.TemplateSuffix
+	loginTemplate    = "login"
+	registerTemplate = "register"
 
 	// Session value keys.
-	sessionValueKeyIsAuth = "blzAuthData"
+	sessionValueKeyIsAuth = "budAuthData"
 
 	// Context Execution keys.
-	contextValueKeyIsAuth = "blzAuthData"
+	contextValueKeyIsAuth = "budAuthData"
 )
 
 var (
@@ -71,8 +71,8 @@ func Init(b bulldozerBackend) (err error) {
 
 	// Create the files slice.
 	files := []string{
-		settings.GetCoreTemplatePath(authTemplatesDir + loginTemplate),
-		settings.GetCoreTemplatePath(authTemplatesDir + registerTemplate),
+		settings.LookupInternalTemplatePath(authTemplatesDir + loginTemplate + settings.TemplateExtension),
+		settings.LookupInternalTemplatePath(authTemplatesDir + registerTemplate + settings.TemplateExtension),
 	}
 
 	// Create and parse the templates.
@@ -83,12 +83,12 @@ func Init(b bulldozerBackend) (err error) {
 
 	// Customize the templates.
 	templates.LookupFatal(loginTemplate).
-		AddStyleClass("bulldozer-page").
+		AddStyleClass("bud-page").
 		RegisterEvents(new(loginEvents)).
 		OnGetData(onLoginTemplateGetData)
 
 	templates.LookupFatal(registerTemplate).
-		AddStyleClass("bulldozer-page").
+		AddStyleClass("bud-page").
 		RegisterEvents(new(registerEvents))
 
 	// Set the login route.

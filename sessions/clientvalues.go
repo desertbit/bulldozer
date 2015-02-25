@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	cacheValueKeyCallbackPrefix = "blzClientCB_"
+	cacheValueKeyCallbackPrefix = "budClientCB_"
 
 	requestTypeClientData   = "clientData"
 	requestKeyDataKey       = "key"

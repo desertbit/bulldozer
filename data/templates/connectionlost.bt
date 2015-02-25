@@ -1,0 +1,7 @@
+<div class="click-to-reconnect connection-lost">
+	<i class="fa fa-bolt fa-2x"></i>
+	<span>
+		<p style="padding: 0px; margin:0px;">{{tr "bud.core.connectionLost.title"}}</p>
+		<small>{{tr "bud.core.connectionLost.text"}}</small>
+	</span>
+</div>

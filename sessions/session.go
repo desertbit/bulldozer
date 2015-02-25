@@ -33,18 +33,18 @@ const (
 	domEncryptionKeyLength  = 40
 
 	// Value keys
-	keyInstanceValues   = "blzInstances"
-	keyUniqueID         = "blzUniqueID"
-	keyUniqueDomID      = "blzUniqueDomID"
-	keyCookieToken      = "blzCookieToken"
-	keyDomEncryptionKey = "blzDomEncryptionKey"
+	keyInstanceValues   = "budInstances"
+	keyUniqueID         = "budUniqueID"
+	keyUniqueDomID      = "budUniqueDomID"
+	keyCookieToken      = "budCookieToken"
+	keyDomEncryptionKey = "budDomEncryptionKey"
 
 	// Instance keys
-	instanceKeyCurrentPath = "blzCurrentPath"
+	instanceKeyCurrentPath = "budCurrentPath"
 
 	// Cache value keys
-	cacheKeyCookieToken = "blzCookieToken"
-	cacheKeySocketType  = "blzSocketType"
+	cacheKeyCookieToken = "budCookieToken"
+	cacheKeySocketType  = "budSocketType"
 )
 
 var (

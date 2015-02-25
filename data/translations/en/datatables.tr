@@ -1,17 +1,17 @@
-{"ID": "blz.datatables.emptyTable", "Text": "No data available in table"}
-{"ID": "blz.datatables.info", "Text": "Showing _START_ to _END_ of _TOTAL_ entries"}
-{"ID": "blz.datatables.infoEmpty", "Text": "Showing 0 to 0 of 0 entries"}
-{"ID": "blz.datatables.infoFiltered", "Text": "(filtered from _MAX_ total entries)"}
-{"ID": "blz.datatables.infoPostFix", "Text": ""}
-{"ID": "blz.datatables.thousands", "Text": ","}
-{"ID": "blz.datatables.lengthMenu", "Text": "Show _MENU_ entries"}
-{"ID": "blz.datatables.loadingRecords", "Text": "Loading..."}
-{"ID": "blz.datatables.processing", "Text": "Processing..."}
-{"ID": "blz.datatables.search", "Text": "Search:"}
-{"ID": "blz.datatables.zeroRecords", "Text": "No matching records found"}
-{"ID": "blz.datatables.Pagination.first", "Text": "First"}
-{"ID": "blz.datatables.Pagination.last", "Text": "Last"}
-{"ID": "blz.datatables.Pagination.next", "Text": "Next"}
-{"ID": "blz.datatables.Pagination.previous", "Text": "Previous"}
-{"ID": "blz.datatables.sortAscending", "Text": ": activate to sort column ascending"}
-{"ID": "blz.datatables.sortDescending", "Text": ": activate to sort column descending"}
+{"ID": "bud.datatables.emptyTable", "Text": "No data available in table"}
+{"ID": "bud.datatables.info", "Text": "Showing _START_ to _END_ of _TOTAL_ entries"}
+{"ID": "bud.datatables.infoEmpty", "Text": "Showing 0 to 0 of 0 entries"}
+{"ID": "bud.datatables.infoFiltered", "Text": "(filtered from _MAX_ total entries)"}
+{"ID": "bud.datatables.infoPostFix", "Text": ""}
+{"ID": "bud.datatables.thousands", "Text": ","}
+{"ID": "bud.datatables.lengthMenu", "Text": "Show _MENU_ entries"}
+{"ID": "bud.datatables.loadingRecords", "Text": "Loading..."}
+{"ID": "bud.datatables.processing", "Text": "Processing..."}
+{"ID": "bud.datatables.search", "Text": "Search:"}
+{"ID": "bud.datatables.zeroRecords", "Text": "No matching records found"}
+{"ID": "bud.datatables.Pagination.first", "Text": "First"}
+{"ID": "bud.datatables.Pagination.last", "Text": "Last"}
+{"ID": "bud.datatables.Pagination.next", "Text": "Next"}
+{"ID": "bud.datatables.Pagination.previous", "Text": "Previous"}
+{"ID": "bud.datatables.sortAscending", "Text": ": activate to sort column ascending"}
+{"ID": "bud.datatables.sortDescending", "Text": ": activate to sort column descending"}

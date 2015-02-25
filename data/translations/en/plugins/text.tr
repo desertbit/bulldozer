@@ -1,10 +1,10 @@
-{"ID": "blz.plugin.text.edit", "Text": "Edit"}
+{"ID": "bud.plugin.text.edit", "Text": "Edit"}
 
-{"ID": "blz.plugin.text.placeholder", "Text": "<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>"}
+{"ID": "bud.plugin.text.placeholder", "Text": "<p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>"}
 
 
-{"ID": "blz.plugin.text.error.getDataFromDatabase", "Text": "Failed to get data from database! Please contact the site administrator!"}
-{"ID": "blz.plugin.text.error.alreadyLockedTitle", "Text": "Already Locked"}
-{"ID": "blz.plugin.text.error.alreadyLockedText", "Text": "The object is currently being edited by another user!"}
-{"ID": "blz.plugin.text.error.saveChangesTitle", "Text": "Error"}
-{"ID": "blz.plugin.text.error.saveChangesText", "Text": "Failed to save your changes! It might be locked by another user."}
+{"ID": "bud.plugin.text.error.getDataFromDatabase", "Text": "Failed to get data from database! Please contact the site administrator!"}
+{"ID": "bud.plugin.text.error.alreadyLockedTitle", "Text": "Already Locked"}
+{"ID": "bud.plugin.text.error.alreadyLockedText", "Text": "The object is currently being edited by another user!"}
+{"ID": "bud.plugin.text.error.saveChangesTitle", "Text": "Error"}
+{"ID": "bud.plugin.text.error.saveChangesText", "Text": "Failed to save your changes! It might be locked by another user."}

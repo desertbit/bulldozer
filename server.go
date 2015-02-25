@@ -25,9 +25,9 @@ const (
 	responseRequestRefresh = "req_refresh"
 
 	// Main template files:
-	loadingIndicatorTemplate = "loadingindicator" + settings.TemplateSuffix
-	connectionLostTemplate   = "connectionlost" + settings.TemplateSuffix
-	noScriptTemplate         = "noscript" + settings.TemplateSuffix
+	loadingIndicatorTemplate = "loadingindicator" + settings.TemplateExtension
+	connectionLostTemplate   = "connectionlost" + settings.TemplateExtension
+	noScriptTemplate         = "noscript" + settings.TemplateExtension
 )
 
 var (
@@ -66,9 +66,9 @@ func init() {
 
 	// Parse the additional main template files.
 	files := []string{
-		settings.GetCoreTemplatePath(loadingIndicatorTemplate),
-		settings.GetCoreTemplatePath(connectionLostTemplate),
-		settings.GetCoreTemplatePath(noScriptTemplate),
+		settings.LookupInternalTemplatePath(loadingIndicatorTemplate),
+		settings.LookupInternalTemplatePath(connectionLostTemplate),
+		settings.LookupInternalTemplatePath(noScriptTemplate),
 	}
 	_, err = mainTemplates.ParseFiles(files...)
 	if err != nil {
@@ -255,15 +255,15 @@ const htmlBody = `
 	{{end}}
 </head>
 <body>
-	{{if not .IsWebCrawler}}<noscript><div id="bulldozer-noscript">{{template "` + noScriptTemplate + `"}}</div></noscript>
-	<div id="bulldozer-script"><script>
+	{{if not .IsWebCrawler}}<noscript><div id="bud-noscript">{{template "` + noScriptTemplate + `"}}</div></noscript>
+	<div id="bud-script"><script>
 		$(document).ready(function() {
 			Bulldozer.init("{{.Session.SessionID}}","{{.AccessToken}}");
-			$("#bulldozer-script").remove();
+			$("#bud-script").remove();
 		});
 	</script></div>
-	<div id="bulldozer-loading-indicator">{{template "` + loadingIndicatorTemplate + `"}}</div>
-	<div id="bulldozer-connection-lost">{{template "` + connectionLostTemplate + `"}}</div>{{end}}
-	<div id="bulldozer-body">{{.Body}}</div>
+	<div id="bud-loading-indicator">{{template "` + loadingIndicatorTemplate + `"}}</div>
+	<div id="bud-connection-lost">{{template "` + connectionLostTemplate + `"}}</div>{{end}}
+	<div id="bud-body">{{.Body}}</div>
 </body>
 </html>`

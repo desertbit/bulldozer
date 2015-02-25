@@ -1,31 +1,31 @@
-<div id="bulldozer-topbar">
-	<div class="bulldozer-topbar-logo"></div>
+<div id="bud-topbar">
+	<div class="bud-topbar-logo"></div>
 {{if %.editmode.IsActive}}
-	<ul class="bulldozer-left-menu">
+	<ul class="bud-left-menu">
 		<li><a id="{{id "stopEdit"}}">
 			<i class="fa fa-close"></i>
-			<span>{{tr "blz.topbar.stopEditMode"}}</span>
+			<span>{{tr "bud.topbar.stopEditMode"}}</span>
 		</a></li>
 		<li><a id="{{id "save"}}">
 			<i class="fa fa-save"></i>
-			<span>{{tr "blz.topbar.saveChanges"}}</span>
+			<span>{{tr "bud.topbar.saveChanges"}}</span>
 		</a></li>
 		{{/*<li><a id="{{id "discard"}}">
 			<i class="fa fa-trash-o"></i>
-			<span>{{tr "blz.topbar.discardChanges"}}</span>
+			<span>{{tr "bud.topbar.discardChanges"}}</span>
 		</a></li>*/}}
 	</ul>
 {{else}}
-	<ul class="bulldozer-left-menu">
+	<ul class="bud-left-menu">
 		<li><a id="{{id "startEdit"}}">
 			<i class="fa fa-pencil"></i>
-			<span>{{tr "blz.topbar.startEditMode"}}</span>
+			<span>{{tr "bud.topbar.startEditMode"}}</span>
 		</a></li>
 	</ul>
-	<ul class="bulldozer-right-menu">
+	<ul class="bud-right-menu">
 		{{/*<li><a>
 			<i class="fa fa-gears"></i>
-			<span>{{tr "blz.topbar.controlPanel"}}</span>
+			<span>{{tr "bud.topbar.controlPanel"}}</span>
 		</a></li>*/}}
 		<li>
 			<a>
@@ -35,7 +35,7 @@
 			<ul>
 				<li><a id="{{id "logout"}}">
 					<i class="fa fa-power-off fa-fw"></i>
-					<span>{{tr "blz.topbar.logout"}}</span>
+					<span>{{tr "bud.topbar.logout"}}</span>
 				</a></li>
 			</ul>
 		</li>

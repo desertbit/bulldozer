@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	PluginType  = "text"
-	TemplateUID = "blzPluginText"
+	PluginType = "text"
+
+	templateUID = "budPluginText"
 
 	ckEditorBaseUrl   = settings.UrlBulldozerResources + "libs/ckeditor/"
 	ckEditorScriptUrl = ckEditorBaseUrl + "ckeditor.js"
@@ -64,7 +65,7 @@ type Plugin struct {
 
 func (p *Plugin) Initialize() *template.Template {
 	// Parse the plugin template
-	t, err := template.New(TemplateUID, PluginType).Parse(templateText)
+	t, err := template.New(templateUID, PluginType).Parse(templateText)
 	plugin.Must(err)
 
 	return t
@@ -158,8 +159,8 @@ func (p *Plugin) EventLock(c *template.Context) {
 
 		// Show a messagebox.
 		messagebox.New().
-			SetTitle(tr.S("blz.plugin.text.error.alreadyLockedTitle")).
-			SetText(tr.S("blz.plugin.text.error.alreadyLockedText")).
+			SetTitle(tr.S("bud.plugin.text.error.alreadyLockedTitle")).
+			SetText(tr.S("bud.plugin.text.error.alreadyLockedText")).
 			SetType(messagebox.TypeWarning).
 			Show(c.Session())
 		return
@@ -184,8 +185,8 @@ func (p *Plugin) EventSetText(c *template.Context, text string) {
 
 		// Show a messagebox.
 		messagebox.New().
-			SetTitle(tr.S("blz.plugin.text.error.saveChangesTitle")).
-			SetText(tr.S("blz.plugin.text.error.saveChangesText")).
+			SetTitle(tr.S("bud.plugin.text.error.saveChangesTitle")).
+			SetText(tr.S("bud.plugin.text.error.saveChangesText")).
 			SetType(messagebox.TypeWarning).
 			Show(c.Session())
 		return
@@ -208,16 +209,16 @@ func getText(c *template.Context) (text string) {
 	i, ok, err := store.Get(c)
 	if err != nil {
 		log.L.Error("plugin text: failed to get data from database: %v", err)
-		text = tr.S("blz.plugin.text.error.getDataFromDatabase")
+		text = tr.S("bud.plugin.text.error.getDataFromDatabase")
 	}
 
 	if !ok {
-		text = tr.S("blz.plugin.text.placeholder")
+		text = tr.S("bud.plugin.text.placeholder")
 	} else {
 		text, ok = i.(string)
 		if !ok {
 			log.L.Error("plugin text: failed to cast database data to string!")
-			text = tr.S("blz.plugin.text.placeholder")
+			text = tr.S("bud.plugin.text.placeholder")
 		}
 	}
 

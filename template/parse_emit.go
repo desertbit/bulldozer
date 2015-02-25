@@ -24,7 +24,7 @@ const (
 	eventsAccessKeyLength = 10
 
 	// Session instance value keys:
-	instanceKeyEvents = "blzEvents"
+	instanceKeyEvents = "budEvents"
 
 	requestTypeEmit = "emit"
 	keyEmitDomID    = "did"
@@ -110,7 +110,7 @@ func (t *Template) RegisterEvents(i interface{}, vars ...string) *Template {
 		// Add the method to the events
 		if overwritten := events.Set(name, e); overwritten {
 			// Print a warning message.
-			log.L.Error("template '%s': RegisterEvents: overwritting event function: '%s.%s'!", t.Name(), namespace, name)
+			log.L.Error("template '%s': RegisterEvents: overwriting event function: '%s.%s'!", t.Name(), namespace, name)
 		}
 
 		// Set the flag

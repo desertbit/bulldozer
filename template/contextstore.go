@@ -14,7 +14,7 @@ import (
 
 const (
 	// Session instance value keys:
-	instanceKeyContextStore = "blzContextStore"
+	instanceKeyContextStore = "budContextStore"
 )
 
 func init() {

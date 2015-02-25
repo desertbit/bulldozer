@@ -31,7 +31,7 @@ Bulldozer.fn.connectionLost = new function () {
 
         timeRemoveClassess = setTimeout(function () {
             timeRemoveClassess = false;
-            $("#bulldozer-connection-lost .click-to-reconnect").removeClass("connecting fail success");
+            $("#bud-connection-lost .click-to-reconnect").removeClass("connecting fail success");
         }, 1500);
     };
 
@@ -42,7 +42,7 @@ Bulldozer.fn.connectionLost = new function () {
      */
 
     this.show = function () {
-        var e = $("#bulldozer-connection-lost");
+        var e = $("#bud-connection-lost");
         if (visible) {
             return;
         }
@@ -59,7 +59,7 @@ Bulldozer.fn.connectionLost = new function () {
     };
 
     this.hide = function () {
-        var e = $("#bulldozer-connection-lost");
+        var e = $("#bud-connection-lost");
         if (!visible) {
             return;
         }
@@ -83,7 +83,7 @@ Bulldozer.fn.connectionLost = new function () {
     };
 
     this.reconnectFailed = function() {
-    	var el = $("#bulldozer-connection-lost .click-to-reconnect");
+    	var el = $("#bud-connection-lost .click-to-reconnect");
 
     	// Ignore if the class is already set or the connecting class is missing.
     	// We only want to set the fail class if the reconnect was triggered from the user.
@@ -99,7 +99,7 @@ Bulldozer.fn.connectionLost = new function () {
     };
 
     this.reconnectSuccess = function() {
-    	var el = $("#bulldozer-connection-lost .click-to-reconnect");
+    	var el = $("#bud-connection-lost .click-to-reconnect");
 
     	// Ignore if the class is already set.
 		if (el.hasClass("success")) {
@@ -122,7 +122,7 @@ Bulldozer.fn.connectionLost = new function () {
 	// On document ready.
     $(function() {
 	    // Add the click handler.
-		$("#bulldozer-connection-lost .click-to-reconnect").click(function() {
+		$("#bud-connection-lost .click-to-reconnect").click(function() {
 			var el = $(this);
 
 			// Ignore if already reconnecting.

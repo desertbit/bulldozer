@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	PluginType  = "protect"
-	TemplateUID = "blzPluginProtect"
+	PluginType = "protect"
+
+	templateUID = "budPluginProtect"
 )
 
 func init() {
@@ -36,7 +37,7 @@ type Plugin struct {
 
 func (p *Plugin) Initialize() *template.Template {
 	// Parse the plugin template
-	t, err := template.New(TemplateUID, PluginType).Parse(templateText)
+	t, err := template.New(templateUID, PluginType).Parse(templateText)
 	plugin.Must(err)
 
 	return t

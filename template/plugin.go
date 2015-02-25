@@ -167,7 +167,7 @@ func renderPlugin(c *Context, uid int64) (r interface{}) {
 	defer func() {
 		if e := recover(); e != nil {
 			log.L.Error("render plugin panic: %v", e)
-			r = utils.ErrorBox(tr.S("blz.template.plugin.error"), e)
+			r = utils.ErrorBox(tr.S("bud.template.plugin.error"), e)
 		}
 	}()
 
@@ -186,7 +186,7 @@ func renderPlugin(c *Context, uid int64) (r interface{}) {
 		if !ok {
 			err = fmt.Errorf("plugin: no plugin data exists with uid '%v'", uid)
 			log.L.Error(err.Error())
-			r = utils.ErrorBox(tr.S("blz.template.plugin.error"), err)
+			r = utils.ErrorBox(tr.S("bud.template.plugin.error"), err)
 		}
 		return
 	}()
@@ -199,7 +199,7 @@ func renderPlugin(c *Context, uid int64) (r interface{}) {
 	if err != nil {
 		err = fmt.Errorf("plugin: failed to render plugin of type '%v': %v", data.plugin.opts.Type, err)
 		log.L.Error(err.Error())
-		return utils.ErrorBox(tr.S("blz.template.plugin.error"), err)
+		return utils.ErrorBox(tr.S("bud.template.plugin.error"), err)
 	}
 
 	return

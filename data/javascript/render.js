@@ -72,13 +72,13 @@ Bulldozer.fn.render = new function () {
         // Clear all global server events.
         Bulldozer.core.clearGlobalServerEvents();
 
-        var blzBody = $("#bulldozer-body");
+        var budBody = $("#bud-body");
 
         // Do some cleanup
-        if (blzBody && body.length > 0) {
+        if (budBody && body.length > 0) {
             // Unbind all events of the current page and all its children
-            blzBody.off();
-            blzBody.find("*").off();
+            budBody.off();
+            budBody.find("*").off();
         }
 
         // Remove any element in the body tag that doesn't belong there
@@ -86,10 +86,10 @@ Bulldozer.fn.render = new function () {
         $('body').children().each(function() {
             el = $(this);
             id = el.attr('id');
-            if (id === "bulldozer-loading-indicator"
-                || id === "bulldozer-body"
-                || id === "bulldozer-connection-lost"
-                || (el.is('noscript') && el.has('#bulldozer-noscript')))
+            if (id === "bud-loading-indicator"
+                || id === "bud-body"
+                || id === "bud-connection-lost"
+                || (el.is('noscript') && el.has('#bud-noscript')))
             {
                 return;
             }
@@ -98,13 +98,13 @@ Bulldozer.fn.render = new function () {
         });
 
         // Create the new body.
-        var newBlzBody = $('<div id="bulldozer-body"></div>');
+        var newBudBody = $('<div id="bud-body"></div>');
 
         // Append the page body.
-        newBlzBody.append(body);
+        newBudBody.append(body);
 
         // Replace the bulldozer body.
-        blzBody.replaceWith(newBlzBody);
+        budBody.replaceWith(newBudBody);
 
         // Scroll to the top of the page
         window.scrollTo(0, 0);

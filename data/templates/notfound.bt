@@ -1,0 +1,8 @@
+<h1>{{tr "bud.page.notFound.title"}}</h1>
+<h2>{{tr "bud.page.notFound.description"}}</h2>
+<div class="details">
+	{{tr "bud.page.notFound.details"}}
+</div>
+<div class="action">
+    <a href="/"> {{tr "bud.page.notFound.goHome"}} </a>
+</div>

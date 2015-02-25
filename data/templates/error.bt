@@ -1,10 +1,10 @@
-<h1>{{tr "blz.page.error.title"}}</h1>
-<h2>{{tr "blz.page.error.description"}}</h2>
+<h1>{{tr "bud.page.error.title"}}</h1>
+<h2>{{tr "bud.page.error.description"}}</h2>
 <div class="details">
-	{{tr "blz.page.error.details"}}
+	{{tr "bud.page.error.details"}}
 	<!-- TODO: Show this error code only if authenticated! -->
 	{{if #.ErrorMessage}}<code>Error details: {{#.ErrorMessage}}</code>{{end}}
 </div>
 <div class="action">
-    <a href="/"> {{tr "blz.page.error.goHome"}} </a>
+    <a href="/"> {{tr "bud.page.error.goHome"}} </a>
 </div>

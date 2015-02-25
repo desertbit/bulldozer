@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	messageBoxTemplateUID = "blzMsgbox"
-	sessionValueKeyPrefix = "blzMsgBox_"
-	callbackPrefixName    = "blzMsgBox_"
+	messageBoxTemplateUID = "budMsgbox"
+	sessionValueKeyPrefix = "budMsgBox_"
+	callbackPrefixName    = "budMsgBox_"
 )
 
 const (
@@ -205,7 +205,7 @@ func (m *MessageBox) Show(s *sessions.Session) (err error) {
 	if m.buttons&ButtonOk == ButtonOk {
 		templButtons = append(templButtons, templButton{
 			"ok",
-			tr.S("blz.messagebox.buttonOk"),
+			tr.S("bud.messagebox.buttonOk"),
 			strconv.Itoa(int(ButtonOk)),
 		})
 		buttonCount++
@@ -213,7 +213,7 @@ func (m *MessageBox) Show(s *sessions.Session) (err error) {
 	if m.buttons&ButtonYes == ButtonYes {
 		templButtons = append(templButtons, templButton{
 			"yes",
-			tr.S("blz.messagebox.buttonYes"),
+			tr.S("bud.messagebox.buttonYes"),
 			strconv.Itoa(int(ButtonYes)),
 		})
 		buttonCount++
@@ -221,7 +221,7 @@ func (m *MessageBox) Show(s *sessions.Session) (err error) {
 	if m.buttons&ButtonNo == ButtonNo {
 		templButtons = append(templButtons, templButton{
 			"no",
-			tr.S("blz.messagebox.buttonNo"),
+			tr.S("bud.messagebox.buttonNo"),
 			strconv.Itoa(int(ButtonNo)),
 		})
 		buttonCount++
@@ -229,7 +229,7 @@ func (m *MessageBox) Show(s *sessions.Session) (err error) {
 	if m.buttons&ButtonCancel == ButtonCancel {
 		templButtons = append(templButtons, templButton{
 			"cancel",
-			tr.S("blz.messagebox.buttonCancel"),
+			tr.S("bud.messagebox.buttonCancel"),
 			strconv.Itoa(int(ButtonCancel)),
 		})
 		buttonCount++

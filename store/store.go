@@ -24,10 +24,10 @@ const (
 	removeExpiredLocksAfterTimeout = 10 * time.Second
 
 	// Value keys.
-	clientKeyStoreState        = "blzStoreState"
-	contextValueKeyStorePrefix = "blzStore_"
+	clientKeyStoreState        = "budStoreState"
+	contextValueKeyStorePrefix = "budStore_"
 
-	saveTemporaryChangesCallback = "blzSaveTmpChanges"
+	saveTemporaryChangesCallback = "budSaveTmpChanges"
 )
 
 var (
@@ -318,16 +318,16 @@ func SaveTemporaryChanges(s *sessions.Session) {
 	if err != nil {
 		// Show a messagebox.
 		messagebox.New().
-			SetTitle(tr.S("blz.core.saveFailedTitle")).
-			SetText(tr.S("blz.core.saveFailedText")).
+			SetTitle(tr.S("bud.core.saveFailedTitle")).
+			SetText(tr.S("bud.core.saveFailedText")).
 			SetType(messagebox.TypeAlert).
 			Show(s)
 		return
 	} else if !hasChanges {
 		// Show a messagebox.
 		messagebox.New().
-			SetTitle(tr.S("blz.core.nothingToSaveTitle")).
-			SetText(tr.S("blz.core.nothingToSaveText")).
+			SetTitle(tr.S("bud.core.nothingToSaveTitle")).
+			SetText(tr.S("bud.core.nothingToSaveText")).
 			SetType(messagebox.TypeInfo).
 			Show(s)
 		return
@@ -335,8 +335,8 @@ func SaveTemporaryChanges(s *sessions.Session) {
 
 	// Show a messagebox to continue.
 	messagebox.New().
-		SetTitle(tr.S("blz.core.saveChangesTitle")).
-		SetText(tr.S("blz.core.saveChangesText")).
+		SetTitle(tr.S("bud.core.saveChangesTitle")).
+		SetText(tr.S("bud.core.saveChangesText")).
 		SetType(messagebox.TypeQuestion).
 		SetButtons(messagebox.ButtonYes | messagebox.ButtonNo).
 		SetCallback(saveTemporaryChangesCallback).
@@ -359,16 +359,16 @@ func saveTemporaryChanges(s *sessions.Session, b messagebox.Button) {
 
 		// Show a messagebox.
 		messagebox.New().
-			SetTitle(tr.S("blz.core.saveFailedTitle")).
-			SetText(tr.S("blz.core.saveFailedText")).
+			SetTitle(tr.S("bud.core.saveFailedTitle")).
+			SetText(tr.S("bud.core.saveFailedText")).
 			SetType(messagebox.TypeAlert).
 			Show(s)
 		return
 	} else if len(locks) > 0 {
 		// Show a messagebox.
 		messagebox.New().
-			SetTitle(tr.S("blz.core.objectsLockedTitle")).
-			SetText(tr.S("blz.core.objectsLockedText")).
+			SetTitle(tr.S("bud.core.objectsLockedTitle")).
+			SetText(tr.S("bud.core.objectsLockedText")).
 			SetType(messagebox.TypeWarning).
 			Show(s)
 		return
@@ -381,8 +381,8 @@ func saveTemporaryChanges(s *sessions.Session, b messagebox.Button) {
 
 		// Show a messagebox.
 		messagebox.New().
-			SetTitle(tr.S("blz.core.saveFailedTitle")).
-			SetText(tr.S("blz.core.saveFailedText")).
+			SetTitle(tr.S("bud.core.saveFailedTitle")).
+			SetText(tr.S("bud.core.saveFailedText")).
 			SetType(messagebox.TypeAlert).
 			Show(s)
 		return
@@ -390,8 +390,8 @@ func saveTemporaryChanges(s *sessions.Session, b messagebox.Button) {
 
 	// Show a success messagebox.
 	messagebox.New().
-		SetTitle(tr.S("blz.core.successSaveTitle")).
-		SetText(tr.S("blz.core.successSaveText")).
+		SetTitle(tr.S("bud.core.successSaveTitle")).
+		SetText(tr.S("bud.core.successSaveText")).
 		SetType(messagebox.TypeSuccess).
 		Show(s)
 }
@@ -556,8 +556,8 @@ func sessionOutOfSync(s *sessions.Session) {
 
 	// Show a messagebox
 	messagebox.New().
-		SetTitle(tr.S("blz.core.sessionOutOfSyncTitle")).
-		SetText(tr.S("blz.core.sessionOutOfSyncText")).
+		SetTitle(tr.S("bud.core.sessionOutOfSyncTitle")).
+		SetText(tr.S("bud.core.sessionOutOfSyncText")).
 		SetType(messagebox.TypeWarning).
 		Show(s)
 }

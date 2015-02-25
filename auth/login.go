@@ -22,9 +22,9 @@ import (
 
 const (
 	passwordTokenLength          = 15
-	sessionValueKeyPasswordToken = "blzAuthPassTok"
+	sessionValueKeyPasswordToken = "budAuthPassTok"
 
-	finishLoginCallbackName = "blzAuthFinishLogin"
+	finishLoginCallbackName = "budAuthFinishLogin"
 )
 
 func init() {
@@ -142,14 +142,14 @@ func routeLoginPage(s *sessions.Session, routeData *router.Data) (string, string
 		return "", "", fmt.Errorf("failed to execute login template: %v", err)
 	}
 
-	return o, tr.S("blz.auth.login.pageTitle"), nil
+	return o, tr.S("bud.auth.login.pageTitle"), nil
 }
 
 func showLoginErrorMsgBox(s *sessions.Session) {
 	// Show a messagebox
 	messagebox.New().
-		SetTitle(tr.S("blz.auth.login.error.title")).
-		SetText(tr.S("blz.auth.login.error.text")).
+		SetTitle(tr.S("bud.auth.login.error.title")).
+		SetText(tr.S("bud.auth.login.error.text")).
 		SetType(messagebox.TypeAlert).
 		Show(s)
 }

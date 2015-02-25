@@ -28,7 +28,7 @@ type templatePackage struct{}
 
 func (p *templatePackage) MustIsAuth(a *template.Action, c *template.Context) {
 	if !IsAuth(c) {
-		a.Error(tr.S("blz.auth.pkg.mustAuthErrorMessage"))
+		a.Error(tr.S("bud.auth.pkg.mustAuthErrorMessage"))
 	}
 }
 

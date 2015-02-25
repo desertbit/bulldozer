@@ -1,6 +1,6 @@
-{"ID": "blz.topbar.logout", "Text": "Logout"}
-{"ID": "blz.topbar.controlPanel", "Text": "Control Panel"}
-{"ID": "blz.topbar.startEditMode", "Text": "Edit"}
-{"ID": "blz.topbar.stopEditMode", "Text": "Finish"}
-{"ID": "blz.topbar.saveChanges", "Text": "Save"}
-{"ID": "blz.topbar.discardChanges", "Text": "Discard"}
+{"ID": "bud.topbar.logout", "Text": "Logout"}
+{"ID": "bud.topbar.controlPanel", "Text": "Control Panel"}
+{"ID": "bud.topbar.startEditMode", "Text": "Edit"}
+{"ID": "bud.topbar.stopEditMode", "Text": "Finish"}
+{"ID": "bud.topbar.saveChanges", "Text": "Save"}
+{"ID": "bud.topbar.discardChanges", "Text": "Discard"}

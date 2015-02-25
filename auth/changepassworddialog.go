@@ -19,10 +19,10 @@ import (
 )
 
 const (
-	changePasswordDialogTemplateUID       = "blzChangePasswordDialog"
-	changePasswordDialogTemplateFile      = authTemplatesDir + "dialogs/changepassword" + settings.TemplateSuffix
-	sessionValueKeyChangePasswordUserID   = "blzChangePasswordUID"
-	sessionValueKeyChangePasswordCallback = "blzChangePasswordCB"
+	changePasswordDialogTemplateUID       = "budChangePasswordDialog"
+	changePasswordDialogTemplateFile      = authTemplatesDir + "dialogs/changepassword" + settings.TemplateExtension
+	sessionValueKeyChangePasswordUserID   = "budChangePasswordUID"
+	sessionValueKeyChangePasswordCallback = "budChangePasswordCB"
 )
 
 var (
@@ -37,7 +37,7 @@ func init() {
 	changePasswordDialog.SetClosable(false)
 
 	// Create the template filepath.
-	path := settings.GetCoreTemplatePath(changePasswordDialogTemplateFile)
+	path := settings.LookupInternalTemplatePath(changePasswordDialogTemplateFile)
 
 	// Parse the template file.
 	err := changePasswordDialog.ParseFile(path)
@@ -124,8 +124,8 @@ func (e *changePasswordDialogEvents) EventSubmit(c *template.Context, newPasswor
 	if user == nil {
 		// Show a messagebox
 		messagebox.New().
-			SetTitle(tr.S("blz.auth.changePassword.error.changePasswordTitle")).
-			SetText(tr.S("blz.auth.changePassword.error.changePassword")).
+			SetTitle(tr.S("bud.auth.changePassword.error.changePasswordTitle")).
+			SetText(tr.S("bud.auth.changePassword.error.changePassword")).
 			SetType(messagebox.TypeAlert).
 			Show(s)
 		return
@@ -135,8 +135,8 @@ func (e *changePasswordDialogEvents) EventSubmit(c *template.Context, newPasswor
 	if strings.TrimSpace(newPassword) == "" || len(newPassword) < minPasswordLength {
 		// Show a messagebox
 		messagebox.New().
-			SetTitle(tr.S("blz.auth.changePassword.error.shortPasswordTitle")).
-			SetText(tr.S("blz.auth.changePassword.error.shortPassword")).
+			SetTitle(tr.S("bud.auth.changePassword.error.shortPasswordTitle")).
+			SetText(tr.S("bud.auth.changePassword.error.shortPassword")).
 			SetType(messagebox.TypeWarning).
 			Show(s)
 		return
@@ -150,8 +150,8 @@ func (e *changePasswordDialogEvents) EventSubmit(c *template.Context, newPasswor
 
 		// Show a messagebox
 		messagebox.New().
-			SetTitle(tr.S("blz.auth.changePassword.error.changePasswordTitle")).
-			SetText(tr.S("blz.auth.changePassword.error.changePassword")).
+			SetTitle(tr.S("bud.auth.changePassword.error.changePasswordTitle")).
+			SetText(tr.S("bud.auth.changePassword.error.changePassword")).
 			SetType(messagebox.TypeAlert).
 			Show(s)
 		return

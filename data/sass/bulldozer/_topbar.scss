@@ -13,7 +13,7 @@ $bulldozer_topbar_sub_menu_bg_color: #F6F6F6;
 $bulldozer_topbar_sub_menu_color: #444444;
 
 
-#bulldozer-topbar
+#bud-topbar
 {
 	position: fixed;
 	z-index: 500;
@@ -26,7 +26,7 @@ $bulldozer_topbar_sub_menu_color: #444444;
 	height: $bulldozer_topbar_height;
 	background-color: $bulldozer_topbar_bg_color;
 
-	> .bulldozer-topbar-logo
+	> .bud-topbar-logo
 	{
 		float: left;
 		position: relative;
@@ -44,8 +44,8 @@ $bulldozer_topbar_sub_menu_color: #444444;
 
     /* Menu */
 
-	.bulldozer-left-menu,
-	.bulldozer-right-menu
+	.bud-left-menu,
+	.bud-right-menu
 	{
 		position: relative;
 		float: left;
@@ -159,7 +159,7 @@ $bulldozer_topbar_sub_menu_color: #444444;
 		}
 	}
 
-	.bulldozer-right-menu
+	.bud-right-menu
 	{
 		float: right;
 

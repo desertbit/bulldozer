@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	topbarTemplatesUID = "blzTopBar"
-	topbarTemplatesDir = "backend/topbar/"
+	topbarTemplatesUID = "budTopBar"
+	topbarTemplatesDir = "topbar/"
 
 	// Template names:
-	topbarTemplate = "topbar" + settings.TemplateSuffix
+	topbarTemplate = "topbar"
 )
 
 var (
@@ -37,7 +37,7 @@ func init() {
 
 func Init() (err error) {
 	// Create the file path.
-	file := settings.GetCoreTemplatePath(topbarTemplatesDir + topbarTemplate)
+	file := settings.LookupInternalTemplatePath(topbarTemplatesDir + topbarTemplate + settings.TemplateExtension)
 
 	// Create and parse the templates.
 	templates, err = template.ParseFiles(topbarTemplatesUID, file)

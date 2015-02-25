@@ -20,6 +20,6 @@ Bulldozer.fn.topbar = new function () {
     	}
 
 		$("body").css("margin-top", space);
-		$(".bulldozer-topbar-auto-move").css("margin-top", space);
+		$(".bud-topbar-auto-move").css("margin-top", space);
     };
 };

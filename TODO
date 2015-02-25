@@ -4,7 +4,6 @@
 
 
 * html minifier
-* remove the template store completly
 * Server database backups
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
@@ -19,6 +18,7 @@ IMPORTANT
 * implement discard option in edit mode.
 * store: convert map if struct... Provide a function for this.s
 * Edit mode: If multiple users are in edit mode, ask all other sessions before save, to confirm save.
+* editmode: don't update sessions with changes if the changes happened on different pages.
 * Implement store backup.
 * Template parse: return an error if an ID for ex.: plugins is used multiple times! This is not allowed. Try testing this by declaring text plugins with the same ID.
 * Add a bulldoze init hook for packages.
@@ -96,6 +96,8 @@ Database
 
 General
 =======
+* Should we move the global events map from the template namespace to the individual template? (Make it accessible from other templates through a special template syntax: @templatename.FuncName...?)
+* Don't print plugin warnings if no event functions are present.
 * Check if the browser is supported.
 * Check for not more used and old store values. (Deleted IDs...)
 * Check if bulldoze is rebuilding the app if a directory is removed from the source folder.

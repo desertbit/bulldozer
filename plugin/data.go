@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	contextStoreKeyData = "blzPluginData"
+	contextStoreKeyData = "budPluginData"
 )
 
 func init() {

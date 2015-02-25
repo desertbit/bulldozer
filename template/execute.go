@@ -150,11 +150,6 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
 	// They will be registered by the following template execution.
 	releaseSessionTemplateEvents(c.ns.s, c.data.DomID)
 
-	// Return the last parse error if present.
-	if t.hasParseError != nil {
-		return t.hasParseError
-	}
-
 	// Call the must function.
 	action := t.callMustFuncs(c)
 	if action != nil && action.action != actionContinue {

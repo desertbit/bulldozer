@@ -1,63 +1,63 @@
-{"ID": "blz.auth.pkg.mustAuthErrorMessage", "Text": "Access denied! Please authenticate to access this page."}
+{"ID": "bud.auth.pkg.mustAuthErrorMessage", "Text": "Access denied! Please authenticate to access this page."}
 
 
 
-{"ID": "blz.auth.login.pageTitle", "Text": "Login"}
-{"ID": "blz.auth.login.title", "Text": "Login"}
-{"ID": "blz.auth.login.usernameLabel", "Text": "Username"}
-{"ID": "blz.auth.login.usernamePlaceholder", "Text": "Enter your username"}
-{"ID": "blz.auth.login.passwordLabel", "Text": "Password"}
-{"ID": "blz.auth.login.passwordPlaceholder", "Text": "Enter your password"}
-{"ID": "blz.auth.login.registerQuestion", "Text": "You don't have an account? Click here to register a new user account."}
-{"ID": "blz.auth.login.loginButton", "Text": "Login"}
+{"ID": "bud.auth.login.pageTitle", "Text": "Login"}
+{"ID": "bud.auth.login.title", "Text": "Login"}
+{"ID": "bud.auth.login.usernameLabel", "Text": "Username"}
+{"ID": "bud.auth.login.usernamePlaceholder", "Text": "Enter your username"}
+{"ID": "bud.auth.login.passwordLabel", "Text": "Password"}
+{"ID": "bud.auth.login.passwordPlaceholder", "Text": "Enter your password"}
+{"ID": "bud.auth.login.registerQuestion", "Text": "You don't have an account? Click here to register a new user account."}
+{"ID": "bud.auth.login.loginButton", "Text": "Login"}
 
-{"ID": "blz.auth.login.error.title", "Text": "Authentication failed"}
-{"ID": "blz.auth.login.error.text", "Text": "The user authentication failed. Please check your username and password."}
-{"ID": "blz.auth.login.error.username", "Text": "Please enter an username"}
-{"ID": "blz.auth.login.error.password", "Text": "Please enter a password"}
-
-
-
-{"ID": "blz.auth.changePassword.title", "Text": "Change password"}
-{"ID": "blz.auth.changePassword.passwordLabel", "Text": "Enter new Password"}
-{"ID": "blz.auth.changePassword.passwordPlaceholder", "Text": "Enter new password"}
-{"ID": "blz.auth.changePassword.passwordVerifyLabel", "Text": "Verify new Password"}
-{"ID": "blz.auth.changePassword.passwordVerifyPlaceholder", "Text": "Enter new password again"}
-{"ID": "blz.auth.changePassword.cancelButton", "Text": "Cancel"}
-{"ID": "blz.auth.changePassword.submitButton", "Text": "Submit"}
-
-{"ID": "blz.auth.changePassword.error.password", "Text": "Passwords must be at least 8 characters with 1 capital letter and 1 number"}
-{"ID": "blz.auth.changePassword.error.passwordsDontMatch", "Text": "The passwords don't match!"}
-{"ID": "blz.auth.changePassword.error.shortPasswordTitle", "Text": "Invalid Password"}
-{"ID": "blz.auth.changePassword.error.shortPassword", "Text": "Your password is to short. The password has to contain at least 8 characters."}
-{"ID": "blz.auth.changePassword.error.changePasswordTitle", "Text": "Error!"}
-{"ID": "blz.auth.changePassword.error.changePassword", "Text": "Failed to change password! Please contact the site administrator!"}
+{"ID": "bud.auth.login.error.title", "Text": "Authentication failed"}
+{"ID": "bud.auth.login.error.text", "Text": "The user authentication failed. Please check your username and password."}
+{"ID": "bud.auth.login.error.username", "Text": "Please enter an username"}
+{"ID": "bud.auth.login.error.password", "Text": "Please enter a password"}
 
 
 
-{"ID": "blz.auth.register.pageTitle", "Text": "Register"}
-{"ID": "blz.auth.register.title", "Text": "Register"}
-{"ID": "blz.auth.register.nameLabel", "Text": "Name"}
-{"ID": "blz.auth.register.namePlaceholder", "Text": "Enter your full name"}
-{"ID": "blz.auth.register.usernameLabel", "Text": "Username"}
-{"ID": "blz.auth.register.usernamePlaceholder", "Text": "Enter your username"}
-{"ID": "blz.auth.register.eMailLabel", "Text": "E-Mail"}
-{"ID": "blz.auth.register.eMailPlaceholder", "Text": "Enter your e-mail address"}
-{"ID": "blz.auth.register.verifyEMailLabel", "Text": "Verify E-Mail"}
-{"ID": "blz.auth.register.verifyEMailPlaceholder", "Text": "Enter your e-mail address again"}
-{"ID": "blz.auth.register.loginQuestion", "Text": "You already have an account? Click here to login."}
-{"ID": "blz.auth.register.registerButton", "Text": "Register"}
-{"ID": "blz.auth.register.cancelButton", "Text": "Cancel"}
+{"ID": "bud.auth.changePassword.title", "Text": "Change password"}
+{"ID": "bud.auth.changePassword.passwordLabel", "Text": "Enter new Password"}
+{"ID": "bud.auth.changePassword.passwordPlaceholder", "Text": "Enter new password"}
+{"ID": "bud.auth.changePassword.passwordVerifyLabel", "Text": "Verify new Password"}
+{"ID": "bud.auth.changePassword.passwordVerifyPlaceholder", "Text": "Enter new password again"}
+{"ID": "bud.auth.changePassword.cancelButton", "Text": "Cancel"}
+{"ID": "bud.auth.changePassword.submitButton", "Text": "Submit"}
 
-{"ID": "blz.auth.register.error.name", "Text": "Please enter a valid name"}
-{"ID": "blz.auth.register.error.username", "Text": "Please enter a valid username"}
-{"ID": "blz.auth.register.error.eMail", "Text": "Please enter a valid e-mail address"}
-{"ID": "blz.auth.register.error.verifyEMail", "Text": "The e-mails do not match"}
-{"ID": "blz.auth.register.error.title", "Text": "Registration failed"}
-{"ID": "blz.auth.register.error.general", "Text": "The user registration failed. Please check your name, username and e-mail!"}
-{"ID": "blz.auth.register.error.generalShort", "Text": "The user registration failed!"}
-{"ID": "blz.auth.register.error.userAlreadyExists", "Text": "The user with username '%s' already exists!"}
-{"ID": "blz.auth.register.error.registrationDisabled", "Text": "The user registration process is disabled!"}
+{"ID": "bud.auth.changePassword.error.password", "Text": "Passwords must be at least 8 characters with 1 capital letter and 1 number"}
+{"ID": "bud.auth.changePassword.error.passwordsDontMatch", "Text": "The passwords don't match!"}
+{"ID": "bud.auth.changePassword.error.shortPasswordTitle", "Text": "Invalid Password"}
+{"ID": "bud.auth.changePassword.error.shortPassword", "Text": "Your password is to short. The password has to contain at least 8 characters."}
+{"ID": "bud.auth.changePassword.error.changePasswordTitle", "Text": "Error!"}
+{"ID": "bud.auth.changePassword.error.changePassword", "Text": "Failed to change password! Please contact the site administrator!"}
 
-{"ID": "blz.auth.register.success.title", "Text": "User registered"}
-{"ID": "blz.auth.register.success.text", "Text": "Your new password has been send to your e-mail address."}
+
+
+{"ID": "bud.auth.register.pageTitle", "Text": "Register"}
+{"ID": "bud.auth.register.title", "Text": "Register"}
+{"ID": "bud.auth.register.nameLabel", "Text": "Name"}
+{"ID": "bud.auth.register.namePlaceholder", "Text": "Enter your full name"}
+{"ID": "bud.auth.register.usernameLabel", "Text": "Username"}
+{"ID": "bud.auth.register.usernamePlaceholder", "Text": "Enter your username"}
+{"ID": "bud.auth.register.eMailLabel", "Text": "E-Mail"}
+{"ID": "bud.auth.register.eMailPlaceholder", "Text": "Enter your e-mail address"}
+{"ID": "bud.auth.register.verifyEMailLabel", "Text": "Verify E-Mail"}
+{"ID": "bud.auth.register.verifyEMailPlaceholder", "Text": "Enter your e-mail address again"}
+{"ID": "bud.auth.register.loginQuestion", "Text": "You already have an account? Click here to login."}
+{"ID": "bud.auth.register.registerButton", "Text": "Register"}
+{"ID": "bud.auth.register.cancelButton", "Text": "Cancel"}
+
+{"ID": "bud.auth.register.error.name", "Text": "Please enter a valid name"}
+{"ID": "bud.auth.register.error.username", "Text": "Please enter a valid username"}
+{"ID": "bud.auth.register.error.eMail", "Text": "Please enter a valid e-mail address"}
+{"ID": "bud.auth.register.error.verifyEMail", "Text": "The e-mails do not match"}
+{"ID": "bud.auth.register.error.title", "Text": "Registration failed"}
+{"ID": "bud.auth.register.error.general", "Text": "The user registration failed. Please check your name, username and e-mail!"}
+{"ID": "bud.auth.register.error.generalShort", "Text": "The user registration failed!"}
+{"ID": "bud.auth.register.error.userAlreadyExists", "Text": "The user with username '%s' already exists!"}
+{"ID": "bud.auth.register.error.registrationDisabled", "Text": "The user registration process is disabled!"}
+
+{"ID": "bud.auth.register.success.title", "Text": "User registered"}
+{"ID": "bud.auth.register.success.text", "Text": "Your new password has been send to your e-mail address."}

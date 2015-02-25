@@ -1,5 +1,5 @@
-{"ID": "blz.page.error.pageTitle", "Text": "Error"}
-{"ID": "blz.page.error.title", "Text": "Oops!"}
-{"ID": "blz.page.error.description", "Text": "An Error occurred!"}
-{"ID": "blz.page.error.details", "Text": "If this error happens again, please contact the site administrator!"}
-{"ID": "blz.page.error.goHome", "Text": "Take Me Home"}
+{"ID": "bud.page.error.pageTitle", "Text": "Error"}
+{"ID": "bud.page.error.title", "Text": "Oops!"}
+{"ID": "bud.page.error.description", "Text": "An Error occurred!"}
+{"ID": "bud.page.error.details", "Text": "If this error happens again, please contact the site administrator!"}
+{"ID": "bud.page.error.goHome", "Text": "Take Me Home"}

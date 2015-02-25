@@ -6,18 +6,19 @@
 package bulldozer
 
 import (
+	_ "code.desertbit.com/bulldozer/bulldozer/controlcenter"
 	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
-	templateStore "code.desertbit.com/bulldozer/bulldozer/template/store"
+
 	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
 	"code.desertbit.com/bulldozer/bulldozer/auth"
-	"code.desertbit.com/bulldozer/bulldozer/backend/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/database"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/store"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 
 	"flag"
@@ -205,8 +206,7 @@ func release() {
 	// Set the flag
 	isReleased = true
 
-	// Stop the filewatchers
-	templateStore.Release()
+	// Stop the filewatcher
 	scssFileWatcher.Close()
 
 	// Release the bulldozer sub packages

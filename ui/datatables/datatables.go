@@ -23,26 +23,26 @@ $.extend( $.fn.dataTable.defaults, {
 	"lengthChange": true,
 	"info": true,
 	"language": {
-		"emptyTable":     "`+tr.S("blz.datatables.emptyTable")+`",
-		"info":           "`+tr.S("blz.datatables.info")+`",
-		"infoEmpty":      "`+tr.S("blz.datatables.infoEmpty")+`",
-		"infoFiltered":   "`+tr.S("blz.datatables.infoFiltered")+`",
-		"infoPostFix":    "`+tr.S("blz.datatables.infoPostFix")+`",
-		"thousands":      "`+tr.S("blz.datatables.thousands")+`",
-		"lengthMenu":     "`+tr.S("blz.datatables.lengthMenu")+`",
-		"loadingRecords": "`+tr.S("blz.datatables.loadingRecords")+`",
-		"processing":     "`+tr.S("blz.datatables.processing")+`",
-		"search":         "`+tr.S("blz.datatables.search")+`",
-		"zeroRecords":    "`+tr.S("blz.datatables.zeroRecords")+`",
+		"emptyTable":     "`+tr.S("bud.datatables.emptyTable")+`",
+		"info":           "`+tr.S("bud.datatables.info")+`",
+		"infoEmpty":      "`+tr.S("bud.datatables.infoEmpty")+`",
+		"infoFiltered":   "`+tr.S("bud.datatables.infoFiltered")+`",
+		"infoPostFix":    "`+tr.S("bud.datatables.infoPostFix")+`",
+		"thousands":      "`+tr.S("bud.datatables.thousands")+`",
+		"lengthMenu":     "`+tr.S("bud.datatables.lengthMenu")+`",
+		"loadingRecords": "`+tr.S("bud.datatables.loadingRecords")+`",
+		"processing":     "`+tr.S("bud.datatables.processing")+`",
+		"search":         "`+tr.S("bud.datatables.search")+`",
+		"zeroRecords":    "`+tr.S("bud.datatables.zeroRecords")+`",
 		"paginate": {
-			"first":      "`+tr.S("blz.datatables.Pagination.first")+`",
-			"last":       "`+tr.S("blz.datatables.Pagination.last")+`",
-			"next":       "`+tr.S("blz.datatables.Pagination.next")+`",
-			"previous":   "`+tr.S("blz.datatables.Pagination.previous")+`"
+			"first":      "`+tr.S("bud.datatables.Pagination.first")+`",
+			"last":       "`+tr.S("bud.datatables.Pagination.last")+`",
+			"next":       "`+tr.S("bud.datatables.Pagination.next")+`",
+			"previous":   "`+tr.S("bud.datatables.Pagination.previous")+`"
 		},
 		"aria": {
-			"sortAscending":  "`+tr.S("blz.datatables.sortAscending")+`",
-			"sortDescending": "`+tr.S("blz.datatables.sortDescending")+`"
+			"sortAscending":  "`+tr.S("bud.datatables.sortAscending")+`",
+			"sortDescending": "`+tr.S("bud.datatables.sortDescending")+`"
 		}
 	}
 } );`)

@@ -15,7 +15,7 @@ import (
 
 const (
 	// Session value keys.
-	sessionValueKeyIsActive = "blzEditModeActive"
+	sessionValueKeyIsActive = "budEditModeActive"
 )
 
 var (
@@ -42,7 +42,7 @@ func Start(s *sessions.Session) {
 	template.EnableSessionContextStore(s)
 
 	// Confirm on exit.
-	s.SetExitMessage(tr.S("blz.core.exitMessage"))
+	s.SetExitMessage(tr.S("bud.core.exitMessage"))
 
 	// Add the session to the active sessions.
 	addSession(s, true)

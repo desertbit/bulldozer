@@ -13,10 +13,13 @@ import (
 
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
+	"code.desertbit.com/bulldozer/bulldozer/settings"
+
 	"errors"
 	"fmt"
 	"github.com/chuckpreslar/emission"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sync"
 )
@@ -111,9 +114,6 @@ type Template struct {
 
 	// Delimiters
 	leftDelim, rightDelim string
-
-	// Store the parse error
-	hasParseError error
 
 	// On render function pointer
 	getDataFunc GetDataFunc
@@ -274,11 +274,6 @@ func (t *Template) Templates() []*Template {
 // with the same receiver template, only one call can contain text
 // other than space, comments, and template definitions.)
 func (t *Template) Parse(src string) (tt *Template, err error) {
-	// Save the parse error if present.
-	defer func() {
-		t.hasParseError = err
-	}()
-
 	// Reset the plugin data.
 	func() {
 		t.pluginDataMapMutex.Lock()
@@ -338,7 +333,7 @@ func (t *Template) Parse(src string) (tt *Template, err error) {
 // t. If an error occurs, parsing stops and the returned template is nil;
 // otherwise it is t. There must be at least one file.
 func (t *Template) ParseFiles(filenames ...string) (*Template, error) {
-	return parseFiles(t.ns.uid, t, filenames...)
+	return parseFiles(t.ns.uid, t, filenames, false)
 }
 
 // ParseGlob parses the template definitions in the files identified by the
@@ -348,6 +343,11 @@ func (t *Template) ParseFiles(filenames ...string) (*Template, error) {
 // pattern.
 func (t *Template) ParseGlob(pattern string) (*Template, error) {
 	return parseGlob(t.ns.uid, t, pattern)
+}
+
+// ParseRec parses all template files recursivly in the given directory path.
+func (t *Template) ParseRec(dir string, excludeDirs ...string) (*Template, error) {
+	return parseRec(t.ns.uid, t, dir, excludeDirs...)
 }
 
 // New allocates a new bulldozer template with the given name.
@@ -387,7 +387,7 @@ func Must(t *Template, err error) *Template {
 // (parsed) contents of the first file. There must be at least one file.
 // If an error occurs, parsing stops and the returned *Template is nil.
 func ParseFiles(uid string, filenames ...string) (*Template, error) {
-	return parseFiles(uid, nil, filenames...)
+	return parseFiles(uid, nil, filenames, false)
 }
 
 // ParseGlob creates a new Template and parses the template definitions from the
@@ -397,6 +397,11 @@ func ParseFiles(uid string, filenames ...string) (*Template, error) {
 // ParseFiles with the list of files matched by the pattern.
 func ParseGlob(uid string, pattern string) (*Template, error) {
 	return parseGlob(uid, nil, pattern)
+}
+
+// ParseRec parses all template files recursivly in the given directory path.
+func ParseRec(uid string, dir string, excludeDirs ...string) (*Template, error) {
+	return parseRec(uid, nil, dir, excludeDirs...)
 }
 
 // ResetEnvironment releases all registered session events.
@@ -425,10 +430,15 @@ func (t *Template) initDefaults() {
 
 // parseFiles is the helper for the method and function. If the argument
 // template is nil, it is created from the first file.
-func parseFiles(uid string, t *Template, filenames ...string) (*Template, error) {
+func parseFiles(uid string, t *Template, filenames []string, recursiveName bool, pathPrefix ...string) (*Template, error) {
 	if len(filenames) == 0 {
 		// Not really a problem, but be consistent.
 		return nil, ErrNoFilesFound
+	}
+
+	var prefix string
+	if len(pathPrefix) > 0 {
+		prefix = pathPrefix[0]
 	}
 
 	var tmpl *Template
@@ -438,6 +448,20 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 		// Clean the path.
 		filename = filepath.Clean(filename)
 
+		// Get the template name.
+		ext := filepath.Ext(filename)
+		name = filename[0 : len(filename)-len(ext)]
+		if recursiveName {
+			name = filepath.ToSlash(name)
+		} else {
+			name = filepath.Base(name)
+		}
+
+		// Add the path prefix if present.
+		if len(prefix) > 0 {
+			filename = filepath.Clean(prefix + "/" + filename)
+		}
+
 		// Read the file.
 		b, err := ioutil.ReadFile(filename)
 		if err != nil {
@@ -446,9 +470,6 @@ func parseFiles(uid string, t *Template, filenames ...string) (*Template, error)
 			errorMessage += fmt.Sprint(err) + "\n"
 			continue
 		}
-
-		// Get the base file name.
-		name = filepath.Base(filename)
 
 		// First template becomes return value if not already defined,
 		// and we use that one for subsequent New calls to associate
@@ -492,7 +513,49 @@ func parseGlob(uid string, t *Template, pattern string) (*Template, error) {
 	if len(filenames) == 0 {
 		return nil, ErrPatternMatchesNoFiles
 	}
-	return parseFiles(uid, t, filenames...)
+	return parseFiles(uid, t, filenames, false)
+}
+
+// parseRec is the implementation of the function and method ParseRec.
+func parseRec(uid string, t *Template, dir string, excludeDirs ...string) (*Template, error) {
+	var filenames []string
+
+	// Prepare the paths.
+	dir = filepath.Clean(dir)
+	for i := 0; i < len(excludeDirs); i++ {
+		r, err := filepath.Rel(dir, excludeDirs[i])
+		if err != nil {
+			return nil, fmt.Errorf("exclude path error: %v", err)
+		}
+
+		excludeDirs[i] = r
+	}
+
+	// Get all template files recursive.
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		r, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
+
+		for _, ep := range excludeDirs {
+			if r == ep {
+				return filepath.SkipDir
+			}
+		}
+
+		// Add the file to the slice if this is a bulldozer template file.
+		if filepath.Ext(r) == settings.TemplateExtension {
+			filenames = append(filenames, r)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return parseFiles(uid, t, filenames, true, dir)
 }
 
 func getNameSpace(uid string) (ns *nameSpace, ok bool) {

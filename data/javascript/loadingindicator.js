@@ -30,7 +30,7 @@ Bulldozer.fn.loadingIndicator = new function () {
      */
 
     this.show = function () {
-        var e = $("#bulldozer-loading-indicator");
+        var e = $("#bud-loading-indicator");
         if (visible) {
             return;
         }
@@ -60,7 +60,7 @@ Bulldozer.fn.loadingIndicator = new function () {
     };
 
     this.hide = function () {
-        var e = $("#bulldozer-loading-indicator");
+        var e = $("#bud-loading-indicator");
         if (!visible) {
             return;
         }

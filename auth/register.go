@@ -38,7 +38,7 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 
 	// Just be sure...
 	if settings.Settings.RegistrationDisabled {
-		showRegisterErrorMsgBox(s, tr.S("blz.auth.register.errorMsgBoxTextRegistrationDisabled"))
+		showRegisterErrorMsgBox(s, tr.S("bud.auth.register.errorMsgBoxTextRegistrationDisabled"))
 		return
 	}
 
@@ -50,7 +50,7 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 	// Validate...
 	if len(name) == 0 || len(loginName) == 0 || len(email) == 0 || !strings.Contains(email, "@") ||
 		len(name) > maxLength || len(loginName) > maxLength || len(email) > maxLength {
-		showRegisterErrorMsgBox(s, tr.S("blz.auth.register.error.general"))
+		showRegisterErrorMsgBox(s, tr.S("bud.auth.register.error.general"))
 		return
 	}
 
@@ -58,10 +58,10 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 	exist, err := dbUserExists(loginName)
 	if err != nil {
 		log.L.Error("failed to check if user '%s' exists: %v", loginName, err)
-		showRegisterErrorMsgBox(s, tr.S("blz.auth.register.error.generalShort"))
+		showRegisterErrorMsgBox(s, tr.S("bud.auth.register.error.generalShort"))
 		return
 	} else if exist {
-		showRegisterErrorMsgBox(s, tr.S("blz.auth.register.error.userAlreadyExists", loginName))
+		showRegisterErrorMsgBox(s, tr.S("bud.auth.register.error.userAlreadyExists", loginName))
 		return
 	}
 
@@ -72,7 +72,7 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 	_, err = dbAddUser(loginName, name, email, password)
 	if err != nil {
 		log.L.Error("failed to add user '%s' to database: %v", loginName, err)
-		showRegisterErrorMsgBox(s, tr.S("blz.auth.register.error.generalShort"))
+		showRegisterErrorMsgBox(s, tr.S("bud.auth.register.error.generalShort"))
 		return
 	}
 
@@ -84,8 +84,8 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 
 	// Show a success message box.
 	messagebox.New().
-		SetTitle(tr.S("blz.auth.register.success.title")).
-		SetText(tr.S("blz.auth.register.success.text")).
+		SetTitle(tr.S("bud.auth.register.success.title")).
+		SetText(tr.S("bud.auth.register.success.text")).
 		SetType(messagebox.TypeSuccess).
 		Show(s)
 }
@@ -113,13 +113,13 @@ func routeRegisterPage(s *sessions.Session, routeData *router.Data) (string, str
 		return "", "", fmt.Errorf("failed to execute register template: %v", err)
 	}
 
-	return o, tr.S("blz.auth.register.pageTitle"), nil
+	return o, tr.S("bud.auth.register.pageTitle"), nil
 }
 
 func showRegisterErrorMsgBox(s *sessions.Session, msg string) {
 	// Show a messagebox
 	messagebox.New().
-		SetTitle(tr.S("blz.auth.register.errorMsgBoxTitle")).
+		SetTitle(tr.S("bud.auth.register.errorMsgBoxTitle")).
 		SetText(msg).
 		SetType(messagebox.TypeAlert).
 		Show(s)

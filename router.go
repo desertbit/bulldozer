@@ -6,11 +6,11 @@
 package bulldozer
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/backend/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/router"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
 )
@@ -125,6 +125,13 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		return
 	}
 
+	// Show the error page if a parse template error occurred.
+	if templatesParseError != nil {
+		// Execute the error template.
+		statusCode, body, title = execErrorTemplate(s, templatesParseError.Error(), false)
+		return
+	}
+
 	var err error
 
 	switch v := data.Value.(type) {
@@ -141,11 +148,11 @@ func execRoute(s *sessions.Session, requestedPath string) (statusCode int, body 
 		// Create the optional options for the template.
 		opts := template.ExecOpts{
 			ID:           v.UID,
-			StyleClasses: []string{"bulldozer-page"},
+			StyleClasses: []string{"bud-page"},
 		}
 
 		// Execute the template
-		o, c, found, err := TemplatesStore.Templates.ExecuteTemplateToString(s, v.TemplateName, opts)
+		o, c, found, err := Templates.ExecuteTemplateToString(s, v.TemplateName, opts)
 
 		if err != nil {
 			if found {
