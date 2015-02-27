@@ -2,15 +2,15 @@
  * Bulldozer TopBar
  */
 
-$bulldozer_topbar_height: 50px;
-$bulldozer_topbar_bg_color: #E25400;
-$bulldozer_topbar_color: #FFF;
-$bulldozer_topbar_split_color: lighten($bulldozer_topbar_bg_color, 10%);
-$bulldozer_topbar_hover_bg_color: #F6F6F6;
-$bulldozer_topbar_hover_color: #444444;
+$bud_topbar_height: 45px;
+$bud_topbar_bg_color: #393939;
+$bud_topbar_color: #999999;
+$bud_topbar_split_color: #333;
+$bud_topbar_hover_bg_color: #3E3E3E;
+$bud_topbar_hover_color: #FFF;
 
-$bulldozer_topbar_sub_menu_bg_color: #F6F6F6;
-$bulldozer_topbar_sub_menu_color: #444444;
+$bud_topbar_sub_menu_bg_color: #F6F6F6;
+$bud_topbar_sub_menu_color: #444444;
 
 
 #bud-topbar
@@ -23,22 +23,42 @@ $bulldozer_topbar_sub_menu_color: #444444;
 	margin: 0;
 	padding: 0;
 	width: 100%;
-	height: $bulldozer_topbar_height;
-	background-color: $bulldozer_topbar_bg_color;
+	height: $bud_topbar_height;
+	background-color: $bud_topbar_bg_color;
 
 	> .bud-topbar-logo
 	{
 		float: left;
 		position: relative;
-        width: 75px;
-        height: 50px;
-        background: url('../img/logo.png') no-repeat center center;
-        color: $bulldozer_topbar_color;
+        width: $bud-ctrl-nav-width;
+        height: $bud_topbar_height;
+        color: $bud_topbar_color;
         padding: 0;
         margin: 0;
-        cursor: default;
+        cursor: pointer;
 
         @include user-select(none);
+
+
+        &:visited {
+        	color: $bud_topbar_color;
+        }
+
+        > div {
+        	width: 100%;
+        	height: 23px;
+        	padding: (($bud_topbar_height - 23px) / 2) 0;
+
+        	svg {
+        		display: block;
+        		margin: auto;
+        	}
+
+        	.bud-logo {
+        		fill: $bud-primary-color;
+        		fill-opacity: 1;
+        	}
+        }
     }
 
 
@@ -52,59 +72,65 @@ $bulldozer_topbar_sub_menu_color: #444444;
 		list-style: none;
 		padding: 0;
 		margin: 0;
-		height: $bulldozer_topbar_height;
+		height: $bud_topbar_height;
 
 		li {
 			float: left;
 			position: relative;
 			padding: 0;
 			margin: 0;
-			border-left: solid 1px $bulldozer_topbar_split_color;
+			border-left: solid 1px $bud_topbar_split_color;
 	
 
 			&:last-child {
-				border-right: solid 1px $bulldozer_topbar_split_color;
+				border-right: solid 1px $bud_topbar_split_color;
 			}	
-			
+
 			i {
-				font-size: 1em;
+				font-size: 20px;;
+				line-height: 20px;
+				vertical-align: middle;
 			}
 
 			a, span {
 				font: 'Open Sans';
-				font-size: 0.93em;
+				font-size: 0.86em;
 				font-weight: bold;
 				text-decoration: none;
 				letter-spacing: 1px;
 				white-space: nowrap;
-				color: $bulldozer_topbar_color;
-				-webkit-user-select: none;  
-				-moz-user-select: none;    
-				-ms-user-select: none;      
-				user-select: none;
+				color: $bud_topbar_color;
+
+				@include user-select(none);
 			}
 
 			span {
 				display: inline-block;
-				margin: 0 0 0 5px;
+				margin: 0 0 0 3px;
 			}
 
 			a {
 				display: block;
-				padding: 0 22px;
+				padding: 0 10px;
 				margin: 0;
-				height: $bulldozer_topbar_height;
-				line-height: $bulldozer_topbar_height;
+				height: $bud_topbar_height;
+				line-height: $bud_topbar_height;
 				vertical-align: middle;
 				cursor: pointer;
+
+				@include bud-transition();
 			}
 
 			&:hover > a {
-				color: $bulldozer_topbar_hover_color;
-				background-color: $bulldozer_topbar_hover_bg_color;
+				color: $bud_topbar_hover_color;
+				background-color: $bud_topbar_hover_bg_color;
 
 				span {
-					color: $bulldozer_topbar_hover_color;
+					color: $bud_topbar_hover_color;
+				}
+
+				i {
+					color: $bud-primary-color;
 				}
 			}
 
@@ -121,7 +147,7 @@ $bulldozer_topbar_sub_menu_color: #444444;
 				right: auto;
 				width: auto;
 				z-index: -1;    
-				background-color: $bulldozer_topbar_sub_menu_bg_color;
+				background-color: $bud_topbar_sub_menu_bg_color;
 
 				// Shadow
 				-webkit-box-shadow: 0px 0px 2px 0px rgba(46,46,46,0.8);
@@ -133,10 +159,10 @@ $bulldozer_topbar_sub_menu_color: #444444;
 					margin: 0;
 					padding: 0;
 					display: block;
-					border-left: solid 2px $bulldozer_topbar_sub_menu_bg_color;
+					border-left: solid 2px $bud_topbar_sub_menu_bg_color;
 
 					a, span {
-						color: $bulldozer_topbar_sub_menu_color;
+						color: $bud_topbar_sub_menu_color;
 					}
 
 					&:last-child {
@@ -144,10 +170,14 @@ $bulldozer_topbar_sub_menu_color: #444444;
 					}
 
 					&:hover {
-						border-left: solid 2px $bulldozer_topbar_split_color;
+						border-left: solid 2px $bud_topbar_split_color;
+
+						> a {
+							background-color: $bud_topbar_sub_menu_bg_color;
+						}
 
 						a, span {
-							color: $bulldozer_topbar_sub_menu_color;
+							color: $bud_topbar_sub_menu_color;
 						}
 					}
 				}

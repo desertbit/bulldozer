@@ -1,47 +1,64 @@
 <div id="bud-topbar">
-	<div class="bud-topbar-logo"></div>
-{{if %.editmode.IsActive}}
-	<ul class="bud-left-menu">
-		<li><a id="{{id "stopEdit"}}">
-			<i class="fa fa-close"></i>
-			<span>{{tr "bud.topbar.stopEditMode"}}</span>
-		</a></li>
-		<li><a id="{{id "save"}}">
-			<i class="fa fa-save"></i>
-			<span>{{tr "bud.topbar.saveChanges"}}</span>
-		</a></li>
-		{{/*<li><a id="{{id "discard"}}">
-			<i class="fa fa-trash-o"></i>
-			<span>{{tr "bud.topbar.discardChanges"}}</span>
-		</a></li>*/}}
-	</ul>
-{{else}}
-	<ul class="bud-left-menu">
-		<li><a id="{{id "startEdit"}}">
-			<i class="fa fa-pencil"></i>
-			<span>{{tr "bud.topbar.startEditMode"}}</span>
-		</a></li>
-	</ul>
-	<ul class="bud-right-menu">
-		{{/*<li><a>
-			<i class="fa fa-gears"></i>
-			<span>{{tr "bud.topbar.controlPanel"}}</span>
-		</a></li>*/}}
-		<li>
-			<a>
-				<i class="fa fa-user"></i>
-				<span>{{%.auth.LoginName}}</span>
-			</a>
-			<ul>
-				<li><a id="{{id "logout"}}">
-					<i class="fa fa-power-off fa-fw"></i>
-					<span>{{tr "bud.topbar.logout"}}</span>
+	<a class="bud-topbar-logo" href="/">
+		{{template "logo"}}
+	</a>
+
+	{{if %.editmode.IsActive}}
+		<ul class="bud-left-menu">
+			{{if #.IsControlPanelPage}}
+				<li><a href="/">
+					<i class="fa fa-arrow-circle-left"></i>
+					<span>{{tr "bud.topbar.backToPage"}}</span>
 				</a></li>
-			</ul>
-		</li>
-	</ul>
-{{end}}
+			{{end}}
+			<li><a id="{{id "stopEdit"}}">
+				<i class="fa fa-close"></i>
+				<span>{{tr "bud.topbar.stopEditMode"}}</span>
+			</a></li>
+			<li><a id="{{id "save"}}">
+				<i class="fa fa-save"></i>
+				<span>{{tr "bud.topbar.saveChanges"}}</span>
+			</a></li>
+			{{/*<li><a id="{{id "discard"}}">
+				<i class="fa fa-trash-o"></i>
+				<span>{{tr "bud.topbar.discardChanges"}}</span>
+			</a></li>*/}}
+		</ul>
+	{{else}}
+		<ul class="bud-left-menu">
+			{{if #.IsControlPanelPage}}
+				<li><a href="/">
+					<i class="fa fa-arrow-circle-left"></i>
+					<span>{{tr "bud.topbar.backToPage"}}</span>
+				</a></li>
+			{{end}}
+			<li><a id="{{id "startEdit"}}">
+				<i class="fa fa-pencil"></i>
+				<span>{{tr "bud.topbar.startEditMode"}}</span>
+			</a></li>
+		</ul>
+		<ul class="bud-right-menu">
+			{{if not #.IsControlPanelPage}}
+				<li><a href="{{#.ControlPanelUrl}}">
+					<i class="fa fa-gears"></i>
+				</a></li>
+			{{end}}
+			<li>
+				<a>
+					<i class="fa fa-user"></i>
+					<span>{{%.auth.LoginName}}</span>
+				</a>
+				<ul>
+					<li><a id="{{id "logout"}}">
+						<i class="fa fa-power-off fa-fw"></i>
+						<span>{{tr "bud.topbar.logout"}}</span>
+					</a></li>
+				</ul>
+			</li>
+		</ul>
+	{{end}}
 </div>
+
 {{js load}}
 	Bulldozer.topbar.space(true);
 

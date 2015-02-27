@@ -26,7 +26,7 @@ IMPORTANT
 * bulldoze: don't initialize the project folder automatically. Implement a init command.
 * Bulldozer.socket.send: clear the queue after a short timeout.
 * Don't load scripts and javascripts twice if already added to the HTML head!
-* Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer.
+* Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer. Check if there are error messages that should be shown to all clients...
 * Search for old naming and replace it:
   -> grep -R "Bulldozer.core.loadPage" ./
   -> grep -R "Bulldozer.core.loadDefaultPage" ./
@@ -43,6 +43,8 @@ IMPROVEMENT
 
 STYLE
 =====
+* If the topbar is shown, then there is always a vertical scrollbar visible.
+* Add svg logo fallback to png image.
 * Hide the overflow on the body or page if the loading indicator is shown.
 * Style the not found and error core template pages.
 * Implement the unused errorbox.

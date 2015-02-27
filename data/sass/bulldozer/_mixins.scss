@@ -1,0 +1,11 @@
+/*
+ * Bulldozer Mixins
+ */
+
+ @mixin bud-transition($delay:.35s) {
+	-o-transition: $delay;
+	-ms-transition: $delay;
+	-moz-transition: $delay;
+	-webkit-transition: $delay;
+	transition: $delay;
+}

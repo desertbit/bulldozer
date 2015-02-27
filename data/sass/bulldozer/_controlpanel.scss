@@ -1,0 +1,133 @@
+/*
+ * Bulldozer Control Panel
+ */
+
+$bud-ctrl-nav-width: 55px;
+$bud-ctrl-nav-expand-width: 210px;
+$bud-ctrl-nav-height: 40px;
+$bud-ctrl-nav-bg-color: #393939;
+$bud-ctrl-nav-color: #999999;
+$bud-ctrl-nav-hover-bg-color: #3E3E3E;
+$bud-ctrl-nav-hover-color: #FFF;
+$bud-ctrl-nav-active-bg-color: #FFF;
+$bud-ctrl-nav-active-color: #333;
+
+$bud-ctrl-view-bg-color: #FFF;
+
+
+#bud-ctrl {
+	position: relative;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	min-height: 100%;
+	background-color: $bud-ctrl-view-bg-color;
+
+	#bud-ctrl-nav {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: $bud-ctrl-nav-width;
+		min-height: 100%;
+		overflow: hidden;
+		background-color: $bud-ctrl-nav-bg-color;
+
+		@include bud-transition();
+
+		ul {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+
+			li {
+				display: block;
+				margin: 0;
+				padding: 0;
+
+				a {
+					position: relative;
+					display: block;
+					width: $bud-ctrl-nav-width;
+					padding: 0;
+					margin: 0;
+					vertical-align: middle;
+					color: $bud-ctrl-nav-color;
+					
+					@include user-select(none);
+					@include bud-transition();
+
+					i {
+						margin: 0;
+						padding: 0;
+						width: $bud-ctrl-nav-width;
+						line-height: $bud-ctrl-nav-height;
+						color: inherit;
+						font-size: 20px;
+						text-align: center;
+						vertical-align: middle;
+					}
+
+					span {
+						position: absolute;
+						display: block;
+						top: 0;
+						bottom: 0;
+						right: 0;
+						left: 0;
+						margin: 0;
+						padding: 0 5px 0 $bud-ctrl-nav-width + 1px;
+						line-height: $bud-ctrl-nav-height;
+						vertical-align: middle;
+						font-size: 0.8em;
+						font-weight: bold;
+						white-space:nowrap;
+						text-overflow: ellipsis;
+						width: 100%;
+						overflow: hidden;
+
+						@include user-select(none);
+					}
+
+					&:hover {
+						background-color: $bud-ctrl-nav-hover-bg-color;
+						color: $bud-ctrl-nav-hover-color;
+
+						i {
+							color: $bud-primary-color;
+						}
+					}
+
+					&.active {
+						background-color: $bud-ctrl-nav-active-bg-color;
+						color: $bud-primary-color;
+					}
+				}
+			}
+		}
+	}
+
+	#bud-ctrl-view {
+		display: block;
+		width: 100%;
+		min-height: 100%;
+		padding: 15px;
+		padding-left: $bud-ctrl-nav-width + 15px;
+		background-color: $bud-ctrl-view-bg-color;
+
+		@include bud-transition();
+	}
+
+	&.bud-ctrl-expand {
+		#bud-ctrl-nav {
+			width: $bud-ctrl-nav-expand-width;
+
+			a  {
+				width: $bud-ctrl-nav-expand-width;
+			}
+		}
+
+		#bud-ctrl-view {
+			padding-left: $bud-ctrl-nav-expand-width + 15px;
+		}
+	}
+}

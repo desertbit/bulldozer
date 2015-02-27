@@ -6,12 +6,12 @@
 package bulldozer
 
 import (
-	_ "code.desertbit.com/bulldozer/bulldozer/controlcenter"
 	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
 
 	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
 	"code.desertbit.com/bulldozer/bulldozer/auth"
+	"code.desertbit.com/bulldozer/bulldozer/controlpanel"
 	"code.desertbit.com/bulldozer/bulldozer/database"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
@@ -152,6 +152,11 @@ func Init() {
 
 	// Initialize the topbar package.
 	if err = topbar.Init(); err != nil {
+		log.L.Fatal(err)
+	}
+
+	// Initialize the control center package.
+	if err = controlpanel.Init(backend); err != nil {
 		log.L.Fatal(err)
 	}
 

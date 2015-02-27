@@ -73,12 +73,12 @@ func init() {
 		ListenAddress:     ":9000",
 		ServeFiles:        true,
 
-		DatabaseAddr:        "localhost",
-		DatabasePort:        "28015",
-		DatabaseName:        "test",
-		DatabaseMaxIdle:     50,
-		DatabaseMaxActive:   50,
-		DatabaseIdleTimeout: time.Minute,
+		DatabaseAddr:    "localhost",
+		DatabasePort:    "28015",
+		DatabaseName:    "test",
+		DatabaseMaxIdle: 50,
+		DatabaseMaxOpen: 50,
+		DatabaseTimeout: time.Minute,
 
 		CookieHashKey:  defaultCookieHashKey,
 		CookieBlockKey: defaultCookieBlockKey,
@@ -283,12 +283,12 @@ type settings struct {
 
 	// Maximum number of connections allocated by the pool at a given time.
 	// When zero, there is no limit on the number of connections in the pool.
-	DatabaseMaxActive int
+	DatabaseMaxOpen int
 
 	// Close connections after remaining idle for this duration. If the value
 	// is zero, then idle connections are not closed. Applications should set
 	// the timeout to a value less than the server's timeout.
-	DatabaseIdleTimeout time.Duration
+	DatabaseTimeout time.Duration
 
 	GoPath               string
 	WorkingPath          string

@@ -14,7 +14,7 @@ Bulldozer.fn.topbar = new function () {
      */
 
     this.space = function (add) {
-    	var space = "50px";
+    	var space = "45px";
     	if (add === false) {
     		space = "0";
     	}

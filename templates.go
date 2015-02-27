@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	Templates *template.Template
+	Templates *template.Template = template.New(templatesUID, "")
 
 	templatesParseError error
 	coreTemplates       *template.Template
@@ -42,7 +42,7 @@ func loadTemplates() (err error) {
 	}
 
 	// Load all the template files recursivly.
-	Templates, err = template.ParseRec(templatesUID, settings.Settings.TemplatesPath, excludeDirs...)
+	_, err = Templates.ParseRec(settings.Settings.TemplatesPath, excludeDirs...)
 	if err != nil && err != template.ErrNoFilesFound && err != template.ErrPatternMatchesNoFiles {
 		// Just store the templates parse error.
 		// The application startup should not be interrupted...

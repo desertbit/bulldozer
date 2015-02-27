@@ -116,7 +116,7 @@ func GetSessions() []*sessions.Session {
 
 func addSession(s *sessions.Session, triggerEvent bool) {
 	// Remove the session if closed from the map.
-	s.OnClose(removeSession)
+	s.OnceClose(removeSession)
 
 	// Lock the mutex.
 	activeSessionsMutex.Lock()

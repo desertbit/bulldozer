@@ -7,6 +7,7 @@ package topbar
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/auth"
+	"code.desertbit.com/bulldozer/bulldozer/controlpanel"
 	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
@@ -21,6 +22,7 @@ const (
 
 	// Template names:
 	topbarTemplate = "topbar"
+	logoTemplate   = "logo"
 )
 
 var (
@@ -37,10 +39,13 @@ func init() {
 
 func Init() (err error) {
 	// Create the file path.
-	file := settings.LookupInternalTemplatePath(topbarTemplatesDir + topbarTemplate + settings.TemplateExtension)
+	files := []string{
+		settings.LookupInternalTemplatePath(topbarTemplatesDir + topbarTemplate + settings.TemplateExtension),
+		settings.LookupInternalTemplatePath(topbarTemplatesDir + logoTemplate + settings.TemplateExtension),
+	}
 
 	// Create and parse the templates.
-	templates, err = template.ParseFiles(topbarTemplatesUID, file)
+	templates, err = template.ParseFiles(topbarTemplatesUID, files...)
 	if err != nil {
 		return err
 	}
@@ -81,10 +86,22 @@ func ExecTopBar(i interface{}) (string, error) {
 		return "", nil
 	}
 
-	// TODO: Only show topbar if the user has the specific group set.
+	// Is the current page the control panel?
+	isControlPanelPage := s.CurrentPath() == controlpanel.PageUrl
+
+	// Template options and data.
+	opts := template.ExecOpts{
+		Data: struct {
+			IsControlPanelPage bool
+			ControlPanelUrl    string
+		}{
+			IsControlPanelPage: isControlPanelPage,
+			ControlPanelUrl:    controlpanel.PageUrl,
+		},
+	}
 
 	// Execute the topbar template.
-	body, _, _, err := templates.ExecuteTemplateToString(s, topbarTemplate)
+	body, _, _, err := templates.ExecuteTemplateToString(s, topbarTemplate, opts)
 	if err != nil {
 		return "", err
 	}

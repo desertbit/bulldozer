@@ -1,0 +1,19 @@
+{{must auth.IsAuth}}
+
+<div id="bud-ctrl-nav">
+	<ul>
+		<li><a class="active"><i class="fa fa-fw fa-tachometer"></i><span>Dashboard</span></a></li>
+		<li><a><i class="fa fa-fw fa-tachometer"></i><span>Dashboard</span></a></li>
+	</ul>
+</div>
+<div id="bud-ctrl-view">
+	<p>View</p>
+</div>
+
+{{js load}}
+	$("#bud-ctrl-nav").hover(function() {
+		$("#bud-ctrl").addClass("bud-ctrl-expand");
+	}, function() {
+		$("#bud-ctrl").removeClass("bud-ctrl-expand");
+	});
+{{end js}}

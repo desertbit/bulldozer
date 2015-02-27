@@ -26,11 +26,11 @@ func Connect() (err error) {
 
 	// Connext to the database server.
 	Session, err = r.Connect(r.ConnectOpts{
-		Address:     addr,
-		Database:    settings.Settings.DatabaseName,
-		MaxIdle:     settings.Settings.DatabaseMaxIdle,
-		MaxActive:   settings.Settings.DatabaseMaxActive,
-		IdleTimeout: settings.Settings.DatabaseIdleTimeout,
+		Address:  addr,
+		Database: settings.Settings.DatabaseName,
+		MaxIdle:  settings.Settings.DatabaseMaxIdle,
+		MaxOpen:  settings.Settings.DatabaseMaxOpen,
+		Timeout:  settings.Settings.DatabaseTimeout,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %v", err)

@@ -4,3 +4,4 @@
 {"ID": "bud.topbar.stopEditMode", "Text": "Finish"}
 {"ID": "bud.topbar.saveChanges", "Text": "Save"}
 {"ID": "bud.topbar.discardChanges", "Text": "Discard"}
+{"ID": "bud.topbar.backToPage", "Text": "Back To Page"}
