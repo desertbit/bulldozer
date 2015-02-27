@@ -11,8 +11,13 @@ package template
 import (
 	"bytes"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
+	"errors"
 	"fmt"
 	"io"
+)
+
+var (
+	ExecTemplateAbort = errors.New("Template execution aborted")
 )
 
 //#############//
@@ -154,15 +159,13 @@ func ExecuteContext(c *Context, wr io.Writer, data interface{}) error {
 	action := t.callMustFuncs(c)
 	if action != nil && action.action != actionContinue {
 		if action.action == actionError {
-			// Execute the error template without logging the error
-			// and write it to the io writer.
-			_, out, _ := backend.ExecErrorTemplate(c.ns.s, action.data, false)
-			wr.Write([]byte(out))
-			return nil
+			// Show the error page.
+			c.ns.s.ShowErrorPage(action.data, false)
+			return ExecTemplateAbort
 		} else if action.action == actionRedirect {
 			// Navigate to the path.
 			c.ns.s.Navigate(action.data)
-			return nil
+			return ExecTemplateAbort
 		} else {
 			return fmt.Errorf("invalid template action type: %v", action.action)
 		}

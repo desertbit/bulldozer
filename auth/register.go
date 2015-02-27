@@ -9,14 +9,17 @@ import (
 	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
 	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/router"
+	"code.desertbit.com/bulldozer/bulldozer/mux"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/templates"
 	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
+
 	"fmt"
 	"strings"
+	"time"
 )
 
 const (
@@ -82,6 +85,11 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 	// Redirect to the login page.
 	NavigateToLoginPage(s)
 
+	// Just timeout for a short period, because the navigation call is
+	// process in a separate goroutine. Otherwise the messagebox
+	// would be shown before the page is changed.
+	time.Sleep(350 * time.Millisecond)
+
 	// Show a success message box.
 	messagebox.New().
 		SetTitle(tr.S("bud.auth.register.success.title")).
@@ -94,26 +102,30 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 //### Private ###//
 //###############//
 
-func routeRegisterPage(s *sessions.Session, routeData *router.Data) (string, string, error) {
+func routeRegisterPage(s *sessions.Session, req *mux.Request) {
 	// If already authenticated, then redirect to the default page.
 	if IsAuth(s) {
 		s.NavigateHome()
-		return "", "", nil
+		return
 	}
 
 	// If the registration is disabled, then redirect to the login page.
 	if settings.Settings.RegistrationDisabled {
 		NavigateToLoginPage(s)
-		return "", "", nil
+		return
 	}
 
 	// Execute the login template.
-	o, _, _, err := templates.ExecuteTemplateToString(s, registerTemplate)
+	o, _, _, err := templates.Templates.ExecuteTemplateToString(s, registerTemplate)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to execute register template: %v", err)
+		req.Error(fmt.Errorf("failed to execute register template: %v", err))
+		return
 	}
 
-	return o, tr.S("bud.auth.register.pageTitle"), nil
+	// Set the body and title
+	req.Body = o
+	req.Title = tr.S("bud.auth.register.pageTitle")
+	return
 }
 
 func showRegisterErrorMsgBox(s *sessions.Session, msg string) {

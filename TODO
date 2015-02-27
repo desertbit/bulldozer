@@ -3,6 +3,8 @@
 ===========================
 
 
+* Make the template events accessible from other templates through a special template syntax: @templatename.FuncName...?
+* Remove the template must calls and implement middleware on the go side. If this is done, remove the session navigate goroutine and then also remove the time sleep in the registration event.
 * html minifier
 * Server database backups
 * Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
@@ -13,6 +15,7 @@
 
 IMPORTANT
 =========
+* Implement mux redirect route method. Then also add a redirect in the control panel package.
 * Implement detection if the tab is in the background. If so, disconnect the websocket after a specific timeout: https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
 * Detect prerendering/prefetching: http://stackoverflow.com/questions/9852257/http-header-to-detect-a-preload-request-by-google-chrome
 * implement discard option in edit mode.
@@ -33,6 +36,7 @@ IMPORTANT
 * Remove old removed $.DialogId...
 * editable popovers: make the popover styles non changeable from the project styles.
 * Kepler modal no scrollbars bug: open the imprint dialog, close it, save changes and reopen the imrpint dialog. the scrollbars are gone.
+* Set a flag on application shutdown to not perform any new request from any session!.
 
 
 IMPROVEMENT
@@ -84,6 +88,7 @@ SECURITY
 * Change session IDs on authentication.
 * [Optional] Rotate sessions frequently to new ones and replace the old once (Delete session store?)
 * [Optional] Set Cookie Path to restricted area
+* [Optional] Release the dialog contexts if the dialog is closed.
 
 
 Session & Socket
@@ -98,7 +103,6 @@ Database
 
 General
 =======
-* Should we move the global events map from the template namespace to the individual template? (Make it accessible from other templates through a special template syntax: @templatename.FuncName...?)
 * Don't print plugin warnings if no event functions are present.
 * Check if the browser is supported.
 * Check for not more used and old store values. (Deleted IDs...)

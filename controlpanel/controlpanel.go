@@ -8,8 +8,11 @@ package controlpanel
 import (
 	tr "code.desertbit.com/bulldozer/bulldozer/translate"
 
+	"code.desertbit.com/bulldozer/bulldozer/mux"
+	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/templates"
 
 	"fmt"
 )
@@ -17,51 +20,75 @@ import (
 const (
 	PageUrl = "/controlpanel"
 
-	pageUID           = "budControlC"
-	templatesDir      = "controlpanel/"
-	templateName      = "controlpanel"
-	templateNamespace = "bulldozer/"
+	templateName = "bud/controlpanel/controlpanel"
 )
-
-var (
-	backend bulldozerBackend
-)
-
-//###################################//
-//### Bulldozer backend interface ###//
-//###################################//
-
-type bulldozerBackend interface {
-	ParsePageTemplate(templateName string, path string) (*template.Template, error)
-	RoutePage(path string, pageTitle string, pageTemplate string, UID string)
-}
 
 //##############//
 //### Public ###//
 //##############//
 
 // Init initializes this package. This is managed by the bulldozer main package.
-func Init(b bulldozerBackend) (err error) {
-	// Set the backend.
-	backend = b
+func Init() (err error) {
+	// Disallow the control panel page to be indexed.
+	settings.Settings.AddDisallowedRobotsUrls(PageUrl)
 
-	// Create the template file path.
-	file := settings.LookupInternalTemplatePath(templatesDir + templateName + settings.TemplateExtension)
-
-	// Create the template name.
-	name := templateNamespace + templateName
-
-	// Parse and add the control panel template page.
-	t, err := backend.ParsePageTemplate(name, file)
-	if err != nil {
-		return fmt.Errorf("failed to parse control panel page template: %v", err)
+	// Obtain the control center template.
+	t := templates.Templates.Lookup(templateName)
+	if t == nil {
+		return fmt.Errorf("failed to lookup control center template!")
 	}
 
 	// Set the custom ID.
 	t.SetStaticDomID("bud-ctrl")
 
-	// Add the control panel route.
-	backend.RoutePage(PageUrl, tr.S("bud.controlpanel.pageTitle"), name, pageUID)
+	// Add the control panel routes.
+	mux.Route(PageUrl, routePage)
+	mux.Route(PageUrl+"/*", routePage)
 
 	return nil
+}
+
+//###############//
+//### Private ###//
+//###############//
+
+func routePage(s *sessions.Session, req *mux.Request) {
+	// Create the page render data.
+	data := struct {
+		PageUrl string
+		Pages   Pages
+	}{
+		PageUrl: PageUrl,
+		Pages:   pages,
+	}
+
+	// Get the requested control panel template and execute it.
+	/*if len(rData.RestPath) > 0 {
+		id := rData.RestPath
+
+		// Check if the ID is valid and a page exists.
+		page, ok := pages[id]
+		if !ok {
+			return nil, fmt.Errorf("control panel: client requested an invalid control panel page with ID: %s", id)
+		}
+
+		if page.Template == nil {
+			return nil, fmt.Errorf("control panel: client requested the control panel page with ID '%s', but the template is nil!", id)
+		}
+	}*/
+
+	// Set the title.
+	req.Title = tr.S("bud.controlpanel.pageTitle")
+
+	// Create the template execute options.
+	opts := template.ExecOpts{
+		Data: data,
+	}
+
+	// Execute the template page.
+	var err error
+	req.Body, _, _, err = templates.Templates.ExecuteTemplateToString(s, templateName, opts)
+	if err != nil {
+		req.Error(err)
+	}
 }

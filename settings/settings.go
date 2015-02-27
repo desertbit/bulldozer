@@ -120,7 +120,6 @@ func init() {
 	Settings.PublicPath = Settings.WorkingPath + "public"
 	Settings.TemplatesPath = Settings.WorkingPath + "templates"
 	Settings.PagesPath = Settings.TemplatesPath + "/pages"
-	Settings.BulldozerTemplatesPath = Settings.TemplatesPath + "/bulldozer"
 	Settings.TranslationPath = Settings.WorkingPath + "translations"
 	Settings.DataPath = Settings.WorkingPath + "data"
 	Settings.ScssPath = Settings.DataPath + "/scss"
@@ -137,7 +136,8 @@ func init() {
 	}
 
 	Settings.BulldozerSourcePath = Settings.GoPath + bulldozerGoPath
-	Settings.BulldozerInternalTemplatesPath = Settings.BulldozerSourcePath + "/data/templates"
+	Settings.BulldozerTemplatesPath = Settings.BulldozerSourcePath + "/data/templates"
+	Settings.BulldozerCoreTemplatesPath = Settings.BulldozerTemplatesPath + "/core"
 	Settings.BulldozerResourcesPath = Settings.BulldozerSourcePath + "/data/resources"
 	Settings.BulldozerTranslationPath = Settings.BulldozerSourcePath + "/data/translations"
 	Settings.BulldozerPrototypesPath = Settings.BulldozerSourcePath + "/data/prototypes"
@@ -240,19 +240,6 @@ func Load(path string) error {
 	return nil
 }
 
-// GetCoreTemplatePath returns the template path depeding on,
-// if the template exists in the project folder.
-// If not the bulldozer internal template path is used.
-func LookupInternalTemplatePath(path string) string {
-	tmpPath := Settings.BulldozerTemplatesPath + "/" + path
-	if exists, _ := utils.Exists(tmpPath); exists {
-		return tmpPath
-	}
-
-	// Fallback to the bulldozer internal template path.
-	return Settings.BulldozerInternalTemplatesPath + "/" + path
-}
-
 //#######################//
 //### Settings struct ###//
 //#######################//
@@ -295,12 +282,11 @@ type settings struct {
 	TmpPath              string
 	SessionsDatabasePath string
 
-	PublicPath             string
-	PagesPath              string
-	TemplatesPath          string
-	BulldozerTemplatesPath string
-	TranslationPath        string
-	DataPath               string
+	PublicPath      string
+	PagesPath       string
+	TemplatesPath   string
+	TranslationPath string
+	DataPath        string
 
 	ScssPath string
 	CssPath  string
@@ -308,11 +294,12 @@ type settings struct {
 	ScssCmd  string
 	ScssArgs []string
 
-	BulldozerSourcePath            string
-	BulldozerInternalTemplatesPath string
-	BulldozerResourcesPath         string
-	BulldozerTranslationPath       string
-	BulldozerPrototypesPath        string
+	BulldozerSourcePath        string
+	BulldozerTemplatesPath     string
+	BulldozerCoreTemplatesPath string
+	BulldozerResourcesPath     string
+	BulldozerTranslationPath   string
+	BulldozerPrototypesPath    string
 
 	// The CookieHashKey is required, used to authenticate the cookie value using HMAC.
 	// It is recommended to use a key with 32 or 64 bytes.
@@ -350,4 +337,8 @@ func (s *settings) CookieHashKeyBytes() []byte {
 
 func (s *settings) CookieBlockKeyBytes() []byte {
 	return []byte(s.CookieBlockKey)
+}
+
+func (s *settings) AddDisallowedRobotsUrls(urls ...string) {
+	s.DisallowedRobotsUrls = append(s.DisallowedRobotsUrls, urls...)
 }

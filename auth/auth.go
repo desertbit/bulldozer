@@ -7,11 +7,13 @@ package auth
 
 import (
 	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/router"
+	"code.desertbit.com/bulldozer/bulldozer/mux"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/templates"
+
 	"encoding/gob"
+	"fmt"
 )
 
 const (
@@ -19,12 +21,10 @@ const (
 	LoginPageUrl    = "/login"
 	RegisterPageUrl = "/register"
 
-	authTemplatesUID = "budAuth"
-	authTemplatesDir = "auth/"
-
 	// Template names:
-	loginTemplate    = "login"
-	registerTemplate = "register"
+	loginTemplate                = "bud/auth/login"
+	registerTemplate             = "bud/auth/register"
+	changePasswordDialogTemplate = "bud/auth/changepassworddialog"
 
 	// Session value keys.
 	sessionValueKeyIsAuth = "budAuthData"
@@ -33,24 +33,9 @@ const (
 	contextValueKeyIsAuth = "budAuthData"
 )
 
-var (
-	backend bulldozerBackend
-
-	// Templates
-	templates *template.Template
-)
-
 func init() {
 	// Register the custom type.
 	gob.Register(new(sessionAuthData))
-}
-
-//###################################//
-//### Bulldozer backend interface ###//
-//###################################//
-
-type bulldozerBackend interface {
-	Route(path string, f func(*sessions.Session, *router.Data) (string, string, error))
 }
 
 //###################################//
@@ -65,35 +50,35 @@ type sessionAuthData struct {
 //### Public ###//
 //##############//
 
-func Init(b bulldozerBackend) (err error) {
-	// Set the backend.
-	backend = b
-
-	// Create the files slice.
-	files := []string{
-		settings.LookupInternalTemplatePath(authTemplatesDir + loginTemplate + settings.TemplateExtension),
-		settings.LookupInternalTemplatePath(authTemplatesDir + registerTemplate + settings.TemplateExtension),
+func Init() (err error) {
+	// Obtain the login template and prepare it.
+	t := templates.Templates.Lookup(loginTemplate)
+	if t == nil {
+		return fmt.Errorf("failed to lookup auth login template!")
 	}
-
-	// Create and parse the templates.
-	templates, err = template.ParseFiles(authTemplatesUID, files...)
-	if err != nil {
-		return err
-	}
-
-	// Customize the templates.
-	templates.LookupFatal(loginTemplate).
-		AddStyleClass("bud-page").
+	t.AddStyleClass("bud-page").
 		RegisterEvents(new(loginEvents)).
 		OnGetData(onLoginTemplateGetData)
 
-	templates.LookupFatal(registerTemplate).
-		AddStyleClass("bud-page").
+	// Obtain the login template and prepare it.
+	t = templates.Templates.Lookup(registerTemplate)
+	if t == nil {
+		return fmt.Errorf("failed to lookup auth register template!")
+	}
+	t.AddStyleClass("bud-page").
 		RegisterEvents(new(registerEvents))
 
+	// Obtain the change password dialog template  and prepare it.
+	t = templates.Templates.Lookup(changePasswordDialogTemplate)
+	if t == nil {
+		return fmt.Errorf("failed to lookup auth change password dialog template!")
+	}
+	t.RegisterEvents(new(changePasswordDialogEvents))
+	changePasswordDialog.SetTemplate(t)
+
 	// Set the login route.
-	backend.Route(LoginPageUrl, routeLoginPage)
-	backend.Route(RegisterPageUrl, routeRegisterPage)
+	mux.Route(LoginPageUrl, routeLoginPage)
+	mux.Route(RegisterPageUrl, routeRegisterPage)
 
 	// Initialize the database.
 	initDB()

@@ -341,8 +341,8 @@ func (s *Session) Navigate(path string) {
 		s.navigateMutex.Lock()
 		defer s.navigateMutex.Unlock()
 
-		// Call the navigate hook.
-		navigateFunc(s, path)
+		// Call the navigate interface function.
+		backendI.NavigateFunc(s, path)
 	}()
 }
 
@@ -350,6 +350,19 @@ func (s *Session) Navigate(path string) {
 // This is equivalent to: s.Navigate("/")
 func (s *Session) NavigateHome() {
 	s.Navigate("/")
+}
+
+// ShowErrorPage shows the error message page with the error message if the
+// user is authenticated. The error message will be also logged.
+// One optional boolean can be set. If set to false, the error message won't be logged.
+func (s *Session) ShowErrorPage(errorMessage string, vars ...bool) {
+	backendI.ShowErrorPage(s, errorMessage, vars...)
+
+}
+
+// ShowNotFoundPage show the not found page.
+func (s *Session) ShowNotFoundPage() {
+	backendI.ShowNotFoundPage(s)
 }
 
 //######################//
@@ -435,7 +448,10 @@ func (s *Session) CacheDelete(key interface{}) {
 
 // Init initializes the sessions packages.
 // This is called and handled by default by the bulldozer main package.
-func Init() {
+func Init(i Interface) {
+	// Set the interface.
+	backendI = i
+
 	// Create a new secure cookie object with the cookie keys
 	secureCookie = securecookie.New(settings.Settings.CookieHashKeyBytes(), settings.Settings.CookieBlockKeyBytes())
 

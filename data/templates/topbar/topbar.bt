@@ -1,6 +1,6 @@
 <div id="bud-topbar">
 	<a class="bud-topbar-logo" href="/">
-		{{template "logo"}}
+		{{template "bud/topbar/logo"}}
 	</a>
 
 	{{if %.editmode.IsActive}}
@@ -31,11 +31,12 @@
 					<i class="fa fa-arrow-circle-left"></i>
 					<span>{{tr "bud.topbar.backToPage"}}</span>
 				</a></li>
+			{{else}}
+				<li><a id="{{id "startEdit"}}">
+					<i class="fa fa-pencil"></i>
+					<span>{{tr "bud.topbar.startEditMode"}}</span>
+				</a></li>
 			{{end}}
-			<li><a id="{{id "startEdit"}}">
-				<i class="fa fa-pencil"></i>
-				<span>{{tr "bud.topbar.startEditMode"}}</span>
-			</a></li>
 		</ul>
 		<ul class="bud-right-menu">
 			{{if not #.IsControlPanelPage}}

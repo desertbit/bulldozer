@@ -65,23 +65,22 @@ var (
 )
 
 func init() {
-	// Create the dialog
-	d = dialog.New(messageBoxTemplateUID)
+	// Create the dialog and set the default values.
+	d = dialog.New().
+		SetSize(dialog.SizeSmall).
+		SetClosable(false)
 
-	// The messagebox should not be closable
-	d.SetClosable(false)
-
-	// Set the dialog template text and parse it
-	err := d.Parse(messageBoxText)
+	// Parse the messagebox template.
+	t, err := template.New(messageBoxTemplateUID, "msgbox").Parse(messageBoxText)
 	if err != nil {
 		log.L.Fatalf("failed to parse message box dialog template: %v", err)
 	}
 
-	// Set the message box size
-	d.SetSize(dialog.SizeSmall)
+	// Register the events.
+	t.RegisterEvents(new(receiver))
 
-	// Register the internal dialog events.
-	d.RegisterEvents(&receiver{})
+	// Set the template.
+	d.SetTemplate(t)
 }
 
 //###########################//
@@ -91,6 +90,9 @@ func init() {
 type receiver struct{}
 
 func (r *receiver) EventButtonClicked(c *template.Context, b int) {
+	// Close the messagebox.
+	d.Close(c)
+
 	// Save the session pointer.
 	s := c.Session()
 
@@ -312,7 +314,6 @@ const messageBoxText = `<div class="topbar{{#.TypeClass}}">
 			$("#{{id $b.Id}}").click(function() {
 				var t = "{{$b.Type}}";
 				{{emit ButtonClicked(t)}}
-				{{closeDialog $.Context}}
 			});
 		{{end js}}
 	{{end}}

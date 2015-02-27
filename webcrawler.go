@@ -9,6 +9,7 @@ import (
 	textTemplate "text/template"
 
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/mux"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"net/http"
 )
@@ -62,7 +63,7 @@ func handleSitemapFunc(w http.ResponseWriter, req *http.Request) {
 	// Get all paths, without disallowed paths.
 	var paths []string
 	var found bool
-	for _, path := range mainRouter.Paths() {
+	for _, path := range mux.RoutePaths() {
 		found = false
 		for _, dpath := range disallowedPaths {
 			if path == dpath {

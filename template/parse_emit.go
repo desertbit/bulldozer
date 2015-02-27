@@ -69,19 +69,19 @@ func (t *Template) RegisterEvents(i interface{}, vars ...string) *Template {
 	var events *events
 	func() {
 		// Lock the mutex
-		t.ns.eventsMapMutex.Lock()
-		defer t.ns.eventsMapMutex.Unlock()
+		t.eventsMapMutex.Lock()
+		defer t.eventsMapMutex.Unlock()
 
 		// Obtain the events value.
 		// If it doesn't exists for the namespace, then create one.
 		var ok bool
-		events, ok = t.ns.eventsMap[namespace]
+		events, ok = t.eventsMap[namespace]
 		if !ok {
 			// Create a new events value and pass the template.
 			events = newEvents(t)
 
 			// Add the new events to the map
-			t.ns.eventsMap[namespace] = events
+			t.eventsMap[namespace] = events
 		}
 	}()
 
@@ -290,17 +290,17 @@ func parseEmit(typeStr string, token string, d *parseData) error {
 }
 
 func createEventAccessKey(c *Context, namespace string, funcName string) (string, error) {
-	ns := c.t.ns
+	t := c.t
 	s := c.ns.s
 
 	// Check if the function exists.
 	events, ok := func() (e *events, ok bool) {
 		// Lock the mutex
-		ns.eventsMapMutex.Lock()
-		defer ns.eventsMapMutex.Unlock()
+		t.eventsMapMutex.Lock()
+		defer t.eventsMapMutex.Unlock()
 
 		// Obtain the events value.
-		e, ok = ns.eventsMap[namespace]
+		e, ok = t.eventsMap[namespace]
 		return
 	}()
 
@@ -445,17 +445,14 @@ func sessionRequestEmit(s *sessions.Session, data map[string]string) error {
 		return fmt.Errorf("invalid emit call from client: domID '%s' key '%s' parameters '%v': %v", domID, key, params, err)
 	}
 
-	// Get the template namespace pointer.
-	ns := c.t.ns
-
 	// Get the event functions of the given namespace.
 	events, ok := func() (e *events, ok bool) {
 		// Lock the mutex
-		ns.eventsMapMutex.Lock()
-		defer ns.eventsMapMutex.Unlock()
+		c.t.eventsMapMutex.Lock()
+		defer c.t.eventsMapMutex.Unlock()
 
 		// Obtain the events value.
-		e, ok = ns.eventsMap[sEvent.FuncNameSpace]
+		e, ok = c.t.eventsMap[sEvent.FuncNameSpace]
 		return
 	}()
 	if !ok {

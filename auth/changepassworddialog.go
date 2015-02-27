@@ -9,7 +9,6 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/callback"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/translate"
 	"code.desertbit.com/bulldozer/bulldozer/ui/dialog"
@@ -19,8 +18,6 @@ import (
 )
 
 const (
-	changePasswordDialogTemplateUID       = "budChangePasswordDialog"
-	changePasswordDialogTemplateFile      = authTemplatesDir + "dialogs/changepassword" + settings.TemplateExtension
 	sessionValueKeyChangePasswordUserID   = "budChangePasswordUID"
 	sessionValueKeyChangePasswordCallback = "budChangePasswordCB"
 )
@@ -30,26 +27,10 @@ var (
 )
 
 func init() {
-	// Create the dialog.
-	changePasswordDialog = dialog.New(changePasswordDialogTemplateUID)
-
-	// The dialog should not have a close button.
-	changePasswordDialog.SetClosable(false)
-
-	// Create the template filepath.
-	path := settings.LookupInternalTemplatePath(changePasswordDialogTemplateFile)
-
-	// Parse the template file.
-	err := changePasswordDialog.ParseFile(path)
-	if err != nil {
-		log.L.Fatalf("failed to parse change password dialog template: %v", err)
-	}
-
-	// Set the dialog size.
-	changePasswordDialog.SetSize(dialog.SizeSmall)
-
-	// Set the events.
-	changePasswordDialog.RegisterEvents(new(changePasswordDialogEvents))
+	// Create the dialog and set the options.
+	changePasswordDialog = dialog.New().
+		SetSize(dialog.SizeSmall).
+		SetClosable(false)
 }
 
 //##############//

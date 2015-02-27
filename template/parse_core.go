@@ -87,7 +87,7 @@ func parseTemplate(typeStr string, token string, d *parseData) error {
 		}
 	}
 
-	*d.final += d.leftDelim + "template " + templateName + " tmplC " + templateName + " " + id + " $ " + args + d.rightDelim
+	*d.final += d.leftDelim + "tmplR " + templateName + " " + id + " $ " + args + d.rightDelim
 
 	return nil
 }

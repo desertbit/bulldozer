@@ -10,23 +10,15 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/controlpanel"
 	"code.desertbit.com/bulldozer/bulldozer/editmode"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/store"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/templates"
 	"fmt"
 )
 
 const (
-	topbarTemplatesUID = "budTopBar"
-	topbarTemplatesDir = "topbar/"
-
-	// Template names:
-	topbarTemplate = "topbar"
-	logoTemplate   = "logo"
-)
-
-var (
-	templates *template.Template
+	// Template name
+	topbarTemplate = "bud/topbar/topbar"
 )
 
 func init() {
@@ -38,20 +30,14 @@ func init() {
 //##############//
 
 func Init() (err error) {
-	// Create the file path.
-	files := []string{
-		settings.LookupInternalTemplatePath(topbarTemplatesDir + topbarTemplate + settings.TemplateExtension),
-		settings.LookupInternalTemplatePath(topbarTemplatesDir + logoTemplate + settings.TemplateExtension),
+	// Obtain the control center template.
+	t := templates.Templates.Lookup(topbarTemplate)
+	if t == nil {
+		return fmt.Errorf("failed to lookup topbar template!")
 	}
 
-	// Create and parse the templates.
-	templates, err = template.ParseFiles(topbarTemplatesUID, files...)
-	if err != nil {
-		return err
-	}
-
-	// Register the template events.
-	templates.RegisterEvents(new(events))
+	// Register the topbar events.
+	t.RegisterEvents(new(events))
 
 	return nil
 }
@@ -101,7 +87,7 @@ func ExecTopBar(i interface{}) (string, error) {
 	}
 
 	// Execute the topbar template.
-	body, _, _, err := templates.ExecuteTemplateToString(s, topbarTemplate, opts)
+	body, _, _, err := templates.Templates.ExecuteTemplateToString(s, topbarTemplate, opts)
 	if err != nil {
 		return "", err
 	}

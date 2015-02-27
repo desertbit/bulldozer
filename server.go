@@ -10,6 +10,7 @@ import (
 
 	"code.desertbit.com/bulldozer/bulldozer/firewall"
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/mux"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"fmt"
@@ -64,13 +65,9 @@ func init() {
 		log.L.Fatalf("main template body parsing error: %v", err)
 	}
 
-	// Parse the additional main template files.
-	files := []string{
-		settings.LookupInternalTemplatePath(loadingIndicatorTemplate),
-		settings.LookupInternalTemplatePath(connectionLostTemplate),
-		settings.LookupInternalTemplatePath(noScriptTemplate),
-	}
-	_, err = mainTemplates.ParseFiles(files...)
+	// Parse the additional core template files.
+	pattern := settings.Settings.BulldozerCoreTemplatesPath + "/*" + settings.TemplateExtension
+	_, err = mainTemplates.ParseGlob(pattern)
 	if err != nil {
 		log.L.Fatalf("main templates parsing error: %v", err)
 	}
@@ -197,7 +194,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Execute the route.
-	statusCode, body, title, _ := execRoute(session, req.URL.Path)
+	statusCode, body, title, _ := mux.ExecRoute(session, req.URL.Path)
 
 	// Create the template data struct
 	data := struct {

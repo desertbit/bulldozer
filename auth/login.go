@@ -10,12 +10,14 @@ import (
 
 	"code.desertbit.com/bulldozer/bulldozer/callback"
 	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/router"
+	"code.desertbit.com/bulldozer/bulldozer/mux"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/templates"
 	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
+
 	"fmt"
 	"strings"
 )
@@ -129,20 +131,24 @@ func onLoginTemplateGetData(c *template.Context) interface{} {
 	return data
 }
 
-func routeLoginPage(s *sessions.Session, routeData *router.Data) (string, string, error) {
+func routeLoginPage(s *sessions.Session, req *mux.Request) {
 	// If already authenticated, then redirect to the default page.
 	if IsAuth(s) {
 		s.NavigateHome()
-		return "", "", nil
+		return
 	}
 
 	// Execute the login template.
-	o, _, _, err := templates.ExecuteTemplateToString(s, loginTemplate)
+	o, _, _, err := templates.Templates.ExecuteTemplateToString(s, loginTemplate)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to execute login template: %v", err)
+		req.Error(fmt.Errorf("failed to execute login template: %v", err))
+		return
 	}
 
-	return o, tr.S("bud.auth.login.pageTitle"), nil
+	// Set the body and title
+	req.Body = o
+	req.Title = tr.S("bud.auth.login.pageTitle")
+	return
 }
 
 func showLoginErrorMsgBox(s *sessions.Session) {

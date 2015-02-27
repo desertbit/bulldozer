@@ -14,10 +14,11 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/controlpanel"
 	"code.desertbit.com/bulldozer/bulldozer/database"
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/mux"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/store"
-	"code.desertbit.com/bulldozer/bulldozer/template"
+	"code.desertbit.com/bulldozer/bulldozer/templates"
 	"code.desertbit.com/bulldozer/bulldozer/topbar"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
 
@@ -124,8 +125,8 @@ func Init() {
 	tr.Load()
 
 	// Initialize the bulldozer sub packages.
-	sessions.Init()
-	template.Init(backend)
+	sessions.Init(backendI)
+	mux.Init(backendI)
 
 	// Connect to the database server.
 	if err = database.Connect(); err != nil {
@@ -145,8 +146,14 @@ func Init() {
 	// Initialize the store package.
 	store.Init()
 
+	// Load the bulldozer templates to the bulldozer namespace.
+	err = templates.Load("bud", settings.Settings.BulldozerTemplatesPath, settings.Settings.BulldozerCoreTemplatesPath)
+	if err != nil {
+		log.L.Fatal(err)
+	}
+
 	// Initialize the authentication package.
-	if err = auth.Init(backend); err != nil {
+	if err = auth.Init(); err != nil {
 		log.L.Fatal(err)
 	}
 
@@ -156,7 +163,7 @@ func Init() {
 	}
 
 	// Initialize the control center package.
-	if err = controlpanel.Init(backend); err != nil {
+	if err = controlpanel.Init(); err != nil {
 		log.L.Fatal(err)
 	}
 
@@ -165,8 +172,9 @@ func Init() {
 		log.L.Fatalf("init hook error: %v", err)
 	}
 
-	// Load the templates.
-	if err = loadTemplates(); err != nil {
+	// Load the templates in the project templates directory.
+	err = templates.Load("", settings.Settings.TemplatesPath)
+	if err != nil {
 		log.L.Fatal(err)
 	}
 
