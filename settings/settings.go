@@ -214,6 +214,18 @@ func Prepare() error {
 		log.L.Warning("[WARNING] settings: the default password encryption key is set! You should replace this with a secret key!")
 	}
 
+	// Warn the user about possible forgotten root slashes.
+	for _, url := range Settings.StaticJavaScripts {
+		if !strings.HasPrefix(url, "/") {
+			log.L.Warning("static javascript url does not start with a slash: '%s'", url)
+		}
+	}
+	for _, url := range Settings.StaticStyleSheets {
+		if !strings.HasPrefix(url, "/") {
+			log.L.Warning("static style sheet url does not start with a slash: '%s'", url)
+		}
+	}
+
 	// Remove leading / from the site url
 	Settings.SiteUrl = strings.TrimSuffix(Settings.SiteUrl, "/")
 
