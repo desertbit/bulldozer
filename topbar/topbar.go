@@ -107,32 +107,21 @@ func onEndAuthenticatedSession(s *sessions.Session) {
 type events struct{}
 
 func (e *events) EventLogout(c *template.Context) {
-	// Get the session pointer.
-	s := c.Session()
-
-	// Hide the loading indicator on return.
-	s.HideLoadingIndicator()
-
 	// Logout.
-	auth.Logout(s)
+	// The loading indicator is hidden by the page reload.
+	auth.Logout(c.Session())
 }
 
 func (e *events) EventStartEdit(c *template.Context) {
-	// Get the session pointer.
-	s := c.Session()
-
 	// Start the edit mode.
 	// The loading indicator is hidden by the page reload.
-	editmode.Start(s)
+	editmode.Start(c.Session())
 }
 
 func (e *events) EventStopEdit(c *template.Context) {
-	// Get the session pointer.
-	s := c.Session()
-
 	// Stop the edit mode.
 	// The loading indicator is hidden by the page reload.
-	editmode.Stop(s)
+	editmode.Stop(c.Session())
 }
 
 func (e *events) EventSaveChanges(c *template.Context) {
