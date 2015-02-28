@@ -90,11 +90,12 @@ func init() {
 type receiver struct{}
 
 func (r *receiver) EventButtonClicked(c *template.Context, b int) {
-	// Close the messagebox.
-	d.Close(c)
-
 	// Save the session pointer.
 	s := c.Session()
+
+	// Close the messagebox and hide the loading indicator.
+	s.HideLoadingIndicator()
+	d.Close(c)
 
 	// Create the session value access key.
 	key := sessionValueKeyPrefix + c.ID()
@@ -313,6 +314,7 @@ const messageBoxText = `<div class="topbar{{#.TypeClass}}">
 		{{js load}}
 			$("#{{id $b.Id}}").click(function() {
 				var t = "{{$b.Type}}";
+				Bulldozer.loadingIndicator.show();
 				{{emit ButtonClicked(t)}}
 			});
 		{{end js}}
