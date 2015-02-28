@@ -75,7 +75,7 @@ Bulldozer.fn.render = new function () {
         var budBody = $("#bud-body");
 
         // Do some cleanup
-        if (budBody && body.length > 0) {
+        if (budBody && budBody.length > 0) {
             // Unbind all events of the current page and all its children
             budBody.off();
             budBody.find("*").off();

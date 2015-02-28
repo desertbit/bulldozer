@@ -238,7 +238,14 @@ Bulldozer.fn.core = new function () {
     };
 
     this.onJsLoad = function (id, callback) {
-        $("#" + id).one("bulldozer.execJsLoad", callback);
+        $("#" + id).one("bulldozer.execJsLoad", function() {
+            try {
+                callback();
+            }
+            catch(err) {
+                console.log("execute js unload function error: " + err.message);
+            }
+        });
     };
 
     this.execJsUnload = function (id) {
@@ -247,8 +254,17 @@ Bulldozer.fn.core = new function () {
     };
 
     this.onJsUnload = function (id, callback) {
-        $("#" + id).one("bulldozer.execJsUnload", callback);
-        $(document).one("bulldozer.execJsUnload", callback);
+        var cb = function() {
+            try {
+                callback();
+            }
+            catch(err) {
+                console.log("execute js unload function error: " + err.message);
+            }
+        };
+
+        $("#" + id).one("bulldozer.execJsUnload", cb);
+        $(document).one("bulldozer.execJsUnload", cb);
     };
 
 

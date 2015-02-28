@@ -13,10 +13,12 @@
 * NGINX serve bulldozer files also
 * Implement control panel categories.
 * maybe optimize (controlpanel route page) and reduce the auth get user to context call to one single call. If a user is already obtained, then pass it to the next template execution call....
+* Only add template script exec load if there is a script tag in the current executed template....
 
 
 IMPORTANT
 =========
+* Compress the svg logo and replace it by an own logo.
 * Template events map. Remove some overhead by reducing it to one single map.
 * Implement mux redirect route method. Then also add a redirect in the control panel package.
 * Implement detection if the tab is in the background. If so, disconnect the websocket after a specific timeout: https://developer.mozilla.org/en-US/docs/Web/Guide/User_experience/Using_the_Page_Visibility_API
