@@ -121,10 +121,8 @@ func (e *events) EventStartEdit(c *template.Context) {
 	// Get the session pointer.
 	s := c.Session()
 
-	// Hide the loading indicator on return.
-	defer s.HideLoadingIndicator()
-
 	// Start the edit mode.
+	// The loading indicator is hidden by the page reload.
 	editmode.Start(s)
 }
 
@@ -132,10 +130,8 @@ func (e *events) EventStopEdit(c *template.Context) {
 	// Get the session pointer.
 	s := c.Session()
 
-	// Hide the loading indicator on return.
-	defer s.HideLoadingIndicator()
-
 	// Stop the edit mode.
+	// The loading indicator is hidden by the page reload.
 	editmode.Stop(s)
 }
 
