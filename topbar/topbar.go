@@ -107,11 +107,14 @@ func onEndAuthenticatedSession(s *sessions.Session) {
 type events struct{}
 
 func (e *events) EventLogout(c *template.Context) {
+	// Get the session pointer.
+	s := c.Session()
+
 	// Hide the loading indicator on return.
 	s.HideLoadingIndicator()
 
 	// Logout.
-	auth.Logout(c.Session())
+	auth.Logout(s)
 }
 
 func (e *events) EventStartEdit(c *template.Context) {
