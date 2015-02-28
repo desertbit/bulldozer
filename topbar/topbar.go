@@ -72,16 +72,13 @@ func ExecTopBar(i interface{}) (string, error) {
 		return "", nil
 	}
 
-	// Is the current page the control panel?
-	isControlPanelPage := s.CurrentPath() == controlpanel.PageUrl
-
 	// Template options and data.
 	opts := template.ExecOpts{
 		Data: struct {
 			IsControlPanelPage bool
 			ControlPanelUrl    string
 		}{
-			IsControlPanelPage: isControlPanelPage,
+			IsControlPanelPage: controlpanel.IsCurrentPage(s),
 			ControlPanelUrl:    controlpanel.PageUrl,
 		},
 	}

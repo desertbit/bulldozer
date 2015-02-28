@@ -11,32 +11,23 @@ import (
 )
 
 var (
-	pages Pages = make(Pages)
+	pages Pages
 )
-
-func init() {
-	p := &Page{
-		ID:    "dashboard",
-		Title: "Dashboard",
-		Icon:  "fa-tachometer",
-	}
-
-	AddPage(p)
-}
 
 //#############//
 //### Types ###//
 //#############//
 
-type Pages map[string]*Page
+type Pages []*Page
 
 type Page struct {
-	ID    string
-	Group string
+	ID string
 
-	Title    string
-	Icon     string
-	Template *template.Template
+	Title string
+	Icon  string
+
+	AuthGroups []string
+	Template   *template.Template
 }
 
 //##############//
@@ -52,18 +43,14 @@ func AddPage(page *Page) {
 		return
 	}
 
-	// Create the access ID
-	id := page.ID
-	if len(page.Group) > 0 {
-		id = page.Group + "/" + id
-	}
-
 	// Check if already present with ID.
-	if _, ok := pages[id]; ok {
-		log.L.Error("failed to add control panel page with ID '%s' and Group '%s': a page with the same ID exists already!", page.ID, page.Group)
-		return
+	for _, p := range pages {
+		if p.ID == page.ID {
+			log.L.Error("failed to add control panel page with ID '%s': a page with the same ID exists already!", page.ID)
+			return
+		}
 	}
 
-	// Add the page to the map.
-	pages[id] = page
+	// Add the page to the slice.
+	pages = append(pages, page)
 }

@@ -2,14 +2,12 @@
 
 <div id="bud-ctrl-nav">
 	<ul>
-		{{range $id, $page := #.Pages}}
-			<li><a href="{{#.PageUrl}}/{{$id}}"><i class="fa fa-fw {{$page.Icon}}"></i><span>{{$page.Title}}</span></a></li>
+		{{range $item := #.Items}}
+			<li><a {{if $item.IsActive}}class="active"{{end}} href="{{$item.Url}}"><i class="fa fa-fw {{$item.Icon}}"></i><span>{{$item.Title}}</span></a></li>
 		{{end}}
 	</ul>
 </div>
-<div id="bud-ctrl-view">
-	<p>View</p>
-</div>
+<div id="bud-ctrl-view">{{#.Body}}</div>
 
 {{js load}}
 	$("#bud-ctrl-nav").hover(function() {

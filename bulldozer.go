@@ -173,10 +173,8 @@ func Init() {
 	}
 
 	// Load the templates in the project templates directory.
-	err = templates.Load("", settings.Settings.TemplatesPath)
-	if err != nil {
-		log.L.Fatal(err)
-	}
+	// Don't handle the parse errors here. It will be shown by the server.
+	templates.Load("", settings.Settings.TemplatesPath)
 
 	// Build the scss files.
 	buildScss()
