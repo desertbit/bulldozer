@@ -107,6 +107,9 @@ func onEndAuthenticatedSession(s *sessions.Session) {
 type events struct{}
 
 func (e *events) EventLogout(c *template.Context) {
+	// Hide the loading indicator on return.
+	s.HideLoadingIndicator()
+
 	// Logout.
 	auth.Logout(c.Session())
 }

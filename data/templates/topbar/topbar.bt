@@ -82,6 +82,7 @@
 		{{emit DiscardChanges()}}
 	});
 	$("#{{id "logout"}}").click(function() {
+		Bulldozer.loadingIndicator.show();
 		{{emit Logout()}}
 	});
 {{end js}}
