@@ -118,6 +118,13 @@ func serve() error {
 }
 
 func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
+	// If the application is currently shutting down, then
+	// don't process any new requests.
+	if isShuttdingDown {
+		http.Error(rw, "Service Unavailable", 503)
+		return
+	}
+
 	// Only allow POST requests
 	if req.Method != "POST" {
 		http.Error(rw, "Bad Request", 400)
@@ -173,6 +180,13 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 			log.L.Error("http handle panic: %v", e)
 		}
 	}()
+
+	// If the application is currently shutting down, then
+	// don't process any new requests.
+	if isShuttdingDown {
+		http.Error(rw, "Service Unavailable", 503)
+		return
+	}
 
 	// Block to many accesses from the same remote address
 	if allow, remoteAddr := firewall.NewRequest(req); !allow {

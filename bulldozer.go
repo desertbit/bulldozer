@@ -37,8 +37,9 @@ const (
 )
 
 var (
-	isInitialized bool = false
-	isReleased    bool = false
+	isInitialized   bool = false
+	isInitializing  bool = false
+	isShuttdingDown bool = false
 
 	releaseMutex sync.Mutex
 )
@@ -54,8 +55,9 @@ func Init() {
 	var paramSettingsPath string
 	var setupDB bool
 
-	// Set the isInitialized flag to true
+	// Set the flags
 	isInitialized = true
+	isInitializing = true
 
 	// Bind the variables to the flags.
 	flag.StringVar(&paramSettingsPath, "settings", paramSettingsPath, "set the path to an additional settings file.")
@@ -80,6 +82,12 @@ func Init() {
 			<-sigchan
 
 			fmt.Println("Exiting...")
+
+			// If terminated while initializing, just sleep
+			// for a short timeout, to not interrupt the initialization process.
+			if isInitializing {
+				time.Sleep(5 * time.Second)
+			}
 
 			// First cleanup
 			release()
@@ -167,20 +175,23 @@ func Init() {
 		log.L.Fatal(err)
 	}
 
+	// Load the templates in the project templates directory.
+	// Don't handle the parse errors here. It will be shown by the server.
+	templates.Load("", settings.Settings.TemplatesPath)
+
 	// Call the init hooks.
 	if err = triggerOnInit(); err != nil {
 		log.L.Fatalf("init hook error: %v", err)
 	}
-
-	// Load the templates in the project templates directory.
-	// Don't handle the parse errors here. It will be shown by the server.
-	templates.Load("", settings.Settings.TemplatesPath)
 
 	// Build the scss files.
 	buildScss()
 
 	// Watch the scss files and rebuild them on changes.
 	watchScss()
+
+	// Update the flag.
+	isInitializing = false
 }
 
 // Bulldoze starts the Bulldozer server
@@ -210,12 +221,12 @@ func release() {
 	defer releaseMutex.Unlock()
 
 	// Check if already released
-	if isReleased {
+	if isShuttdingDown {
 		return
 	}
 
 	// Set the flag
-	isReleased = true
+	isShuttdingDown = true
 
 	// Stop the filewatcher
 	scssFileWatcher.Close()

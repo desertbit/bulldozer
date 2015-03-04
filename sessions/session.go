@@ -48,6 +48,9 @@ const (
 )
 
 var (
+	// Triggered as soon as this package is released.
+	isShuttdingDown bool = false
+
 	// We don't use a RWMutex here, because the map access is fast enough and
 	// a RWMutex would create more overhead.
 	sessionsMutex sync.Mutex
@@ -465,7 +468,18 @@ func Init(i Interface) {
 // Release releases this session package.
 // This is handled by the main bulldozer package.
 func Release() {
-	// Release the store package
+	// Set the flag.
+	// This will stop accepting new socket connections.
+	isShuttdingDown = true
+
+	// Close all current connected sessions.
+	GetSessions(func(sessions Sessions) {
+		for _, s := range sessions {
+			s.Close()
+		}
+	})
+
+	// Release the store package.
 	store.Release()
 }
 
@@ -648,7 +662,7 @@ func GetSessions(f func(sessions Sessions)) {
 //### Private ###//
 //###############//
 
-// removeSession removes the session from the active session map
+// removeSession removes the session from the active session map.
 func removeSession(s *Session) {
 	// Check if already closed.
 	// This method should be called only once for each session.
@@ -667,10 +681,15 @@ func removeSession(s *Session) {
 	// Remove the lock for this store session
 	s.storeSession.Unlock()
 
-	// Lock the mutex
-	sessionsMutex.Lock()
-	defer sessionsMutex.Unlock()
+	// Process this in a new go routine.
+	// This should not block, because it might be
+	// executed in a function which holds a sessionsMutex lock.
+	go func() {
+		// Lock the mutex
+		sessionsMutex.Lock()
+		defer sessionsMutex.Unlock()
 
-	// Remove the session from the map
-	delete(sessions, s.sessionID)
+		// Remove the session from the map
+		delete(sessions, s.sessionID)
+	}()
 }

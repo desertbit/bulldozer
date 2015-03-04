@@ -78,12 +78,19 @@ func Setup() (err error) {
 		}
 	}
 
+	// Create the indexes.
+	if err = CreateIndexes(); err != nil {
+		if len(errStr) > 0 {
+			errStr += "\n"
+		}
+		errStr += err.Error()
+	}
+
 	if len(errStr) > 0 {
 		return fmt.Errorf(errStr)
 	}
 
-	// Create the indexes.
-	return CreateIndexes()
+	return nil
 }
 
 // CreateIndexes creates the primary and secondary indexes.

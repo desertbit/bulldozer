@@ -6,8 +6,8 @@
 package socket
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"github.com/gorilla/websocket"
 	"io"
 	"net/http"

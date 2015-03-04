@@ -137,6 +137,11 @@ func dbGetUser(loginName string) (*dbUser, error) {
 	var u dbUser
 	err = rows.One(&u)
 	if err != nil {
+		// Check if nothing was found.
+		if err == r.ErrEmptyResult {
+			return nil, nil
+		}
+
 		return nil, fmt.Errorf("failed to get database user '%s': %v", loginName, err)
 	}
 
@@ -161,6 +166,11 @@ func dbGetUserByID(id string) (*dbUser, error) {
 	var u dbUser
 	err = rows.One(&u)
 	if err != nil {
+		// Check if nothing was found.
+		if err == r.ErrEmptyResult {
+			return nil, nil
+		}
+
 		return nil, fmt.Errorf("failed to get database user by ID '%s': %v", id, err)
 	}
 
@@ -354,6 +364,11 @@ func dbGetGroup(name string) (*dbGroup, error) {
 	var g dbGroup
 	err = rows.One(&g)
 	if err != nil {
+		// Check if nothing was found.
+		if err == r.ErrEmptyResult {
+			return nil, nil
+		}
+
 		return nil, fmt.Errorf("failed to get database group '%s': %v", name, err)
 	}
 

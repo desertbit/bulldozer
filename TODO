@@ -14,6 +14,8 @@
 * Implement control panel categories.
 * maybe optimize (controlpanel route page) and reduce the auth get user to context call to one single call. If a user is already obtained, then pass it to the next template execution call....
 * Only add template script exec load if there is a script tag in the current executed template.... Be careful. If there is no more script which executes the execJsLoad function then the loading indicator won't be hidden.
+* SOmetimes the Session ID seams to not be pushed to the session database on restart?!
+- Bulldoze: process wait does not really wait for the process to exit?
 
 
 IMPORTANT
@@ -42,6 +44,7 @@ IMPORTANT
 * editable popovers: make the popover styles non changeable from the project styles.
 * Kepler modal no scrollbars bug: open the imprint dialog, close it, save changes and reopen the imrpint dialog. the scrollbars are gone.
 * Set a flag on application shutdown to not perform any new request from any session!.
+* own kepler namespace for bulldozer only.
 
 
 IMPROVEMENT

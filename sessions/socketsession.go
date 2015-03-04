@@ -49,6 +49,13 @@ type socketSession struct {
 //###############//
 
 func onNewSocketConnection(s socket.Socket) {
+	// Don't accept any new socket connections,
+	// if the application is currently shutting down.
+	if isShuttdingDown {
+		s.Close()
+		return
+	}
+
 	// Create a new socket session
 	ss := &socketSession{
 		socketConn: s,
