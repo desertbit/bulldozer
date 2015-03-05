@@ -15,12 +15,13 @@ import (
 
 var (
 	bulldozerFuncMap FuncMap = FuncMap{
-		"tr":        tr.S,
-		"plugin":    renderPlugin,
-		"eventKey":  createEventAccessKey,
-		"tmplR":     renderTemplate,
-		"loadJS":    loadJavaScript,
-		"loadStyle": loadStyleSheet,
+		"tr":          tr.S,
+		"plugin":      renderPlugin,
+		"eventKeyVar": createEventAccessKeyFromVar,
+		"eventKey":    createEventAccessKey,
+		"tmplR":       renderTemplate,
+		"loadJS":      loadJavaScript,
+		"loadStyle":   loadStyleSheet,
 	}
 )
 

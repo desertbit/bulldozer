@@ -247,13 +247,25 @@ func parseEmit(typeStr string, token string, d *parseData) error {
 	funcName := strings.TrimSpace(token[0:pos])
 	token = strings.TrimSpace(token[pos+1:])
 
-	// Find the function namespace if present
+	// Set the namespace to the default global one.
 	namespace := globalEventsNameSpace
-	pos = strings.Index(funcName, ".")
-	if pos != -1 {
-		// Extract the function namespace and remove it from the function name.
-		namespace = funcName[:pos]
-		funcName = funcName[pos+1:]
+
+	// Check if a template variable is passed as function name.
+	isTemplateVar := false
+	if strings.HasPrefix(funcName, d.leftDelim) && strings.HasSuffix(funcName, d.rightDelim) {
+		// Set the flag.
+		isTemplateVar = true
+
+		// Remove the delimiters from the function name.
+		funcName = strings.TrimSuffix(strings.TrimPrefix(funcName, d.leftDelim), d.rightDelim)
+	} else {
+		// Find the function namespace if present.
+		pos = strings.Index(funcName, ".")
+		if pos != -1 {
+			// Extract the function namespace and remove it from the function name.
+			namespace = funcName[:pos]
+			funcName = funcName[pos+1:]
+		}
 	}
 
 	// Check if the function name and namespace is valid.
@@ -273,7 +285,14 @@ func parseEmit(typeStr string, token string, d *parseData) error {
 
 	// Generate the javascript code to call the function
 	// with the DOM ID and the access key.
-	cmd := `Bulldozer.core.emit("{{$.Context.DomID}}","{{eventKey $.Context "` + namespace + `" "` + funcName + `"}}"`
+	cmd := `Bulldozer.core.emit('{{$.Context.DomID}}','{{eventKey`
+
+	// If the function name is a template variable, then don't add quotes.
+	if isTemplateVar {
+		cmd += `Var $.Context ` + funcName + `}}'`
+	} else {
+		cmd += ` $.Context "` + namespace + `" "` + funcName + `"}}'`
+	}
 
 	// Add the function arguments if present
 	if len(token) > 0 {
@@ -287,6 +306,22 @@ func parseEmit(typeStr string, token string, d *parseData) error {
 	*d.final += cmd
 
 	return nil
+}
+
+func createEventAccessKeyFromVar(c *Context, funcName string) (string, error) {
+	// Set the namespace to the default global one.
+	namespace := globalEventsNameSpace
+
+	// Find the function namespace if present.
+	pos := strings.Index(funcName, ".")
+	if pos != -1 {
+		// Extract the function namespace and remove it from the function name.
+		namespace = funcName[:pos]
+		funcName = funcName[pos+1:]
+	}
+
+	// Call the actual function.
+	return createEventAccessKey(c, namespace, funcName)
 }
 
 func createEventAccessKey(c *Context, namespace string, funcName string) (string, error) {

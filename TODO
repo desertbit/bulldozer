@@ -2,7 +2,7 @@
 === Bulldozer TODO List ===
 ===========================
 
-
+* topbar: If not in editmode access group, then deactivate the menu completly.
 * Make the template events accessible from other templates through a special template syntax: @templatename.FuncName...?
 * Remove the template must calls and implement middleware on the go side. If this is done, remove the session navigate goroutine and then also remove the time sleep in the registration event.
 * html minifier
@@ -111,6 +111,7 @@ Database
 
 General
 =======
+* The template engine uses internally hardcoded {{ and }} delimiters. Make them dynamic and use the set template's delimiters. (parseEmit(),...)
 * Don't print plugin warnings if no event functions are present.
 * Check if the browser is supported.
 * Check for not more used and old store values. (Deleted IDs...)

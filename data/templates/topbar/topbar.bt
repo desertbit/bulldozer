@@ -23,6 +23,28 @@
 				<i class="fa fa-trash-o"></i>
 				<span>{{tr "bud.topbar.discardChanges"}}</span>
 			</a></li>*/}}
+			{{range $item := #.EditmodeMenu}}
+				{{if #.User.IsInGroupSlice $item.AuthGroups}}
+					<li>
+						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}() }}"{{end}}>
+							<i class="fa {{$item.Icon}}"></i>
+							<span>{{$item.Title}}</span>
+						</a>
+						{{if $item.SubItems}}
+							<ul>
+								{{range $subItem := $item.SubItems}}
+									{{if #.User.IsInGroupSlice $subItem.AuthGroups}}
+										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}() }}"{{end}}>
+											<i class="fa {{$subItem.Icon}}"></i>
+											<span>{{$subItem.Title}}</span>
+										</a></li>
+									{{end}}
+								{{end}}
+							</ul>
+						{{end}}
+					</li>
+				{{end}}
+			{{end}}
 		</ul>
 	{{else}}
 		<ul class="bud-left-menu">
@@ -37,8 +59,52 @@
 					<span>{{tr "bud.topbar.startEditMode"}}</span>
 				</a></li>
 			{{end}}
+			{{range $item := #.LeftMenu}}
+				{{if #.User.IsInGroupSlice $item.AuthGroups}}
+					<li>
+						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}() }}"{{end}}>
+							<i class="fa {{$item.Icon}}"></i>
+							<span>{{$item.Title}}</span>
+						</a>
+						{{if $item.SubItems}}
+							<ul>
+								{{range $subItem := $item.SubItems}}
+									{{if #.User.IsInGroupSlice $subItem.AuthGroups}}
+										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}() }}"{{end}}>
+											<i class="fa {{$subItem.Icon}}"></i>
+											<span>{{$subItem.Title}}</span>
+										</a></li>
+									{{end}}
+								{{end}}
+							</ul>
+						{{end}}
+					</li>
+				{{end}}
+			{{end}}
 		</ul>
 		<ul class="bud-right-menu">
+			{{range $item := #.RightMenu}}
+				{{if #.User.IsInGroupSlice $item.AuthGroups}}
+					<li>
+						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}() }}"{{end}}>
+							<i class="fa {{$item.Icon}}"></i>
+							<span>{{$item.Title}}</span>
+						</a>
+						{{if $item.SubItems}}
+							<ul>
+								{{range $subItem := $item.SubItems}}
+									{{if #.User.IsInGroupSlice $subItem.AuthGroups}}
+										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}() }}"{{end}}>
+											<i class="fa {{$subItem.Icon}}"></i>
+											<span>{{$subItem.Title}}</span>
+										</a></li>
+									{{end}}
+								{{end}}
+							</ul>
+						{{end}}
+					</li>
+				{{end}}
+			{{end}}
 			{{if not #.IsControlPanelPage}}
 				<li><a href="{{#.ControlPanelUrl}}">
 					<i class="fa fa-gears"></i>
@@ -65,24 +131,24 @@
 
 	$("#{{id "startEdit"}}").click(function() {
 		Bulldozer.loadingIndicator.show();
-		{{emit StartEdit()}}
+		{{emit budTB.StartEdit()}}
 	});
 	$("#{{id "stopEdit"}}").click(function() {
 		Bulldozer.loadingIndicator.show();
 		setTimeout(function() {
-			{{emit StopEdit()}}
+			{{emit budTB.StopEdit()}}
 		}, 2000);
 	});
 	$("#{{id "save"}}").click(function() {
 		Bulldozer.loadingIndicator.show();
-		{{emit SaveChanges()}}
+		{{emit budTB.SaveChanges()}}
 	});
 	$("#{{id "discard"}}").click(function() {
 		Bulldozer.loadingIndicator.show();
-		{{emit DiscardChanges()}}
+		{{emit budTB.DiscardChanges()}}
 	});
 	$("#{{id "logout"}}").click(function() {
 		Bulldozer.loadingIndicator.show();
-		{{emit Logout()}}
+		{{emit budTB.Logout()}}
 	});
 {{end js}}

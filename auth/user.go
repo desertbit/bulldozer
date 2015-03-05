@@ -55,7 +55,13 @@ func (u *User) Groups() []string {
 	return u.u.Groups
 }
 
+// IsInGroup returns true if the user is in one of the passed groups.
+// True is returned if no groups are passed.
 func (u *User) IsInGroup(groups ...string) bool {
+	if len(groups) == 0 {
+		return true
+	}
+
 	userGroups := u.u.Groups
 
 	var found bool
@@ -74,6 +80,12 @@ func (u *User) IsInGroup(groups ...string) bool {
 	}
 
 	return true
+}
+
+// IsInGroupSlice accepts a slice instead of variadic arguments.
+// This might be useful if called from templates directly.
+func (u *User) IsInGroupSlice(groups []string) bool {
+	return u.IsInGroup(groups...)
 }
 
 // Update the user data, by retreiving the data from the database.

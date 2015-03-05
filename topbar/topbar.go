@@ -17,8 +17,12 @@ import (
 )
 
 const (
-	// Template name
-	topbarTemplate = "bud/topbar/topbar"
+	topbarTemplateName   = "bud/topbar/topbar"
+	topbarEventNamespace = "budTB"
+)
+
+var (
+	topbarTemplate *template.Template
 )
 
 func init() {
@@ -30,16 +34,24 @@ func init() {
 //##############//
 
 func Init() (err error) {
-	// Obtain the control center template.
-	t := templates.Templates.Lookup(topbarTemplate)
-	if t == nil {
+	// Obtain the topbar template.
+	topbarTemplate = templates.Templates.Lookup(topbarTemplateName)
+	if topbarTemplate == nil {
 		return fmt.Errorf("failed to lookup topbar template!")
 	}
 
 	// Register the topbar events.
-	t.RegisterEvents(new(events))
+	topbarTemplate.RegisterEvents(new(events), topbarEventNamespace)
 
 	return nil
+}
+
+// RegisterEvents passes the events to the underlying topbar template.
+// One optional parameter can be set, to define the events namespace.
+// If no namespace is defined, then the event is registered in the global namespace.
+// Call this method not before the bulldozer initialization process!
+func RegisterEvents(i interface{}, vars ...string) {
+	topbarTemplate.RegisterEvents(i, vars...)
 }
 
 // ExecTopBar executes the topbar.
@@ -75,16 +87,24 @@ func ExecTopBar(i interface{}) (string, error) {
 	// Template options and data.
 	opts := template.ExecOpts{
 		Data: struct {
+			User               *auth.User
 			IsControlPanelPage bool
 			ControlPanelUrl    string
+			LeftMenu           Items
+			RightMenu          Items
+			EditmodeMenu       Items
 		}{
+			User:               user,
 			IsControlPanelPage: controlpanel.IsCurrentPage(s),
 			ControlPanelUrl:    controlpanel.PageUrl,
+			LeftMenu:           leftMenuItems,
+			RightMenu:          rightMenuItems,
+			EditmodeMenu:       editmodeMenuItems,
 		},
 	}
 
 	// Execute the topbar template.
-	body, _, _, err := templates.Templates.ExecuteTemplateToString(s, topbarTemplate, opts)
+	body, _, err := topbarTemplate.ExecuteToString(s, opts)
 	if err != nil {
 		return "", err
 	}
