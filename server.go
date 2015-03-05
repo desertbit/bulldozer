@@ -212,15 +212,15 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 
 	// Create the template data struct
 	data := struct {
-		Session       *sessions.Session
-		AccessToken   string
-		Title         string
-		Body          template.HTML
-		JSLibs        []string
-		Styles        []string
-		SessionJSLibs []string
-		SessionStyles []string
-		IsWebCrawler  bool
+		Session      *sessions.Session
+		AccessToken  string
+		Title        string
+		Body         template.HTML
+		JSLibs       []string
+		Styles       []string
+		StaticJSLibs []string
+		StaticStyles []string
+		IsWebCrawler bool
 	}{
 		session,
 		accessToken,
@@ -228,8 +228,8 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 		template.HTML(body),
 		bulldozerJavaScripts,
 		bulldozerStyleSheets,
-		session.JavaScripts(),
-		session.StyleSheets(),
+		settings.Settings.StaticJavaScripts,
+		settings.Settings.StaticStyleSheets,
 		isWebCrawler,
 	}
 
@@ -255,13 +255,13 @@ const htmlBody = `
 	{{range $style := .Styles}}
 		<link rel="stylesheet" type="text/css" href="{{$style}}">
 	{{end}}
-	{{range $style := .SessionStyles}}
+	{{range $style := .StaticStyles}}
 		<link rel="stylesheet" type="text/css" href="{{$style}}">
 	{{end}}
 	{{range $js := .JSLibs}}
 		<script src="{{$js}}"></script>
 	{{end}}
-	{{range $js := .SessionJSLibs}}
+	{{range $js := .StaticJSLibs}}
 		<script src="{{$js}}"></script>
 	{{end}}
 </head>

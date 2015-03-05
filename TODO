@@ -35,7 +35,6 @@ IMPORTANT
 * Implement utils.SendMail and send the registration mail...
 * bulldoze: don't initialize the project folder automatically. Implement a init command.
 * Bulldozer.socket.send: clear the queue after a short timeout.
-* Don't load scripts and javascripts twice if already added to the HTML head!
 * Only show the utils.errorBox error code and 500 error template error message if the user is authenticated as developer. Check if there are error messages that should be shown to all clients...
 * Search for old naming and replace it:
   -> grep -R "Bulldozer.core.loadPage" ./

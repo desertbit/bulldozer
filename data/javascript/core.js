@@ -14,7 +14,7 @@ Bulldozer.fn.core = new function () {
      * Private Variables
      */
 
-    var documentReady = false;
+    var bulldozerReady = false;
     var scriptsToLoad = [];
     var pendingLoadJsTriggerIDs = [];
     var globalServerEvents = {};
@@ -28,7 +28,7 @@ Bulldozer.fn.core = new function () {
 
     $(document).on('bulldozer.ready', function() {
     	// Update the flag.
-    	documentReady = true;
+    	bulldozerReady = true;
 
     	// Execute all js load functions.
     	Bulldozer.core.execJsLoad();
@@ -171,9 +171,17 @@ Bulldozer.fn.core = new function () {
                 });
         };
 
-        // Load the script if no other ajax loading script process is running
+        // Load the script if no other ajax loading script process is running.
         if (scriptsToLoad.length <= 1) {
-            ajaxLoadScript(url, callback);
+            // If the document is not ready, then load the script on the document ready event.
+            if (!($.isReady)) {
+                $(document).ready(function() {
+                    ajaxLoadScript(url, callback);
+                });
+            }
+            else {
+                ajaxLoadScript(url, callback);
+            }
         }
     };
 
@@ -209,7 +217,7 @@ Bulldozer.fn.core = new function () {
         setTimeout(function () {
             // Only trigger the event if no more script is loading and only if the HTML document is loaded already.
             // Otherwise the event is triggered after all scripts are loaded or the document gets loaded.
-            if (scriptsToLoad.length > 0 || !documentReady) {
+            if (scriptsToLoad.length > 0 || !bulldozerReady) {
                 // Add the ID to the pending list
                 if (id) {
                     pendingLoadJsTriggerIDs.push(id.toString());
@@ -243,7 +251,7 @@ Bulldozer.fn.core = new function () {
                 callback();
             }
             catch(err) {
-                console.log("execute js unload function error: " + err.message);
+                console.log("execute js load function error: " + err.message);
             }
         });
     };
