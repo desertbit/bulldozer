@@ -84,27 +84,35 @@ func ExecTopBar(i interface{}) (string, error) {
 		return "", nil
 	}
 
-	// Template options and data.
-	opts := template.ExecOpts{
-		Data: struct {
-			User               *auth.User
-			IsControlPanelPage bool
-			ControlPanelUrl    string
-			LeftMenu           Items
-			RightMenu          Items
-			EditmodeMenu       Items
-		}{
-			User:               user,
-			IsControlPanelPage: controlpanel.IsCurrentPage(s),
-			ControlPanelUrl:    controlpanel.PageUrl,
-			LeftMenu:           leftMenuItems,
-			RightMenu:          rightMenuItems,
-			EditmodeMenu:       editmodeMenuItems,
-		},
+	// Template render data.
+	data := struct {
+		User               *auth.User
+		IsControlPanelPage bool
+		ControlPanelUrl    string
+		EnableEditmode     bool
+		EditmodeActive     bool
+		LeftMenu           Items
+		RightMenu          Items
+		EditmodeMenu       Items
+	}{
+		User:               user,
+		IsControlPanelPage: controlpanel.IsCurrentPage(s),
+		ControlPanelUrl:    controlpanel.PageUrl,
+		EnableEditmode:     false,
+		EditmodeActive:     false,
+		LeftMenu:           leftMenuItems,
+		RightMenu:          rightMenuItems,
+		EditmodeMenu:       editmodeMenuItems,
+	}
+
+	// Only enable the edit mode for sysops and admins.
+	if user.IsInGroup(auth.GroupSysOp, auth.GroupAdmin) {
+		data.EnableEditmode = true
+		data.EditmodeActive = editmode.IsActive(s)
 	}
 
 	// Execute the topbar template.
-	body, _, err := topbarTemplate.ExecuteToString(s, opts)
+	body, _, err := topbarTemplate.ExecuteToString(s, template.ExecOpts{Data: data})
 	if err != nil {
 		return "", err
 	}

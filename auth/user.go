@@ -13,6 +13,8 @@ import (
 //### User Struct ###//
 //###################//
 
+type Users []*User
+
 type User struct {
 	u *dbUser
 }
@@ -51,6 +53,16 @@ func (u *User) Created() int64 {
 	return u.u.Created
 }
 
+// IsSysOp returns a boolean if the user is a system operator.
+func (u *User) IsSysOp() bool {
+	return u.IsInGroup(GroupSysOp)
+}
+
+// IsAdmin returns a boolean if the user is an administrator.
+func (u *User) IsAdmin() bool {
+	return u.IsInGroup(GroupAdmin)
+}
+
 func (u *User) Groups() []string {
 	return u.u.Groups
 }
@@ -62,29 +74,23 @@ func (u *User) IsInGroup(groups ...string) bool {
 		return true
 	}
 
+	// Create a copy, if the groups slice of the user is changed by another process...
 	userGroups := u.u.Groups
 
-	var found bool
 	for _, group := range groups {
-		found = false
 		for _, userGroup := range userGroups {
 			if group == userGroup {
-				found = true
-				break
+				return true
 			}
-		}
-
-		if !found {
-			return false
 		}
 	}
 
-	return true
+	return false
 }
 
-// IsInGroupSlice accepts a slice instead of variadic arguments.
+// IsInGroups accepts a slice instead of variadic arguments.
 // This might be useful if called from templates directly.
-func (u *User) IsInGroupSlice(groups []string) bool {
+func (u *User) IsInGroups(groups []string) bool {
 	return u.IsInGroup(groups...)
 }
 

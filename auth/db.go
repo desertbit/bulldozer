@@ -21,8 +21,6 @@ const (
 	dbUserTable      = "users"
 	dbUserTableIndex = "LoginName"
 
-	dbGroupTable = "groups"
-
 	maxLength         = 100
 	minPasswordLength = 8
 
@@ -59,11 +57,6 @@ type dbUser struct {
 	Groups       []string
 }
 
-type dbGroup struct {
-	Name        string `gorethink:"id"`
-	Description string
-}
-
 //#######################//
 //### Private Methods ###//
 //#######################//
@@ -71,12 +64,6 @@ type dbGroup struct {
 func setupDB() error {
 	// Create the users table.
 	err := db.CreateTable(dbUserTable)
-	if err != nil {
-		return err
-	}
-
-	// Create the groups table.
-	err = db.CreateTable(dbGroupTable)
 	if err != nil {
 		return err
 	}
@@ -177,22 +164,6 @@ func dbGetUserByID(id string) (*dbUser, error) {
 	return &u, nil
 }
 
-// TODO: Add an option to retrieve batched users. Don't return all at once!
-func dbGetUsers() ([]*dbUser, error) {
-	rows, err := r.Table(dbUserTable).Run(db.Session)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all database users: %v", err)
-	}
-
-	var users []*dbUser
-	err = rows.All(&users)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all database users: %v", err)
-	}
-
-	return users, nil
-}
-
 func dbAddUser(loginName string, name string, email string, password string, groups ...string) (u *dbUser, err error) {
 	// Prepare the inputs.
 	loginName = strings.TrimSpace(loginName)
@@ -231,11 +202,10 @@ func dbAddUser(loginName string, name string, email string, password string, gro
 
 	// Check if the groups exists.
 	if len(groups) > 0 {
-		exists, err := dbGroupsExists(groups)
-		if err != nil {
-			return nil, err
-		} else if !exists {
-			return nil, fmt.Errorf("failed to add user '%s': one of the groups '%v' does not exists!", loginName, groups)
+		for _, g := range groups {
+			if !groupExists(g) {
+				return nil, fmt.Errorf("failed to add user '%s': the group '%s' does not exists!", loginName, g)
+			}
 		}
 	}
 
@@ -289,105 +259,22 @@ func dbChangePassword(u *dbUser, newPassword string) error {
 	return dbUpdateUser(u)
 }
 
-func dbAddGroup(name string, description string) (*dbGroup, error) {
-	if len(name) == 0 {
-		return nil, fmt.Errorf("failed to add group: group name is empty!")
-	}
-
-	// Check if the group already exists.
-	exists, err := dbGroupExists(name)
+// TODO: Add an option to retrieve batched users. Don't return all at once!
+func dbGetUsersInGroup(group string) ([]*dbUser, error) {
+	// Execute the query.
+	rows, err := r.Table(dbUserTable).Filter(r.Row.Field("Groups").Contains(group)).Run(db.Session)
 	if err != nil {
-		return nil, fmt.Errorf("failed to add group '%s': %v", name, err)
-	} else if exists {
-		return nil, fmt.Errorf("failed to add group '%s': group already exists!", name)
+		return nil, fmt.Errorf("failed to get all database users: %v", err)
 	}
 
-	// Create a new group value.
-	g := &dbGroup{
-		Name:        name,
-		Description: description,
-	}
-
-	// Insert it to the database.
-	_, err = r.Table(dbGroupTable).Insert(g).RunWrite(db.Session)
+	// Get the users from the query.
+	var users []*dbUser
+	err = rows.All(&users)
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert new group '%s' to database table: %v", name, err)
+		return nil, fmt.Errorf("failed to get all database users: %v", err)
 	}
 
-	return g, nil
-}
-
-func dbGroupExists(name string) (bool, error) {
-	g, err := dbGetGroup(name)
-	if err != nil {
-		return false, err
-	}
-
-	return g != nil, nil
-}
-
-func dbGroupsExists(names []string) (bool, error) {
-	groups, err := dbGetGroups()
-	if err != nil {
-		return false, err
-	}
-
-	var found bool
-	for _, name := range names {
-		found = false
-		for _, group := range groups {
-			if name == group.Name {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			return false, nil
-		}
-	}
-
-	return true, nil
-}
-
-func dbGetGroup(name string) (*dbGroup, error) {
-	rows, err := r.Table(dbGroupTable).Get(name).Run(db.Session)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get database group '%s': %v", name, err)
-	}
-
-	// Check if nothing was found.
-	if rows.IsNil() {
-		return nil, nil
-	}
-
-	var g dbGroup
-	err = rows.One(&g)
-	if err != nil {
-		// Check if nothing was found.
-		if err == r.ErrEmptyResult {
-			return nil, nil
-		}
-
-		return nil, fmt.Errorf("failed to get database group '%s': %v", name, err)
-	}
-
-	return &g, nil
-}
-
-func dbGetGroups() ([]*dbGroup, error) {
-	rows, err := r.Table(dbGroupTable).Run(db.Session)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all database groups: %v", err)
-	}
-
-	var groups []*dbGroup
-	err = rows.All(&groups)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get all database groups: %v", err)
-	}
-
-	return groups, nil
+	return users, nil
 }
 
 //########################//

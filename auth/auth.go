@@ -91,6 +91,26 @@ func Release() {
 	releaseDB()
 }
 
+func NavigateToLoginPage(s *sessions.Session) {
+	s.Navigate(LoginPageUrl)
+}
+
+func NavigateToRegisterPage(s *sessions.Session) {
+	s.Navigate(RegisterPageUrl)
+}
+
+// Logout logs out the user if authenticated.
+func Logout(s *sessions.Session) {
+	// Remove the authenticated user data if present.
+	s.Delete(sessionValueKeyIsAuth)
+
+	// Redirect to the default page.
+	s.NavigateHome()
+
+	// Trigger the event
+	triggerOnEndAuthenticatedSession(s)
+}
+
 // IsAuth returns a boolean if the current session is authenticated
 // by a user login.
 // You can pass a session or context value to this method.
@@ -171,22 +191,50 @@ func GetUser(i interface{}) *User {
 	return user
 }
 
-// Logout logs out the user if authenticated.
-func Logout(s *sessions.Session) {
-	// Remove the authenticated user data if present.
-	s.Delete(sessionValueKeyIsAuth)
+// GetUserByID retreives the user with the ID from the database.
+func GetUserByID(id string) (*User, error) {
+	// Obtain the user from the database.
+	u, err := dbGetUserByID(id)
+	if err != nil {
+		return nil, err
+	} else if u == nil {
+		return nil, fmt.Errorf("failed to get the user from database: user with ID '%s' does not exists!", id)
+	}
 
-	// Redirect to the default page.
-	s.NavigateHome()
-
-	// Trigger the event
-	triggerOnEndAuthenticatedSession(s)
+	// Create a new user value and return it.
+	return newUser(u), nil
 }
 
-func NavigateToLoginPage(s *sessions.Session) {
-	s.Navigate(LoginPageUrl)
+// GetUserByLoginName retreives the user with the login name from the database.
+func GetUserByLoginName(name string) (*User, error) {
+	// Obtain the user from the database.
+	u, err := dbGetUser(name)
+	if err != nil {
+		return nil, err
+	} else if u == nil {
+		return nil, fmt.Errorf("failed to get the user from database: user with login name '%s' does not exists!", name)
+	}
+
+	// Create a new user value and return it.
+	return newUser(u), nil
 }
 
-func NavigateToRegisterPage(s *sessions.Session) {
-	s.Navigate(RegisterPageUrl)
+// GetUsersInGroup retreives all users from the database which are in the desired group.
+func GetUsersInGroup(group string) (Users, error) {
+	// Obtain the users from the database.
+	dbUsers, err := dbGetUsersInGroup(group)
+	if err != nil {
+		return nil, err
+	} else if dbUsers == nil {
+		// Nothing found.
+		return nil, nil
+	}
+
+	// Create the users slice and fill it.
+	var users Users
+	for _, u := range dbUsers {
+		users = append(users, newUser(u))
+	}
+
+	return users, nil
 }

@@ -2,6 +2,8 @@
  * Bulldozer TopBar
  */
 
+$bud_topbar_breakpoint: 600px;
+
 $bud_topbar_height: 45px;
 $bud_topbar_bg_color: #393939;
 $bud_topbar_color: #999999;
@@ -105,8 +107,12 @@ $bud_topbar_sub_menu_color: #444444;
 			}
 
 			span {
-				display: inline-block;
+				display: none;
 				margin: 0 0 0 3px;
+
+				@media screen and (min-width: $bud_topbar_breakpoint) {
+					display: inline-block;
+				}
 			}
 
 			a {
@@ -162,6 +168,7 @@ $bud_topbar_sub_menu_color: #444444;
 					border-left: solid 2px $bud_topbar_sub_menu_bg_color;
 
 					a, span {
+						display: inline-block;
 						color: $bud_topbar_sub_menu_color;
 					}
 

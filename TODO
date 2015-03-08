@@ -20,6 +20,8 @@
 
 IMPORTANT
 =========
+* auth: implement limits and ranges for getters.
+* Implement a database migration tool.
 * Compress the svg logo and replace it by an own logo.
 * Template events map. Remove some overhead by reducing it to one single map.
 * Implement mux redirect route method. Then also add a redirect in the control panel package.
@@ -44,6 +46,12 @@ IMPORTANT
 * Kepler modal no scrollbars bug: open the imprint dialog, close it, save changes and reopen the imrpint dialog. the scrollbars are gone.
 * Set a flag on application shutdown to not perform any new request from any session!.
 * own kepler namespace for bulldozer only.
+
+
+Bugs
+====
+- Check the core.js bulldozer ready hook event. The execJSLoad function is executed, but isn't this handled by the loadJS call?
+
 
 
 IMPROVEMENT

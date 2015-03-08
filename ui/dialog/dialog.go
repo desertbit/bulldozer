@@ -27,9 +27,10 @@ const (
 //###################//
 
 type Dialog struct {
-	t        *template.Template
-	size     Size
-	closable bool
+	t            *template.Template
+	size         Size
+	closable     bool
+	StyleClasses []string
 }
 
 // New creates a new dialog.
@@ -43,9 +44,9 @@ func New() *Dialog {
 	return d
 }
 
-// AddStyleClass adds one style classes.
-func (d *Dialog) AddStyleClass(class string) *Dialog {
-	d.t.AddStyleClass(class)
+// AddStyleClasses adds the style classes to the dialog modal.
+func (d *Dialog) AddStyleClasses(classes ...string) *Dialog {
+	d.StyleClasses = append(d.StyleClasses, classes...)
 	return d
 }
 
@@ -59,12 +60,6 @@ func (d *Dialog) SetSize(size Size) *Dialog {
 // Whenever the modal is closable with a backdrop click or x button
 func (d *Dialog) SetClosable(closable bool) *Dialog {
 	d.closable = closable
-	return d
-}
-
-// OnGetData is the same as template.OnGetData...
-func (d *Dialog) OnGetData(f template.GetDataFunc) *Dialog {
-	d.t.OnGetData(f)
 	return d
 }
 
@@ -105,11 +100,17 @@ func (d *Dialog) Show(s *sessions.Session, data ...interface{}) (*template.Conte
 	// Transform to string
 	closableStr := strconv.FormatBool(d.closable)
 
+	// Transform the additional style classes to a string.
+	var styles string
+	for _, style := range d.StyleClasses {
+		styles += " " + style
+	}
+
 	// Create the command
 	cmd := `Bulldozer.utils.addAndShowTmpModal('` + utils.EscapeJS(o) + `',{
 			domId:'` + dialogDomID + `',
 			closable:` + closableStr + `,
-			class:'radius shadow ` + string(d.size) + `'
+			class:'radius shadow ` + string(d.size) + styles + `'
 		});`
 
 	// Execute the command on the client side.
