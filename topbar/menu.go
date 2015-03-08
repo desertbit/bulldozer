@@ -9,6 +9,7 @@ var (
 	leftMenuItems     Items
 	rightMenuItems    Items
 	editmodeMenuItems Items
+	userMenuItems     Items
 )
 
 //###################//
@@ -39,14 +40,20 @@ func AddRightMenuItem(item *Item) {
 	rightMenuItems = append(rightMenuItems, item)
 }
 
-// AddLeftMenuItem adds a menu item to the right menu.
+// AddLeftMenuItem adds a menu item to the left menu.
 // Only call this during application initialization.
 func AddLeftMenuItem(item *Item) {
 	leftMenuItems = append(leftMenuItems, item)
 }
 
-// AddEditmodeMenuItem adds a menu item to the right menu.
+// AddEditmodeMenuItem adds a menu item to the editmode menu.
 // Only call this during application initialization.
 func AddEditmodeMenuItem(item *Item) {
 	editmodeMenuItems = append(editmodeMenuItems, item)
+}
+
+// AddUserMenuItem adds a menu item to the user menu.
+// Only call this during application initialization.
+func AddUserMenuItem(item *Item) {
+	userMenuItems = append(userMenuItems, item)
 }

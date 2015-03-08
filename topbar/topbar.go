@@ -94,6 +94,7 @@ func ExecTopBar(i interface{}) (string, error) {
 		LeftMenu           Items
 		RightMenu          Items
 		EditmodeMenu       Items
+		UserMenu           Items
 	}{
 		User:               user,
 		IsControlPanelPage: controlpanel.IsCurrentPage(s),
@@ -103,6 +104,7 @@ func ExecTopBar(i interface{}) (string, error) {
 		LeftMenu:           leftMenuItems,
 		RightMenu:          rightMenuItems,
 		EditmodeMenu:       editmodeMenuItems,
+		UserMenu:           userMenuItems,
 	}
 
 	// Only enable the edit mode for sysops and admins.

@@ -19,14 +19,16 @@
 				<i class="fa fa-save"></i>
 				<span>{{tr "bud.topbar.saveChanges"}}</span>
 			</a></li>
-			{{/*<li><a id="{{id "discard"}}">
+			{{/*
+			<li><a id="{{id "discard"}}">
 				<i class="fa fa-trash-o"></i>
 				<span>{{tr "bud.topbar.discardChanges"}}</span>
-			</a></li>*/}}
+			</a></li>
+			*/}}
 			{{range $item := #.EditmodeMenu}}
 				{{if #.User.IsInGroups $item.AuthGroups}}
 					<li>
-						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}() }}"{{end}}>
+						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}()}}"{{end}}>
 							<i class="fa {{$item.Icon}}"></i>
 							<span>{{$item.Title}}</span>
 						</a>
@@ -34,8 +36,8 @@
 							<ul>
 								{{range $subItem := $item.SubItems}}
 									{{if #.User.IsInGroups $subItem.AuthGroups}}
-										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}() }}"{{end}}>
-											<i class="fa {{$subItem.Icon}}"></i>
+										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}()}}"{{end}}>
+											<i class="fa fa-fw {{$subItem.Icon}}"></i>
 											<span>{{$subItem.Title}}</span>
 										</a></li>
 									{{end}}
@@ -62,7 +64,7 @@
 			{{range $item := #.LeftMenu}}
 				{{if #.User.IsInGroups $item.AuthGroups}}
 					<li>
-						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}() }}"{{end}}>
+						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}()}}"{{end}}>
 							<i class="fa {{$item.Icon}}"></i>
 							<span>{{$item.Title}}</span>
 						</a>
@@ -70,8 +72,8 @@
 							<ul>
 								{{range $subItem := $item.SubItems}}
 									{{if #.User.IsInGroups $subItem.AuthGroups}}
-										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}() }}"{{end}}>
-											<i class="fa {{$subItem.Icon}}"></i>
+										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}()}}"{{end}}>
+											<i class="fa fa-fw {{$subItem.Icon}}"></i>
 											<span>{{$subItem.Title}}</span>
 										</a></li>
 									{{end}}
@@ -86,7 +88,7 @@
 			{{range $item := #.RightMenu}}
 				{{if #.User.IsInGroups $item.AuthGroups}}
 					<li>
-						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}() }}"{{end}}>
+						<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}()}}"{{end}}>
 							<i class="fa {{$item.Icon}}"></i>
 							<span>{{$item.Title}}</span>
 						</a>
@@ -94,8 +96,8 @@
 							<ul>
 								{{range $subItem := $item.SubItems}}
 									{{if #.User.IsInGroups $subItem.AuthGroups}}
-										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}() }}"{{end}}>
-											<i class="fa {{$subItem.Icon}}"></i>
+										<li><a {{if $subItem.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$subItem.EventFunc}}()}}"{{end}}>
+											<i class="fa fa-fw {{$subItem.Icon}}"></i>
 											<span>{{$subItem.Title}}</span>
 										</a></li>
 									{{end}}
@@ -116,6 +118,16 @@
 					<span>{{%.auth.UserName}}</span>
 				</a>
 				<ul>
+					{{range $item := #.UserMenu}}
+						{{if #.User.IsInGroups $item.AuthGroups}}
+							<li>
+								<a{{if $item.EventFunc}} onclick="Bulldozer.loadingIndicator.show();{{emit {{$item.EventFunc}}()}}"{{end}}>
+									<i class="fa fa-fw {{$item.Icon}}"></i>
+									<span>{{$item.Title}}</span>
+								</a>
+							</li>
+						{{end}}
+					{{end}}
 					<li><a id="{{id "logout"}}">
 						<i class="fa fa-power-off fa-fw"></i>
 						<span>{{tr "bud.topbar.logout"}}</span>
