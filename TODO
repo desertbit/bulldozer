@@ -18,6 +18,9 @@
 - Bulldoze: process wait does not really wait for the process to exit?
 
 
+Rules: Don't forget to wrap the template emit calls in if checks, if access should be limited. maybe also check on server side event execution for access rights...
+
+
 IMPORTANT
 =========
 * auth: implement limits and ranges for getters.

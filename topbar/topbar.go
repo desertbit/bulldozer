@@ -19,6 +19,7 @@ import (
 const (
 	topbarTemplateName   = "bud/topbar/topbar"
 	topbarEventNamespace = "budTB"
+	topbarTemplateID     = "budTB"
 )
 
 var (
@@ -114,7 +115,10 @@ func ExecTopBar(i interface{}) (string, error) {
 	}
 
 	// Execute the topbar template.
-	body, _, err := topbarTemplate.ExecuteToString(s, template.ExecOpts{Data: data})
+	body, _, err := topbarTemplate.ExecuteToString(s, template.ExecOpts{
+		ID:   topbarTemplateID,
+		Data: data,
+	})
 	if err != nil {
 		return "", err
 	}

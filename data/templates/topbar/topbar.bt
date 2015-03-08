@@ -141,26 +141,30 @@
 {{js load}}
 	Bulldozer.topbar.space(true);
 
-	$("#{{id "startEdit"}}").click(function() {
-		Bulldozer.loadingIndicator.show();
-		{{emit budTB.StartEdit()}}
-	});
-	$("#{{id "stopEdit"}}").click(function() {
-		Bulldozer.loadingIndicator.show();
-		setTimeout(function() {
-			{{emit budTB.StopEdit()}}
-		}, 2000);
-	});
-	$("#{{id "save"}}").click(function() {
-		Bulldozer.loadingIndicator.show();
-		{{emit budTB.SaveChanges()}}
-	});
-	$("#{{id "discard"}}").click(function() {
-		Bulldozer.loadingIndicator.show();
-		{{emit budTB.DiscardChanges()}}
-	});
 	$("#{{id "logout"}}").click(function() {
 		Bulldozer.loadingIndicator.show();
 		{{emit budTB.Logout()}}
 	});
+
+	{{/* Only enable the emit functions if access is granted */}}
+	{{if #.EnableEditmode}}
+		$("#{{id "startEdit"}}").click(function() {
+			Bulldozer.loadingIndicator.show();
+			{{emit budTB.StartEdit()}}
+		});
+		$("#{{id "stopEdit"}}").click(function() {
+			Bulldozer.loadingIndicator.show();
+			setTimeout(function() {
+				{{emit budTB.StopEdit()}}
+			}, 2000);
+		});
+		$("#{{id "save"}}").click(function() {
+			Bulldozer.loadingIndicator.show();
+			{{emit budTB.SaveChanges()}}
+		});
+		$("#{{id "discard"}}").click(function() {
+			Bulldozer.loadingIndicator.show();
+			{{emit budTB.DiscardChanges()}}
+		});
+	{{end}}
 {{end js}}
