@@ -10,12 +10,13 @@ import (
 	htmlT "html/template"
 
 	"code.desertbit.com/bulldozer/bulldozer/editmode"
+	"code.desertbit.com/bulldozer/bulldozer/libs/ckeditor"
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/plugin"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/store"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
+
 	"fmt"
 	"strings"
 )
@@ -23,11 +24,7 @@ import (
 const (
 	PluginType = "text"
 
-	templateUID = "budPluginText"
-
-	ckEditorBaseUrl   = settings.UrlBulldozerResources + "libs/ckeditor/"
-	ckEditorScriptUrl = ckEditorBaseUrl + "ckeditor.js"
-
+	templateUID          = "budPluginText"
 	emptyTextPlaceholder = "<p><br></p>"
 )
 
@@ -121,14 +118,9 @@ func (p *Plugin) Render(c *template.Context, d *plugin.Data) interface{} {
 	// Check if in edit mode.
 	editModeActive := editmode.IsActive(s)
 
-	if editModeActive && !s.IsJavaScriptLoaded(ckEditorScriptUrl) {
-		// When loaded with Bulldozer.loadScript (Ajax call), CKEDITOR.basePath won't be set correctly.
-		// Here's the fix:
-		s.SendCommand("window.CKEDITOR_BASEPATH = '" + ckEditorBaseUrl + "';")
-
+	if editModeActive {
 		// Load the CKEditor javascript library if not already loaded.
-		// Also disable CKEditor's auto inline mode.
-		s.LoadJavaScript(ckEditorScriptUrl, "CKEDITOR.disableAutoInline = true;")
+		ckeditor.Load(s)
 	}
 
 	// Get the text.

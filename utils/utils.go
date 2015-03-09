@@ -67,6 +67,15 @@ func Fields(s string) ([]string, error) {
 	return l, nil
 }
 
+// LimitLen will cut a string if it exceeds the max length.
+func LimitLen(s string, max int) string {
+	if len(s) <= max {
+		return s
+	}
+
+	return s[:max]
+}
+
 // RandomString generates a random string with a length of n
 func RandomString(n int) string {
 	const alphanum = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"

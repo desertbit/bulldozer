@@ -97,6 +97,12 @@ Bulldozer.fn.render = new function () {
             $(this).remove();
         });
 
+        // Remove all styles from the html and body tag.
+        $('html, body').removeAttr('style');
+
+        // Reset the previous topbar space.
+        Bulldozer.topbar.space();
+
         // Create the new body.
         var newBudBody = $('<div id="bud-body"></div>');
 
