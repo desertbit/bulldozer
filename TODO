@@ -2,7 +2,8 @@
 === Bulldozer TODO List ===
 ===========================
 
-* Remove the Kepler dependency and add a small own style framework (Don't forget to remove the Kepler.init calls from the bulldozer script. Add a page ready event).
+* make the text plugin accessible as module?
+* Remove the Kepler dependency and add a small own style framework (Don't forget to remove the Kepler.init calls from the bulldozer script. Add a page ready event. Also replace all kepler utils throttles...).
 * topbar: If not in editmode access group, then deactivate the menu completly.
 * Make the template events accessible from other templates through a special template syntax: @templatename.FuncName...?
 * Remove the template must calls and implement middleware on the go side. If this is done, remove the session navigate goroutine and then also remove the time sleep in the registration event.
@@ -17,7 +18,7 @@
 * Only add template script exec load if there is a script tag in the current executed template.... Be careful. If there is no more script which executes the execJsLoad function then the loading indicator won't be hidden.
 * SOmetimes the Session ID seams to not be pushed to the session database on restart?!
 - Bulldoze: process wait does not really wait for the process to exit?
-
+- edit user profile data as full name,...
 
 Rules: Don't forget to wrap the template emit calls in if checks, if access should be limited. maybe also check on server side event execution for access rights...
 

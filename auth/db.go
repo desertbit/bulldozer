@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	dbUserTable      = "users"
-	dbUserTableIndex = "LoginName"
+	DBUserTable      = "users"
+	DBUserTableIndex = "LoginName"
 
 	maxLength         = 100
 	minPasswordLength = 8
@@ -63,7 +63,7 @@ type dbUser struct {
 
 func setupDB() error {
 	// Create the users table.
-	err := db.CreateTable(dbUserTable)
+	err := db.CreateTable(DBUserTable)
 	if err != nil {
 		return err
 	}
@@ -73,13 +73,13 @@ func setupDB() error {
 
 func createIndexes() error {
 	// Create a secondary index on the LoginName attribute.
-	_, err := r.Table(dbUserTable).IndexCreate(dbUserTableIndex).Run(db.Session)
+	_, err := r.Table(DBUserTable).IndexCreate(DBUserTableIndex).Run(db.Session)
 	if err != nil {
 		return err
 	}
 
 	// Wait for the index to be ready to use.
-	_, err = r.Table(dbUserTable).IndexWait(dbUserTableIndex).Run(db.Session)
+	_, err = r.Table(DBUserTable).IndexWait(DBUserTableIndex).Run(db.Session)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func dbGetUser(loginName string) (*dbUser, error) {
 		return nil, fmt.Errorf("failed to get database user: login name is empty!")
 	}
 
-	rows, err := r.Table(dbUserTable).GetAllByIndex(dbUserTableIndex, loginName).Run(db.Session)
+	rows, err := r.Table(DBUserTable).GetAllByIndex(DBUserTableIndex, loginName).Run(db.Session)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database user '%s': %v", loginName, err)
 	}
@@ -140,7 +140,7 @@ func dbGetUserByID(id string) (*dbUser, error) {
 		return nil, fmt.Errorf("failed to get database user: ID is empty!")
 	}
 
-	rows, err := r.Table(dbUserTable).Get(id).Run(db.Session)
+	rows, err := r.Table(DBUserTable).Get(id).Run(db.Session)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database user by ID '%s': %v", id, err)
 	}
@@ -223,7 +223,7 @@ func dbAddUser(loginName string, name string, email string, password string, gro
 	}
 
 	// Insert it to the database.
-	_, err = r.Table(dbUserTable).Insert(u).RunWrite(db.Session)
+	_, err = r.Table(DBUserTable).Insert(u).RunWrite(db.Session)
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert new user '%s' to database table: %v", loginName, err)
 	}
@@ -232,7 +232,7 @@ func dbAddUser(loginName string, name string, email string, password string, gro
 }
 
 func dbUpdateUser(u *dbUser) error {
-	_, err := r.Table(dbUserTable).Update(u).RunWrite(db.Session)
+	_, err := r.Table(DBUserTable).Update(u).RunWrite(db.Session)
 	if err != nil {
 		return err
 	}
@@ -262,7 +262,7 @@ func dbChangePassword(u *dbUser, newPassword string) error {
 // TODO: Add an option to retrieve batched users. Don't return all at once!
 func dbGetUsersInGroup(group string) ([]*dbUser, error) {
 	// Execute the query.
-	rows, err := r.Table(dbUserTable).Filter(r.Row.Field("Groups").Contains(group)).Run(db.Session)
+	rows, err := r.Table(DBUserTable).Filter(r.Row.Field("Groups").Contains(group)).Run(db.Session)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all database users: %v", err)
 	}
@@ -323,7 +323,7 @@ func cleanupExpiredData() {
 	expires := time.Now().Unix() - int64(settings.Settings.RemoveNotConfirmedUsersTimeout)
 
 	// Remove all expired users.
-	_, err := r.Table(dbUserTable).Filter(
+	_, err := r.Table(DBUserTable).Filter(
 		r.Row.Field("LastLogin").Eq(-1).
 			And(r.Row.Field("Created").Sub(expires).Le(0))).
 		Delete().RunWrite(db.Session)

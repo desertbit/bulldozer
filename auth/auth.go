@@ -238,3 +238,14 @@ func GetUsersInGroup(group string) (Users, error) {
 
 	return users, nil
 }
+
+// AddUser adds a new user to the database.
+func AddUser(loginName string, name string, email string, password string, groups ...string) (*User, error) {
+	u, err := dbAddUser(loginName, name, email, password, groups...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a new user value and return it.
+	return newUser(u), nil
+}

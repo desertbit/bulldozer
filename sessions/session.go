@@ -455,6 +455,8 @@ func Init(i Interface) {
 	// Set the interface.
 	backendI = i
 
+	log.L.Info("sessions: initializing")
+
 	// Create a new secure cookie object with the cookie keys
 	secureCookie = securecookie.New(settings.Settings.CookieHashKeyBytes(), settings.Settings.CookieBlockKeyBytes())
 

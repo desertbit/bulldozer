@@ -109,3 +109,29 @@ func (u *User) Update() error {
 
 	return nil
 }
+
+//#################################//
+//### User manipulation methods ###//
+//#################################//
+
+// SetName sets the user's name.
+// You have to call the commit method to make this persistent.
+func (u *User) SetName(name string) {
+	u.u.Name = name
+}
+
+// SetEMail sets the user's e-mail.
+// You have to call the commit method to make this persistent.
+func (u *User) SetEMail(email string) {
+	u.u.EMail = email
+}
+
+// Commit all changes to the database.
+func (u *User) Commit() error {
+	err := dbUpdateUser(u.u)
+	if err != nil {
+		return fmt.Errorf("auth: failed to commit user changes: %v", err)
+	}
+
+	return nil
+}
