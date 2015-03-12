@@ -159,8 +159,9 @@ func (t *Template) New(name string) *Template {
 // OnGetData set the function which is called during template execution
 // if no data is specified with the optional execute option.
 // Return the template render data.
-func (t *Template) OnGetData(f GetDataFunc) {
+func (t *Template) OnGetData(f GetDataFunc) *Template {
 	t.getDataFunc = f
+	return t
 }
 
 // Lookup returns the template with the given name that is associated with t,

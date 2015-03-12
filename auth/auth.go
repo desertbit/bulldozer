@@ -51,6 +51,9 @@ type sessionAuthData struct {
 //##############//
 
 func Init() (err error) {
+	// Set the on new session hook.
+	sessions.OnNewSession(onNewSession)
+
 	// Obtain the login template and prepare it.
 	t := templates.Templates.Lookup(loginTemplate)
 	if t == nil {
@@ -248,4 +251,15 @@ func AddUser(loginName string, name string, email string, password string, group
 
 	// Create a new user value and return it.
 	return newUser(u), nil
+}
+
+//###############//
+//### Private ###//
+//###############//
+
+func onNewSession(s *sessions.Session) {
+	// if the session is authenticated, then trigger the onNewAuthenticatedSession event.
+	if IsAuth(s) {
+		triggerOnNewAuthenticatedSession(s)
+	}
 }

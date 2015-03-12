@@ -92,6 +92,9 @@ func init() {
 		RegistrationDisabled:           true,
 		PasswordEncryptionKey:          defaultPasswordEncryptionKey,
 		RemoveNotConfirmedUsersTimeout: 60 * 60 * 24 * 14, // 14 Days
+
+		MailSMTPPort:              587,
+		MailSkipCertificateVerify: false,
 	}
 
 	// Set the temporary directory path
@@ -341,6 +344,14 @@ type settings struct {
 	RegistrationDisabled           bool
 	PasswordEncryptionKey          string
 	RemoveNotConfirmedUsersTimeout int
+
+	// Mail
+	MailFrom                  string
+	MailUsername              string
+	MailPassword              string
+	MailSMTPHost              string
+	MailSMTPPort              int
+	MailSkipCertificateVerify bool
 }
 
 func (s *settings) CookieHashKeyBytes() []byte {

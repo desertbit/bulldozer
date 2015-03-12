@@ -232,6 +232,16 @@ func dbAddUser(loginName string, name string, email string, password string, gro
 }
 
 func dbUpdateUser(u *dbUser) error {
+	// Check if the groups exists.
+	// They might have changed.
+	if len(u.Groups) > 0 {
+		for _, g := range u.Groups {
+			if !groupExists(g) {
+				return fmt.Errorf("failed to update user '%s': the group '%s' does not exists!", u.LoginName, g)
+			}
+		}
+	}
+
 	_, err := r.Table(DBUserTable).Update(u).RunWrite(db.Session)
 	if err != nil {
 		return err

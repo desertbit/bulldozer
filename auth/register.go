@@ -16,6 +16,7 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/templates"
 	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"code.desertbit.com/bulldozer/bulldozer/utils/mail"
 
 	"fmt"
 	"strings"
@@ -72,15 +73,20 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 	password := utils.RandomString(randomPasswordLength)
 
 	// Add the user to the database
-	_, err = dbAddUser(loginName, name, email, password)
+	u, err := dbAddUser(loginName, name, email, password)
 	if err != nil {
 		log.L.Error("failed to add user '%s' to database: %v", loginName, err)
 		showRegisterErrorMsgBox(s, tr.S("bud.auth.register.error.generalShort"))
 		return
 	}
 
-	// TODO: Send password to the e-mail!
-	fmt.Printf("TODO: send password '%s' to e-mail '%s'", password, email)
+	// Send the registration e-mail.
+	err = sendRegistrationEMail(u, password)
+	if err != nil {
+		log.L.Error("%v", err)
+		showRegisterErrorMsgBox(s, tr.S("bud.auth.register.error.generalShort"))
+		return
+	}
 
 	// Redirect to the login page.
 	NavigateToLoginPage(s)
@@ -135,4 +141,28 @@ func showRegisterErrorMsgBox(s *sessions.Session, msg string) {
 		SetText(msg).
 		SetType(messagebox.TypeAlert).
 		Show(s)
+}
+
+func sendRegistrationEMail(u *dbUser, password string) error {
+	// Create a new mail message.
+	m := mail.Message{
+		To:      []string{u.EMail},
+		Subject: "Ihre Registrierung beim Gesundheitnetz",
+	}
+
+	// Create the login url.
+	loginURL := settings.Settings.SiteUrl + LoginPageUrl
+
+	// TODO: Translate this!
+	m.Body = "Sie haben sich erfolgreich beim Ganzheitichen Gesundheitsnetz registriert." +
+		"<br>Bitte melden Sie sich unter folgender Addresse an: <a href=\"" + loginURL + "\">" + loginURL + "</a>" +
+		"<br><br>Ihr generiertes Passwort ist: " + password
+
+	// Send the e-mail
+	err := mail.Send(&m)
+	if err != nil {
+		return fmt.Errorf("failed to send registration e-mail: %v", err)
+	}
+
+	return nil
 }

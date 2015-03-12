@@ -1,6 +1,6 @@
 /*
- *  Goji Framework
- *  Copyright (C) Roland Singer & Wlad Meixner
+ *  Bulldozer Framework
+ *  Copyright (C) DesertBit
  */
 
 package utils

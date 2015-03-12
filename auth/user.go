@@ -74,11 +74,8 @@ func (u *User) IsInGroup(groups ...string) bool {
 		return true
 	}
 
-	// Create a copy, if the groups slice of the user is changed by another process...
-	userGroups := u.u.Groups
-
 	for _, group := range groups {
-		for _, userGroup := range userGroups {
+		for _, userGroup := range u.u.Groups {
 			if group == userGroup {
 				return true
 			}
@@ -113,6 +110,29 @@ func (u *User) Update() error {
 //#################################//
 //### User manipulation methods ###//
 //#################################//
+
+// AddGroup adds the user to the group.
+// You have to call the commit method to make this persistent.
+func (u *User) AddGroup(groups ...string) {
+	// TODO: Validate if the groups exists?
+
+	// Only add the groups, if they don't exist already.
+	var found bool
+	for _, group := range groups {
+		found = false
+
+		for _, userGroup := range u.u.Groups {
+			if group == userGroup {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			u.u.Groups = append(u.u.Groups, group)
+		}
+	}
+}
 
 // SetName sets the user's name.
 // You have to call the commit method to make this persistent.
