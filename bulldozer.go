@@ -62,7 +62,7 @@ func Init() {
 	// Bind the variables to the flags.
 	flag.StringVar(&paramSettingsPath, "settings", paramSettingsPath, "set the path to an additional settings file.")
 	flag.BoolVar(&setupDB, "setup", false, "setup the database structure.")
-
+	setupDB = true
 	// Set the maximum number of CPUs that can be executing simultaneously.
 	if settings.Settings.AutoSetGOMAXPROCS {
 		runtime.GOMAXPROCS(runtime.NumCPU())
