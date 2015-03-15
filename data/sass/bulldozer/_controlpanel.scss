@@ -122,11 +122,16 @@ $bud-ctrl-view-nav-color: #747B84;
 							position: absolute;
 							pointer-events: none;
 							border-color: rgba(136, 183, 213, 0);
-							border-right-color: $bud-ctrl-view-nav-bg-color;
+							border-right-color: $bud-ctrl-view-bg-color;
 							border-width: 10px;
 							margin-top: -10px;
 						}
 					}
+				}
+
+				&:first-child a.active::after,
+				&:first-child a.active:hover::after {
+					border-right-color: $bud-ctrl-view-nav-bg-color;
 				}
 			}
 		}
