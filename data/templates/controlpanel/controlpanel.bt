@@ -7,7 +7,13 @@
 		{{end}}
 	</ul>
 </div>
-<div id="bud-ctrl-view">{{#.Body}}</div>
+
+<div id="bud-ctrl-view">
+	<div id="bud-ctrl-view-nav">
+		<h1>{{#.CurrentTitle}}</h1>
+	</div>
+	<div id="bud-ctrl-view-body">{{#.Body}}</div>
+</div>
 
 {{js load}}
 	$("#bud-ctrl-nav").hover(function() {

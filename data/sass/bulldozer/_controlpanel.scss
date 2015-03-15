@@ -2,9 +2,9 @@
  * Bulldozer Control Panel
  */
 
-$bud-ctrl-nav-width: 65px;
+$bud-ctrl-nav-width: 70px;
 $bud-ctrl-nav-expand-width: 265px;
-$bud-ctrl-nav-height: 40px;
+$bud-ctrl-nav-height: $bud-ctrl-nav-width;
 $bud-ctrl-nav-bg-color: $bud-primary-color;
 $bud-ctrl-nav-color: #3D3D3D;
 $bud-ctrl-nav-icon-color: #595959;
@@ -14,7 +14,9 @@ $bud-ctrl-nav-hover-icon-color: $bud-primary-color;
 $bud-ctrl-nav-active-bg-color: $bud-primary-color;
 $bud-ctrl-nav-active-color: #393939;
 
-$bud-ctrl-view-bg-color: #F8F8F8;
+$bud-ctrl-view-bg-color: #F2F2F2;
+$bud-ctrl-view-nav-bg-color: #FFF;
+$bud-ctrl-view-nav-color: #747B84;
 
 
 #bud-ctrl {
@@ -54,6 +56,7 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 					margin: 0;
 					vertical-align: middle;
 					color: $bud-ctrl-nav-color;
+					font: $bud-main-font;
 					
 					@include user-select(none);
 					@include bud-transition();
@@ -64,7 +67,7 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 						width: $bud-ctrl-nav-width;
 						line-height: $bud-ctrl-nav-height;
 						color: $bud-ctrl-nav-icon-color;
-						font-size: 25px;
+						font-size: 35px;
 						text-align: center;
 						vertical-align: middle;
 					}
@@ -80,6 +83,7 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 						padding: 0 5px 0 $bud-ctrl-nav-width + 1px;
 						line-height: $bud-ctrl-nav-height;
 						vertical-align: middle;
+						font: $bud-main-font;
 						font-size: 0.8em;
 						font-weight: bold;
 						white-space:nowrap;
@@ -110,7 +114,7 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 
 						&::after {
 							right: 0;
-							top: 20px;
+							top: 35px;
 							border: solid transparent;
 							content: " ";
 							height: 0;
@@ -118,7 +122,7 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 							position: absolute;
 							pointer-events: none;
 							border-color: rgba(136, 183, 213, 0);
-							border-right-color: #FAFAFA;
+							border-right-color: $bud-ctrl-view-nav-bg-color;
 							border-width: 10px;
 							margin-top: -10px;
 						}
@@ -132,11 +136,35 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 		display: block;
 		width: 100%;
 		min-height: 100%;
-		padding: 15px;
-		padding-left: $bud-ctrl-nav-width + 15px;
+		padding: 0;
+		padding-left: $bud-ctrl-nav-width;
 		background-color: $bud-ctrl-view-bg-color;
 
 		@include bud-transition();
+
+		#bud-ctrl-view-nav {
+			height: $bud-ctrl-nav-height;
+			width: 100%;
+			padding: 0 0 0 30px;
+			background-color: $bud-ctrl-view-nav-bg-color;
+			border-bottom: 2px solid #DCDCDC;
+
+			h1 {
+				padding: 0;
+				margin: 0;
+				height: $bud-ctrl-nav-height;
+				line-height: $bud-ctrl-nav-height;
+				vertical-align: middle;
+				font: $bud-main-font;
+				font-size: 1.1em;
+				font-weight: bold;
+				color: $bud-ctrl-view-nav-color;
+			}
+		}
+
+		#bud-ctrl-view-body {
+			padding: 30px;
+		}
 	}
 
 	&.bud-ctrl-expand {
@@ -149,7 +177,7 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 		}
 
 		#bud-ctrl-view {
-			padding-left: $bud-ctrl-nav-expand-width + 15px;
+			padding-left: $bud-ctrl-nav-expand-width;
 		}
 	}
 }

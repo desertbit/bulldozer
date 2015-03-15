@@ -1,17 +1,9 @@
-// Variables
-$base-font-size:    16px;
-$font-stack:        'Open Sans', sans-serif;
-$primary-color:     #505050;
-$bg-color:          #ffffff;
-
-
-
 /*
- * Goji Core
+ * Bulldozer Core
  */
 
 body, html {
-	font-size: $base-font-size;
+	font-size: 16px;
 	height:100%;
 	width:100%;
 	padding:0;
@@ -19,9 +11,9 @@ body, html {
 }
 
 body {
-    font: 100% $font-stack;
-    color: $primary-color;
-    background-color: $bg-color;
+    font: 100% $bud-main-font;
+    color: $bud-secondary-color;
+    background-color: #FFF;
 }
 
 code {

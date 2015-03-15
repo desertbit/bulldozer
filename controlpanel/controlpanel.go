@@ -120,8 +120,9 @@ func routePage(s *sessions.Session, req *mux.Request) {
 
 	// Create the page render data.
 	data := struct {
-		Items []item
-		Body  ht.HTML
+		Items        []item
+		Body         ht.HTML
+		CurrentTitle string
 	}{
 		Items: items,
 	}
@@ -154,8 +155,9 @@ func routePage(s *sessions.Session, req *mux.Request) {
 	// Unescape the body.
 	data.Body = ht.HTML(body)
 
-	// Set the page title.
+	// Set the control panel and page title.
 	req.Title = currentPage.Title
+	data.CurrentTitle = currentPage.Title
 
 	// Create the template execute options.
 	opts := template.ExecOpts{
