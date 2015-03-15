@@ -154,6 +154,8 @@ func Init() {
 	// Initialize the store package.
 	store.Init()
 
+	log.L.Info("Parsing internal templates...")
+
 	// Load the bulldozer templates to the bulldozer namespace.
 	err = templates.Load("bud", settings.Settings.BulldozerTemplatesPath, settings.Settings.BulldozerCoreTemplatesPath)
 	if err != nil {
@@ -174,6 +176,8 @@ func Init() {
 	if err = controlpanel.Init(); err != nil {
 		log.L.Fatal(err)
 	}
+
+	log.L.Info("Parsing project templates...")
 
 	// Load the templates in the project templates directory.
 	// Don't handle the parse errors here. It will be shown by the server.

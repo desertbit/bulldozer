@@ -2,15 +2,17 @@
  * Bulldozer Control Panel
  */
 
-$bud-ctrl-nav-width: 55px;
-$bud-ctrl-nav-expand-width: 210px;
+$bud-ctrl-nav-width: 65px;
+$bud-ctrl-nav-expand-width: 265px;
 $bud-ctrl-nav-height: 40px;
-$bud-ctrl-nav-bg-color: #393939;
-$bud-ctrl-nav-color: #999999;
+$bud-ctrl-nav-bg-color: $bud-primary-color;
+$bud-ctrl-nav-color: #3D3D3D;
+$bud-ctrl-nav-icon-color: #595959;
 $bud-ctrl-nav-hover-bg-color: #3E3E3E;
 $bud-ctrl-nav-hover-color: #FFF;
-$bud-ctrl-nav-active-bg-color: #F8F8F8;
-$bud-ctrl-nav-active-color: #333;
+$bud-ctrl-nav-hover-icon-color: $bud-primary-color;
+$bud-ctrl-nav-active-bg-color: $bud-primary-color;
+$bud-ctrl-nav-active-color: #393939;
 
 $bud-ctrl-view-bg-color: #F8F8F8;
 
@@ -61,8 +63,8 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 						padding: 0;
 						width: $bud-ctrl-nav-width;
 						line-height: $bud-ctrl-nav-height;
-						color: inherit;
-						font-size: 20px;
+						color: $bud-ctrl-nav-icon-color;
+						font-size: 25px;
 						text-align: center;
 						vertical-align: middle;
 					}
@@ -93,13 +95,33 @@ $bud-ctrl-view-bg-color: #F8F8F8;
 						color: $bud-ctrl-nav-hover-color;
 
 						i {
-							color: $bud-primary-color;
+							color: $bud-ctrl-nav-hover-icon-color;
 						}
 					}
 
-					&.active {
+					&.active,
+					&.active:hover {
 						background-color: $bud-ctrl-nav-active-bg-color;
-						color: $bud-primary-color;
+						color: $bud-ctrl-nav-active-color;
+
+						i {
+							color: $bud-ctrl-nav-active-color;
+						}
+
+						&::after {
+							right: 0;
+							top: 20px;
+							border: solid transparent;
+							content: " ";
+							height: 0;
+							width: 0;
+							position: absolute;
+							pointer-events: none;
+							border-color: rgba(136, 183, 213, 0);
+							border-right-color: #FAFAFA;
+							border-width: 10px;
+							margin-top: -10px;
+						}
 					}
 				}
 			}

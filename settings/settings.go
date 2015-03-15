@@ -144,7 +144,6 @@ func init() {
 	Settings.BulldozerResourcesPath = Settings.BulldozerSourcePath + "/data/resources"
 	Settings.BulldozerTranslationPath = Settings.BulldozerSourcePath + "/data/translations"
 	Settings.BulldozerPrototypesPath = Settings.BulldozerSourcePath + "/data/prototypes"
-
 }
 
 //##############//
@@ -275,6 +274,8 @@ type settings struct {
 	SocketType    SocketType
 	ListenAddress string
 	ServeFiles    bool
+
+	MinifyTemplates bool
 
 	DatabaseAddr string
 	DatabasePort string

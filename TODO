@@ -2,6 +2,8 @@
 === Bulldozer TODO List ===
 ===========================
 
+* open two tabs. logout one. perform action on the other. the action is still valid, because the emit call is still valid. maybe perform auth checks on each event trigger?
+* Add production or debug environment variables. switch on compression....
 * auth: registration: There is a german email !!! Translate this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 * auth: check if reg email is already present!
 * move the gesundheitsnetz check emtpy email dialog to the auth package? this might be useful?
