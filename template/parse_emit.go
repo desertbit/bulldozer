@@ -51,11 +51,11 @@ func init() {
 //### Public Template methods ###//
 //###############################//
 
-// RegisterEvents registeres the event methods of the interface to all templates.
-// Event method names have to start with the EventMethodPrefix.
+// RegisterEvents registeres the event methods of the interface.
+// Event method names have to start with the 'Event' prefix.
 // They are called from the client-side without this prefix.
 // One optional parameter can be set, to define the events namespace.
-// If no namespace is defined, then the event is registered in the global namespace.
+// If no namespace is defined, then the events are registered in the global namespace.
 func (t *Template) RegisterEvents(i interface{}, vars ...string) *Template {
 	// Get the namespace
 	var namespace string
@@ -268,7 +268,7 @@ func parseEmit(typeStr string, token string, d *parseData) error {
 		}
 	}
 
-	// Check if the function name and namespace is valid.
+	// Check if the function name and namespace are valid.
 	if funcName == "" {
 		return fmt.Errorf("empty emit function name!")
 	} else if namespace == "" {

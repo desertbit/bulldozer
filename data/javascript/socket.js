@@ -33,7 +33,7 @@ Bulldozer.fn.socket = new function () {
      */
 
     var documentReady = false,
-        socket,
+        socket = false,
         sid, instanceID, token,
         timeoutConnectionLost = false,
         reconnectCount = 0,
@@ -234,6 +234,10 @@ Bulldozer.fn.socket = new function () {
      * Public Methods
      */
 
+    this.hasSocket = function() {
+        return !(socket === false);
+    };
+
     this.sessionID = function() {
         return sid;
     };
@@ -264,6 +268,7 @@ Bulldozer.fn.socket = new function () {
 
                 // Reset the socket.
                 socket.reset();
+                socket = false;
 
                 // Set the wait duration to a short timeout.
                 waitDuration = 300;

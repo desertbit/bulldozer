@@ -48,7 +48,8 @@ Bulldozer.fn.core = new function () {
         }
         // Check if this is an internal link, if the url is not an anchor link
         // and if the url points not to a file on the server...
-        else if (this.host === window.location.host
+        else if (Bulldozer.socket.hasSocket()
+            && this.host === window.location.host
             && url.slice(0, 1) !== "#"
             && url.slice(0, 7) !== "public/"
             && url.slice(0, 8) !== "/public/")

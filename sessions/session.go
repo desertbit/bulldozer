@@ -92,6 +92,7 @@ type Session struct {
 	path       string
 
 	domEncryptionKey string
+	isWebCrawler     bool
 
 	sessionInstance *instance
 
@@ -166,6 +167,11 @@ func (s *Session) SocketType() socket.SocketType {
 // RemoteAddr returns the client remote address
 func (s *Session) RemoteAddr() string {
 	return s.socket.RemoteAddr()
+}
+
+// IsWebCrawler returns a boolean whenever the client is a web crawler.
+func (s *Session) IsWebCrawler() bool {
+	return s.isWebCrawler
 }
 
 func (s *Session) ShowLoadingIndicator() {
@@ -495,7 +501,7 @@ func Release() {
 // One optional parameter can be passed, which set's the instance ID.
 // A new instance ID is generated if no instance ID is passed or if the
 // instance ID string length is invalid.
-func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, string, bool, error) {
+func New(rw http.ResponseWriter, req *http.Request, isWebCrawler bool, vars ...string) (*Session, string, bool, error) {
 	// Get the store session
 	var err error
 	var storeSession *store.Session
@@ -527,6 +533,7 @@ func New(rw http.ResponseWriter, req *http.Request, vars ...string) (*Session, s
 		storeSession:                  storeSession,
 		stopExpireAccessSocketTimeout: make(chan struct{}),
 		isClosed:                      false,
+		isWebCrawler:                  isWebCrawler,
 
 		// Add the static scripts and stylesheets.
 		// They will be loaded always on session initialization.

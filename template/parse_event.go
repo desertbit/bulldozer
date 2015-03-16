@@ -6,12 +6,13 @@
 package template
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"strconv"
 	"strings"
+
+	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/sessions"
+	"code.desertbit.com/bulldozer/bulldozer/utils"
 )
 
 func init() {

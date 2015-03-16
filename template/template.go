@@ -120,6 +120,9 @@ type Template struct {
 	// Events emitter
 	emitter *emission.Emitter
 
+	// Functions
+	funcsMap tFuncs
+
 	// Events
 	eventsMap      map[string]*events
 	eventsMapMutex sync.Mutex
@@ -247,6 +250,8 @@ type FuncMap map[string]interface{}
 // It panics if a value in the map is not a function with appropriate return
 // type. However, it is legal to overwrite elements of the map. The return
 // value is the template, so calls can be chained.
+// Functions have to be registered before any template which use these functions are parsed.
+// This method is equivalent of calling the html/template Funcs method.
 func (t *Template) Funcs(funcMap FuncMap) *Template {
 	t.template.Funcs(htmlTemplate.FuncMap(funcMap))
 	return t

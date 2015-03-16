@@ -339,8 +339,6 @@ type settings struct {
 	StaticJavaScripts []string
 	StaticStyleSheets []string
 
-	DisallowedRobotsUrls []string
-
 	// Authentication stuff
 	RegistrationDisabled           bool
 	PasswordEncryptionKey          string
@@ -361,8 +359,4 @@ func (s *settings) CookieHashKeyBytes() []byte {
 
 func (s *settings) CookieBlockKeyBytes() []byte {
 	return []byte(s.CookieBlockKey)
-}
-
-func (s *settings) AddDisallowedRobotsUrls(urls ...string) {
-	s.DisallowedRobotsUrls = append(s.DisallowedRobotsUrls, urls...)
 }

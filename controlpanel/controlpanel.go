@@ -11,9 +11,9 @@ import (
 	"code.desertbit.com/bulldozer/bulldozer/auth"
 	"code.desertbit.com/bulldozer/bulldozer/mux"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/templates"
+	"code.desertbit.com/bulldozer/bulldozer/webcrawler"
 
 	"fmt"
 	"strings"
@@ -32,7 +32,7 @@ const (
 // Init initializes this package. This is managed by the bulldozer main package.
 func Init() (err error) {
 	// Disallow the control panel page to be indexed.
-	settings.Settings.AddDisallowedRobotsUrls(PageUrl)
+	webcrawler.AddDisallowedPath(PageUrl + "/")
 
 	// Obtain the control center template.
 	t := templates.Templates.Lookup(templateName)

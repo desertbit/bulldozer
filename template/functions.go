@@ -17,6 +17,7 @@ var (
 	bulldozerFuncMap FuncMap = FuncMap{
 		"tr":          tr.S,
 		"plugin":      renderPlugin,
+		"callFunc":    callTemplateFunc,
 		"eventKeyVar": createEventAccessKeyFromVar,
 		"eventKey":    createEventAccessKey,
 		"tmplR":       renderTemplate,

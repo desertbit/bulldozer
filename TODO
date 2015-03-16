@@ -2,10 +2,13 @@
 === Bulldozer TODO List ===
 ===========================
 
+
+* create documentation and package descriptions. Especially the template package.
+
 * open two tabs. logout one. perform action on the other. the action is still valid, because the emit call is still valid. maybe perform auth checks on each event trigger?
 * Add production or debug environment variables. switch on compression....
 * auth: registration: There is a german email !!! Translate this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-* auth: check if reg email is already present!
+* auth: check if user reg email is already present!
 * move the gesundheitsnetz check emtpy email dialog to the auth package? this might be useful?
 * auth. user set options: dbUpdateUser: validate for false inputs
 
@@ -13,6 +16,13 @@
   parse the render data and check if a module is there....
 
 * It might be, that during one request the authenticated user is obtained from the database mutliple times.
+
+* Access control system in route methods and event methods.
+* template: always call the getData function, also if data is passed?
+* template: remove funcsMapMutex and eventsMapMutex?
+* template: rewrite the emit events access. There are some obsolete values as event struct Template pointer.
+* template: emit call optional args? + events?
+* template: create a register function which call registerEvents and registerFuncs. Use this function for plugins instead of only register events.
 
 * make the text plugin accessible as module?
 * implement client side javascript messageboxes

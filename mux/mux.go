@@ -6,14 +6,16 @@
 package mux
 
 import (
+	"errors"
+	"fmt"
+
 	"code.desertbit.com/bulldozer/bulldozer/log"
 	"code.desertbit.com/bulldozer/bulldozer/router"
 	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"code.desertbit.com/bulldozer/bulldozer/template"
 	"code.desertbit.com/bulldozer/bulldozer/templates"
 	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"errors"
-	"fmt"
+	"code.desertbit.com/bulldozer/bulldozer/webcrawler"
 )
 
 var (
@@ -97,6 +99,8 @@ func Route(path string, f RouteFunc) {
 // The templates of the bulldozer templates package are used.
 // One optional variadic argument can be passed, which defines the page template ID.
 // This ID is passed to the template.ExecOpts.
+// The path is automatically added to the webcrawler sitemap paths.
+// If you don't want to have this added, then remove the path from the webcrawler's sitemap again.
 func RoutePage(path string, title string, templateName string, vars ...string) {
 	// Create a new page route value.
 	p := &pageRoute{
@@ -111,11 +115,9 @@ func RoutePage(path string, title string, templateName string, vars ...string) {
 
 	// Add the value to the router.
 	mainRouter.Route(path, p)
-}
 
-// RoutePaths returns all current route paths.
-func RoutePaths() []string {
-	return mainRouter.Paths()
+	// Add the path to the webcrawler's sitemap.
+	webcrawler.AddSitemapPath(path)
 }
 
 // ExecRoute executes the routes and returns the status code

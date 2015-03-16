@@ -79,7 +79,6 @@ func init() {
 
 func serve() error {
 	// Create the html handlers.
-	setWebCrawlerHtmlFuncs()
 	http.HandleFunc("/bulldozer/reconnect", reconnectSessionFunc)
 	http.HandleFunc("/", handleHtmlFunc)
 
@@ -149,7 +148,7 @@ func reconnectSessionFunc(rw http.ResponseWriter, req *http.Request) {
 
 	// Create a new session object, pass the instance ID and
 	// obtain the unique socket session token.
-	session, accessToken, isNewSession, err := sessions.New(rw, req, instanceID)
+	session, accessToken, isNewSession, err := sessions.New(rw, req, false, instanceID)
 	if err != nil {
 		// Log the error
 		log.L.Error("reconnect session error: %v", err)
@@ -200,7 +199,7 @@ func handleHtmlFunc(rw http.ResponseWriter, req *http.Request) {
 
 	// Create a new session object and
 	// obtain the unique socket session token.
-	session, accessToken, _, err := sessions.New(rw, req)
+	session, accessToken, _, err := sessions.New(rw, req, isWebCrawler)
 	if err != nil {
 		log.L.Error("new session error: %v", err)
 		http.Error(rw, "Internal Server Error", 500)
