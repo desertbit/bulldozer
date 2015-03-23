@@ -20,6 +20,7 @@ import (
 )
 
 const (
+	openTimeout           = 5 * time.Second
 	saveLoopTimeout       = 1 * time.Minute
 	cleanupExpiredTimeout = 2 * time.Minute
 
@@ -56,10 +57,15 @@ var (
 // Init initializes this store package.
 // This is handled by the main bulldozer package.
 func Init() {
+	// The bolt database options.
+	opts := &bolt.Options{
+		Timeout: openTimeout,
+	}
+
 	// Open the sessions database file.
 	// It will be created if it doesn't exist.
 	var err error
-	db, err = bolt.Open(settings.Settings.SessionsDatabasePath, 0600, nil)
+	db, err = bolt.Open(settings.Settings.SessionsDatabasePath, 0600, opts)
 	if err != nil {
 		log.L.Fatalf("failed to open sessions database '%s': %v", settings.Settings.SessionsDatabasePath, err)
 	}
