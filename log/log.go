@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	L = logging.MustGetLogger("example")
+	L = logging.MustGetLogger("logger")
 
 	// Custom format string. Everything except the message has a custom color
 	// which is dependent on the log level. Many fields have a custom output

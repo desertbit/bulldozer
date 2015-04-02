@@ -122,7 +122,7 @@ func (s *Session) InstanceDelete(key interface{}) {
 //### Private ###//
 //###############//
 
-func newUniqueInstanceID(s *Session) string {
+func newUniqueInstanceID() string {
 	// Creating UUID Version 4.
 	return uuid.NewV4().String()
 }

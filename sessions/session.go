@@ -563,7 +563,7 @@ func New(rw http.ResponseWriter, req *http.Request, isWebCrawler bool, vars ...s
 		s.instanceID = vars[0]
 	}
 	if len(s.instanceID) == 0 {
-		s.instanceID = newUniqueInstanceID(s)
+		s.instanceID = newUniqueInstanceID()
 	}
 
 	// Get the instance pointer. This will create a new instance if not present.

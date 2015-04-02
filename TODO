@@ -32,7 +32,6 @@
 * Remove the template must calls and implement middleware on the go side. If this is done, remove the session navigate goroutine and then also remove the time sleep in the registration event.
 * html minifier
 * Server database backups
-* Add default groups (Admin, Dev,...) to the auth package and make them accessible in the template engine.
 * Also check for the desired group in the topbar exec package!
 * CaptchaCode
 * NGINX serve bulldozer files also

@@ -6,10 +6,10 @@
 package database
 
 import (
-	r "github.com/dancannon/gorethink"
+	"fmt"
 
 	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"fmt"
+	r "github.com/dancannon/gorethink"
 )
 
 var (
