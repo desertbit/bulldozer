@@ -6,12 +6,13 @@
 package sessions
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"encoding/gob"
-	"github.com/satori/go.uuid"
 	"sync"
 	"time"
+
+	"code.desertbit.com/bulldozer/bulldozer/log"
+	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"github.com/satori/go.uuid"
 )
 
 func init() {

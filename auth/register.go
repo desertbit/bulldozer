@@ -73,7 +73,7 @@ func (e *registerEvents) EventRegister(c *template.Context, name string, loginNa
 	password := utils.RandomString(randomPasswordLength)
 
 	// Add the user to the database
-	u, err := dbAddUser(loginName, name, email, password)
+	u, err := dbAddUser(loginName, name, email, password, true)
 	if err != nil {
 		log.L.Error("failed to add user '%s' to database: %v", loginName, err)
 		showRegisterErrorMsgBox(s, tr.S("bud.auth.register.error.generalShort"))

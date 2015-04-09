@@ -243,8 +243,9 @@ func GetUsersInGroup(group string) (Users, error) {
 }
 
 // AddUser adds a new user to the database.
-func AddUser(loginName string, name string, email string, password string, groups ...string) (*User, error) {
-	u, err := dbAddUser(loginName, name, email, password, groups...)
+// If removeOnExpire is true, the user will be removed automatically if not logged in once for the expire timeout.
+func AddUser(loginName string, name string, email string, password string, removeOnExpire bool, groups ...string) (*User, error) {
+	u, err := dbAddUser(loginName, name, email, password, removeOnExpire, groups...)
 	if err != nil {
 		return nil, err
 	}

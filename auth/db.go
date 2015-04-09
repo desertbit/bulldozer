@@ -164,7 +164,7 @@ func dbGetUserByID(id string) (*dbUser, error) {
 	return &u, nil
 }
 
-func dbAddUser(loginName string, name string, email string, password string, groups ...string) (u *dbUser, err error) {
+func dbAddUser(loginName string, name string, email string, password string, removeOnExpire bool, groups ...string) (u *dbUser, err error) {
 	// Prepare the inputs.
 	loginName = strings.TrimSpace(loginName)
 	name = strings.TrimSpace(name)
@@ -217,9 +217,13 @@ func dbAddUser(loginName string, name string, email string, password string, gro
 		EMail:        email,
 		PasswordHash: password,
 		Enabled:      true,
-		LastLogin:    -1,
+		LastLogin:    0,
 		Created:      time.Now().Unix(),
 		Groups:       groups,
+	}
+
+	if removeOnExpire {
+		u.LastLogin = -1
 	}
 
 	// Insert it to the database.
