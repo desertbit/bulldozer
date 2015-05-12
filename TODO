@@ -2,16 +2,14 @@
 === Bulldozer TODO List ===
 ===========================
 
-
+* auth register: don't allow special characters in username,... as <>?-....
 * create documentation and package descriptions. Especially the template package.
 
 * auth user: don't allow logins for disabled users (enabled user flag)
 
 * open two tabs. logout one. perform action on the other. the action is still valid, because the emit call is still valid. maybe perform auth checks on each event trigger?
 * Add production or debug environment variables. switch on compression....
-* auth: registration: There is a german email !!! Translate this!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 * auth: check if user reg email is already present!
-* move the gesundheitsnetz check emtpy email dialog to the auth package? this might be useful?
 * auth. user set options: dbUpdateUser: validate for false inputs
 
 * Create modules: render data := { TextArea TextEditModule }

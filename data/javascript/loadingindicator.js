@@ -78,4 +78,5 @@ Bulldozer.fn.loadingIndicator = new function () {
             e.hide();
         }, 2000);
     };
+
 };

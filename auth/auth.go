@@ -51,6 +51,9 @@ type sessionAuthData struct {
 //##############//
 
 func Init() (err error) {
+	// Register the internal groups.
+	registerInternalGroups()
+
 	// Set the on new session hook.
 	sessions.OnNewSession(onNewSession)
 

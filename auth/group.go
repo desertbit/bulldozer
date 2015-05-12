@@ -26,12 +26,6 @@ var (
 	groups Groups
 )
 
-func init() {
-	// Register the internal groups.
-	RegisterGroup(GroupSysOp, tr.S("bud.auth.groupSysOpDescription"))
-	RegisterGroup(GroupAdmin, tr.S("bud.auth.groupAdminDescription"))
-}
-
 //####################//
 //### Group Struct ###//
 //####################//
@@ -84,6 +78,12 @@ func GetGroups() Groups {
 //###############//
 //### Private ###//
 //###############//
+
+// Register the internal groups.
+func registerInternalGroups() {
+	RegisterGroup(GroupSysOp, tr.S("bud.auth.groupSysOpDescription"))
+	RegisterGroup(GroupAdmin, tr.S("bud.auth.groupAdminDescription"))
+}
 
 func groupExists(name string) bool {
 	for _, g := range groups {

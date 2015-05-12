@@ -81,7 +81,7 @@ func Init() {
 			signal.Notify(sigchan, os.Interrupt, os.Kill, syscall.SIGTERM, syscall.SIGKILL)
 			<-sigchan
 
-			fmt.Println("Exiting...")
+			log.L.Info("Exiting...")
 
 			// If terminated while initializing, just sleep
 			// for a short timeout, to not interrupt the initialization process.

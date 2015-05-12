@@ -1,3 +1,8 @@
+{"ID": "bud.auth.groupSysOpDescription", "Text": "The SysOp has complete control over the system."}
+{"ID": "bud.auth.groupAdminDescription", "Text": "The Admin is the site administrator."}
+
+
+
 {"ID": "bud.auth.pkg.mustAuthErrorMessage", "Text": "Access denied! Please authenticate to access this page."}
 
 
@@ -61,3 +66,8 @@
 
 {"ID": "bud.auth.register.success.title", "Text": "User registered"}
 {"ID": "bud.auth.register.success.text", "Text": "Your new password has been send to your e-mail address."}
+
+
+
+{"ID": "bud.auth.register.mail.subject", "Text": "Your registration on $SiteURL"}
+{"ID": "bud.auth.register.mail.body", "Text": "You have been successfully registered on $SiteURL.<br>Please login with your chosen username at: <a href=\"$LoginURL\">$LoginURL</a><br><br>Your password is: $Password"}

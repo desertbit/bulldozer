@@ -144,19 +144,25 @@ func showRegisterErrorMsgBox(s *sessions.Session, msg string) {
 }
 
 func sendRegistrationEMail(u *dbUser, password string) error {
-	// Create a new mail message.
-	m := mail.Message{
-		To:      []string{u.EMail},
-		Subject: "Ihre Registrierung beim Gesundheitnetz",
-	}
-
 	// Create the login url.
 	loginURL := settings.Settings.SiteUrl + LoginPageUrl
 
-	// TODO: Translate this!
-	m.Body = "Sie haben sich erfolgreich beim Ganzheitichen Gesundheitsnetz registriert." +
-		"<br>Bitte melden Sie sich unter folgender Addresse an: <a href=\"" + loginURL + "\">" + loginURL + "</a>" +
-		"<br><br>Ihr generiertes Passwort ist: " + password
+	// The replace function.
+	replaceArgs := func(s string) string {
+		s = strings.Replace(s, "$SiteURL", settings.Settings.SiteUrl, -1)
+		s = strings.Replace(s, "$LoginURL", loginURL, -1)
+		s = strings.Replace(s, "$Password", password, -1)
+		return s
+	}
+
+	// Create a new mail message.
+	m := mail.Message{
+		To:      []string{u.EMail},
+		Subject: replaceArgs(tr.S("bud.auth.register.mail.subject")),
+	}
+
+	// Set the mail message body.
+	m.Body = replaceArgs(tr.S("bud.auth.register.mail.body"))
 
 	// Send the e-mail
 	err := mail.Send(&m)
