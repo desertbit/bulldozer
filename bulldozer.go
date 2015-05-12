@@ -6,21 +6,21 @@
 package bulldozer
 
 import (
-	_ "code.desertbit.com/bulldozer/bulldozer/plugins"
+	_ "github.com/desertbit/bulldozer/plugins"
 
-	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+	tr "github.com/desertbit/bulldozer/translate"
 
-	"code.desertbit.com/bulldozer/bulldozer/auth"
-	"code.desertbit.com/bulldozer/bulldozer/controlpanel"
-	"code.desertbit.com/bulldozer/bulldozer/database"
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/mux"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/store"
-	"code.desertbit.com/bulldozer/bulldozer/templates"
-	"code.desertbit.com/bulldozer/bulldozer/topbar"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"github.com/desertbit/bulldozer/auth"
+	"github.com/desertbit/bulldozer/controlpanel"
+	"github.com/desertbit/bulldozer/database"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/mux"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/settings"
+	"github.com/desertbit/bulldozer/store"
+	"github.com/desertbit/bulldozer/templates"
+	"github.com/desertbit/bulldozer/topbar"
+	"github.com/desertbit/bulldozer/utils"
 
 	"flag"
 	"fmt"

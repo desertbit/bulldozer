@@ -6,10 +6,10 @@
 package settings
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
 	"github.com/BurntSushi/toml"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/utils"
 	"os"
 	"reflect"
 	"strings"
@@ -42,7 +42,7 @@ const (
 	 *  Private
 	 */
 
-	bulldozerGoPath      = "src/code.desertbit.com/bulldozer/bulldozer/"
+	bulldozerGoPath      = "src/github.com/desertbit/bulldozer/"
 	tmpDirName           = "bulldozer"
 	sessionsDatabaseName = "sessions.db"
 

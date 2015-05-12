@@ -11,9 +11,9 @@ package template
 import (
 	htmlTemplate "html/template"
 
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/settings"
 
 	"errors"
 	"fmt"

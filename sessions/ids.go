@@ -6,8 +6,8 @@
 package sessions
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
+	"github.com/desertbit/bulldozer/utils"
 	"strconv"
 	"sync"
 )

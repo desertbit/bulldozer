@@ -6,8 +6,8 @@
 package tr
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/filewatcher"
-	"code.desertbit.com/bulldozer/bulldozer/log"
+	"github.com/desertbit/bulldozer/filewatcher"
+	"github.com/desertbit/bulldozer/log"
 	"strings"
 )
 

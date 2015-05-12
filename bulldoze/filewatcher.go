@@ -6,8 +6,8 @@
 package main
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/filewatcher"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"github.com/desertbit/bulldozer/filewatcher"
+	"github.com/desertbit/bulldozer/utils"
 	"log"
 	"path/filepath"
 	"strings"

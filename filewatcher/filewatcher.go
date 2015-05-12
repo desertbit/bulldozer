@@ -7,7 +7,7 @@ package filewatcher
 
 import (
 	"fmt"
-	"code.desertbit.com/bulldozer/bulldozer/log"
+	"github.com/desertbit/bulldozer/log"
 	"gopkg.in/fsnotify.v1"
 	"os"
 	"path/filepath"

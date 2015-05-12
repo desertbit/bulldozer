@@ -6,8 +6,8 @@
 package socket
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"code.desertbit.com/bulldozer/bulldozer/log"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/utils"
 	"io"
 	"io/ioutil"
 	"net/http"

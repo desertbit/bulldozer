@@ -7,14 +7,14 @@ package store
 
 import (
 	"bytes"
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/sessions/store/protobuf"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"code.google.com/p/gogoprotobuf/proto"
 	"encoding/gob"
 	"errors"
 	"fmt"
 	"github.com/boltdb/bolt"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/sessions/store/protobuf"
+	"github.com/desertbit/bulldozer/settings"
 	"sync"
 	"time"
 )

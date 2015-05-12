@@ -6,10 +6,10 @@
 package editmode
 
 import (
-	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+	tr "github.com/desertbit/bulldozer/translate"
 
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/template"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/template"
 	"sync"
 )
 

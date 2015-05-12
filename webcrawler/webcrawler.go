@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"strings"
 
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/settings"
 )
 
 var (

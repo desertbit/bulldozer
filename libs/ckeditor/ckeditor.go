@@ -6,8 +6,8 @@
 package ckeditor
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/settings"
 )
 
 const (

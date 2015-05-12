@@ -6,14 +6,14 @@
 package bulldozer
 
 import (
-	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+	tr "github.com/desertbit/bulldozer/translate"
 
-	"code.desertbit.com/bulldozer/bulldozer/firewall"
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/mux"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	"fmt"
+	"github.com/desertbit/bulldozer/firewall"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/mux"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/settings"
 	"html/template"
 	"net"
 	"net/http"

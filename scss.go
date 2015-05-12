@@ -6,10 +6,10 @@
 package bulldozer
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/filewatcher"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"code.desertbit.com/bulldozer/bulldozer/log"
+	"github.com/desertbit/bulldozer/filewatcher"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/settings"
+	"github.com/desertbit/bulldozer/utils"
 	"os/exec"
 	"strings"
 	"time"

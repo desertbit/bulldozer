@@ -6,8 +6,8 @@
 package store
 
 import (
-	db "code.desertbit.com/bulldozer/bulldozer/database"
 	r "github.com/dancannon/gorethink"
+	db "github.com/desertbit/bulldozer/database"
 
 	"fmt"
 	"time"

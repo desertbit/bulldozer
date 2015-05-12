@@ -6,7 +6,7 @@
 package store
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/template"
+	"github.com/desertbit/bulldozer/template"
 )
 
 const (

@@ -6,8 +6,8 @@
 package sessions
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"container/list"
+	"github.com/desertbit/bulldozer/utils"
 	"sync"
 )
 

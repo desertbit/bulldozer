@@ -6,11 +6,11 @@
 package template
 
 import (
-	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+	tr "github.com/desertbit/bulldozer/translate"
 
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/utils"
 	"strconv"
 )
 

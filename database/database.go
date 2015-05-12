@@ -8,8 +8,8 @@ package database
 import (
 	"fmt"
 
-	"code.desertbit.com/bulldozer/bulldozer/settings"
 	r "github.com/dancannon/gorethink"
+	"github.com/desertbit/bulldozer/settings"
 )
 
 var (

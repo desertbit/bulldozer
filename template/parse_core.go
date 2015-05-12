@@ -6,9 +6,9 @@
 package template
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/utils"
 	"strings"
 )
 

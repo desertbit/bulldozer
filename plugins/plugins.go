@@ -6,6 +6,6 @@
 package plugins
 
 import (
-	_ "code.desertbit.com/bulldozer/bulldozer/plugins/protect"
-	_ "code.desertbit.com/bulldozer/bulldozer/plugins/text"
+	_ "github.com/desertbit/bulldozer/plugins/protect"
+	_ "github.com/desertbit/bulldozer/plugins/text"
 )

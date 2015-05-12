@@ -10,9 +10,9 @@ package template
 
 import (
 	"bytes"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"errors"
 	"fmt"
+	"github.com/desertbit/bulldozer/sessions"
 	"io"
 )
 

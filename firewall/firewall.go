@@ -6,8 +6,8 @@
 package firewall
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"github.com/desertbit/bulldozer/settings"
+	"github.com/desertbit/bulldozer/utils"
 	"net/http"
 	"sync"
 	"time"

@@ -6,10 +6,10 @@
 package datatables
 
 import (
-	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+	tr "github.com/desertbit/bulldozer/translate"
 
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/settings"
 )
 
 // Load loads the required files for the datatables plugin.

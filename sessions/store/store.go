@@ -6,7 +6,7 @@
 package store
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"github.com/desertbit/bulldozer/utils"
 	"sync"
 )
 

@@ -6,8 +6,8 @@
 package sessions
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"github.com/chuckpreslar/emission"
+	"github.com/desertbit/bulldozer/log"
 )
 
 const (

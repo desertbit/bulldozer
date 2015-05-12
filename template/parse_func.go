@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"strings"
 
-	"code.desertbit.com/bulldozer/bulldozer/log"
+	"github.com/desertbit/bulldozer/log"
 )
 
 const (

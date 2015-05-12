@@ -6,10 +6,10 @@
 package main
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"flag"
 	"fmt"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/utils"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	bulldozerGoPath = "src/code.desertbit.com/bulldozer/bulldozer/"
+	bulldozerGoPath = "src/github.com/desertbit/bulldozer/"
 )
 
 var (

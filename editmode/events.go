@@ -6,9 +6,9 @@
 package editmode
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
 	"github.com/chuckpreslar/emission"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/sessions"
 )
 
 const (

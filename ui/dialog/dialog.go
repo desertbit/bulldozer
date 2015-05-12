@@ -6,9 +6,9 @@
 package dialog
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/utils"
 
 	"fmt"
 	"strconv"

@@ -6,14 +6,14 @@
 package store
 
 import (
-	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+	tr "github.com/desertbit/bulldozer/translate"
 
-	"code.desertbit.com/bulldozer/bulldozer/editmode"
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
 	"fmt"
+	"github.com/desertbit/bulldozer/editmode"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/ui/messagebox"
 	"strconv"
 	"sync"
 	"time"

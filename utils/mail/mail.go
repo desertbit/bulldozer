@@ -9,7 +9,7 @@ import (
 	"crypto/tls"
 	"fmt"
 
-	"code.desertbit.com/bulldozer/bulldozer/settings"
+	"github.com/desertbit/bulldozer/settings"
 
 	"gopkg.in/gomail.v1"
 )

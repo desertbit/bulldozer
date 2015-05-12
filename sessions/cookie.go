@@ -6,11 +6,11 @@
 package sessions
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/sessions/store"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"encoding/gob"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/sessions/store"
+	"github.com/desertbit/bulldozer/settings"
+	"github.com/desertbit/bulldozer/utils"
 	"net/http"
 	"time"
 )

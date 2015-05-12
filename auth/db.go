@@ -6,13 +6,13 @@
 package auth
 
 import (
-	db "code.desertbit.com/bulldozer/bulldozer/database"
 	r "github.com/dancannon/gorethink"
+	db "github.com/desertbit/bulldozer/database"
 
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
 	"fmt"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/settings"
+	"github.com/desertbit/bulldozer/utils"
 	"strings"
 	"time"
 )

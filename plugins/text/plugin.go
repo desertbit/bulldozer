@@ -6,16 +6,16 @@
 package text
 
 import (
-	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+	tr "github.com/desertbit/bulldozer/translate"
 	htmlT "html/template"
 
-	"code.desertbit.com/bulldozer/bulldozer/editmode"
-	"code.desertbit.com/bulldozer/bulldozer/libs/ckeditor"
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/plugin"
-	"code.desertbit.com/bulldozer/bulldozer/store"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
+	"github.com/desertbit/bulldozer/editmode"
+	"github.com/desertbit/bulldozer/libs/ckeditor"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/plugin"
+	"github.com/desertbit/bulldozer/store"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/ui/messagebox"
 
 	"fmt"
 	"strings"

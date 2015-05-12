@@ -6,7 +6,7 @@
 package template
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
+	"github.com/desertbit/bulldozer/log"
 )
 
 const (

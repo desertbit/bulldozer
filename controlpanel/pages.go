@@ -6,8 +6,8 @@
 package controlpanel
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/template"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/template"
 )
 
 var (

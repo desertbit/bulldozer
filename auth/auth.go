@@ -6,11 +6,11 @@
 package auth
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/mux"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/templates"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/mux"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/templates"
 
 	"encoding/gob"
 	"fmt"

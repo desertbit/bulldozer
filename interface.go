@@ -6,11 +6,11 @@
 package bulldozer
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/mux"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/templates"
-	"code.desertbit.com/bulldozer/bulldozer/topbar"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"github.com/desertbit/bulldozer/mux"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/templates"
+	"github.com/desertbit/bulldozer/topbar"
+	"github.com/desertbit/bulldozer/utils"
 )
 
 var (

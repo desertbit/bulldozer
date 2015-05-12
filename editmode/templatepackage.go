@@ -6,7 +6,7 @@
 package editmode
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/template"
+	"github.com/desertbit/bulldozer/template"
 )
 
 const (

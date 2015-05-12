@@ -8,12 +8,12 @@ package controlpanel
 import (
 	ht "html/template"
 
-	"code.desertbit.com/bulldozer/bulldozer/auth"
-	"code.desertbit.com/bulldozer/bulldozer/mux"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/templates"
-	"code.desertbit.com/bulldozer/bulldozer/webcrawler"
+	"github.com/desertbit/bulldozer/auth"
+	"github.com/desertbit/bulldozer/mux"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/templates"
+	"github.com/desertbit/bulldozer/webcrawler"
 
 	"fmt"
 	"strings"

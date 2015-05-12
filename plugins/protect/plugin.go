@@ -8,9 +8,9 @@ package protect
 // This plugin only shows the template section, if the session is a valid human session.
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/plugin"
-	"code.desertbit.com/bulldozer/bulldozer/template"
 	"fmt"
+	"github.com/desertbit/bulldozer/plugin"
+	"github.com/desertbit/bulldozer/template"
 )
 
 const (

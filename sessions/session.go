@@ -6,12 +6,12 @@
 package sessions
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/sessions/socket"
-	"code.desertbit.com/bulldozer/bulldozer/sessions/store"
-	"code.desertbit.com/bulldozer/bulldozer/sessions/stream"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/sessions/socket"
+	"github.com/desertbit/bulldozer/sessions/store"
+	"github.com/desertbit/bulldozer/sessions/stream"
+	"github.com/desertbit/bulldozer/settings"
+	"github.com/desertbit/bulldozer/utils"
 
 	"github.com/chuckpreslar/emission"
 	"github.com/gorilla/securecookie"

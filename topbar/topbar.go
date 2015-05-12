@@ -6,14 +6,14 @@
 package topbar
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/auth"
-	"code.desertbit.com/bulldozer/bulldozer/controlpanel"
-	"code.desertbit.com/bulldozer/bulldozer/editmode"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/store"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/templates"
 	"fmt"
+	"github.com/desertbit/bulldozer/auth"
+	"github.com/desertbit/bulldozer/controlpanel"
+	"github.com/desertbit/bulldozer/editmode"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/store"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/templates"
 )
 
 const (

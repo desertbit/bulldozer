@@ -6,14 +6,14 @@
 package auth
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/callback"
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/translate"
-	"code.desertbit.com/bulldozer/bulldozer/ui/dialog"
-	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
 	"fmt"
+	"github.com/desertbit/bulldozer/callback"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/translate"
+	"github.com/desertbit/bulldozer/ui/dialog"
+	"github.com/desertbit/bulldozer/ui/messagebox"
 	"strings"
 )
 

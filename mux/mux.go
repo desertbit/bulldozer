@@ -9,13 +9,13 @@ import (
 	"errors"
 	"fmt"
 
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/router"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/templates"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"code.desertbit.com/bulldozer/bulldozer/webcrawler"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/router"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/templates"
+	"github.com/desertbit/bulldozer/utils"
+	"github.com/desertbit/bulldozer/webcrawler"
 )
 
 var (

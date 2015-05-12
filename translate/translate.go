@@ -7,9 +7,9 @@ package tr
 
 import (
 	"bufio"
-	"code.desertbit.com/bulldozer/bulldozer/log"
 	"encoding/json"
 	"fmt"
+	"github.com/desertbit/bulldozer/log"
 	"io"
 	"io/ioutil"
 	"os"

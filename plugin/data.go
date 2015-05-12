@@ -6,9 +6,9 @@
 package plugin
 
 import (
-	"code.desertbit.com/bulldozer/bulldozer/template"
 	"encoding/gob"
 	"fmt"
+	"github.com/desertbit/bulldozer/template"
 )
 
 const (

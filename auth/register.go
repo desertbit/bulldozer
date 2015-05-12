@@ -6,17 +6,17 @@
 package auth
 
 import (
-	tr "code.desertbit.com/bulldozer/bulldozer/translate"
+	tr "github.com/desertbit/bulldozer/translate"
 
-	"code.desertbit.com/bulldozer/bulldozer/log"
-	"code.desertbit.com/bulldozer/bulldozer/mux"
-	"code.desertbit.com/bulldozer/bulldozer/sessions"
-	"code.desertbit.com/bulldozer/bulldozer/settings"
-	"code.desertbit.com/bulldozer/bulldozer/template"
-	"code.desertbit.com/bulldozer/bulldozer/templates"
-	"code.desertbit.com/bulldozer/bulldozer/ui/messagebox"
-	"code.desertbit.com/bulldozer/bulldozer/utils"
-	"code.desertbit.com/bulldozer/bulldozer/utils/mail"
+	"github.com/desertbit/bulldozer/log"
+	"github.com/desertbit/bulldozer/mux"
+	"github.com/desertbit/bulldozer/sessions"
+	"github.com/desertbit/bulldozer/settings"
+	"github.com/desertbit/bulldozer/template"
+	"github.com/desertbit/bulldozer/templates"
+	"github.com/desertbit/bulldozer/ui/messagebox"
+	"github.com/desertbit/bulldozer/utils"
+	"github.com/desertbit/bulldozer/utils/mail"
 
 	"fmt"
 	"strings"
