@@ -2,6 +2,7 @@
 === Bulldozer TODO List ===
 ===========================
 
+* restore the default orange bulldozer main color.
 * auth register: don't allow special characters in username,... as <>?-....
 * create documentation and package descriptions. Especially the template package.
 
