@@ -91,7 +91,7 @@ func init() {
 
 		RegistrationDisabled:           true,
 		PasswordEncryptionKey:          defaultPasswordEncryptionKey,
-		RemoveNotConfirmedUsersTimeout: 60 * 60 * 24 * 14, // 14 Days
+		RemoveNotConfirmedUsersTimeout: 60 * 60 * 24 * 20, // 20 Days
 
 		MailSMTPPort:              587,
 		MailSkipCertificateVerify: false,
@@ -163,6 +163,7 @@ func Prepare() error {
 	}
 
 	// Always get the following values first from the environment variables.
+	// TODO: Get this values with reflect.
 	Settings.DatabaseAddr = getEnv("BULLDOZER_DB_ADDR", Settings.DatabaseAddr)
 	Settings.DatabasePort = getEnv("BULLDOZER_DB_PORT", Settings.DatabasePort)
 
