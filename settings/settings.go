@@ -152,6 +152,20 @@ func init() {
 
 // Prepare checks if the settings are correct and valid and initializes some values.
 func Prepare() error {
+	// getEnv gets the environment variable or if empty fallsback to the default value.
+	getEnv := func(v, d string) string {
+		envV := os.Getenv(v)
+		if len(envV) > 0 {
+			return envV
+		}
+
+		return d
+	}
+
+	// Always get the following values first from the environment variables.
+	Settings.DatabaseAddr = getEnv("BULLDOZER_DB_ADDR", Settings.DatabaseAddr)
+	Settings.DatabasePort = getEnv("BULLDOZER_DB_PORT", Settings.DatabasePort)
+
 	// Get environment variable values if the environment prefix is set on struct field strings.
 	s := reflect.ValueOf(&Settings).Elem()
 	for x := 0; x < s.NumField(); x++ {
