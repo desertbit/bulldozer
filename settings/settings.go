@@ -166,6 +166,7 @@ func Prepare() error {
 	// TODO: Get this values with reflect.
 	Settings.DatabaseAddr = getEnv("BULLDOZER_DB_ADDR", Settings.DatabaseAddr)
 	Settings.DatabasePort = getEnv("BULLDOZER_DB_PORT", Settings.DatabasePort)
+	Settings.SessionsDatabasePath = getEnv("BULLDOZER_SESSIONS_DB_PATH", Settings.SessionsDatabasePath)
 
 	// Get environment variable values if the environment prefix is set on struct field strings.
 	s := reflect.ValueOf(&Settings).Elem()
