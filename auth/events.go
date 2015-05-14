@@ -14,6 +14,7 @@ import (
 const (
 	onNewAuthenticatedSession = "OnNewAuthSession"
 	onEndAuthenticatedSession = "OnEndAuthSession"
+	onRemovedUser             = "OnRemovedUser"
 )
 
 var (
@@ -50,6 +51,16 @@ func OffEndAuthenticatedSession(f func(s *sessions.Session)) {
 	emitter.Off(onEndAuthenticatedSession, f)
 }
 
+// OnRemovedUser sets the function which is triggered if a user is removed.
+func OnRemovedUser(f func(userID string)) {
+	emitter.On(onRemovedUser, f)
+}
+
+// OffRemovedUser removes the listener again
+func OffRemovedUser(f func(userID string)) {
+	emitter.Off(onRemovedUser, f)
+}
+
 //###############//
 //### Private ###//
 //###############//
@@ -64,4 +75,8 @@ func triggerOnNewAuthenticatedSession(s *sessions.Session) {
 
 func triggerOnEndAuthenticatedSession(s *sessions.Session) {
 	emitter.Emit(onEndAuthenticatedSession, s)
+}
+
+func triggerOnRemovedUser(userID string) {
+	emitter.Emit(onRemovedUser, userID)
 }

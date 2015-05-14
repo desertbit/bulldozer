@@ -257,6 +257,10 @@ func AddUser(loginName string, name string, email string, password string, remov
 	return newUser(u), nil
 }
 
+func RemoveUser(id string) error {
+	return dbRemoveUsers(id)
+}
+
 //###############//
 //### Private ###//
 //###############//

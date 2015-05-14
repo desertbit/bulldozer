@@ -254,6 +254,27 @@ func dbUpdateUser(u *dbUser) error {
 	return nil
 }
 
+func dbRemoveUsers(ids ...string) error {
+	idsI := make([]interface{}, len(ids))
+	for i, id := range ids {
+		idsI[i] = id
+	}
+
+	// Remove the passed users with the given IDs.
+	_, err := r.Table(DBUserTable).GetAll(idsI...).
+		Delete().RunWrite(db.Session)
+	if err != nil {
+		return fmt.Errorf("failed to remove users by IDs '%+v': %v", ids, err)
+	}
+
+	// Trigger the event.
+	for _, id := range ids {
+		triggerOnRemovedUser(id)
+	}
+
+	return nil
+}
+
 func dbUpdateLastLogin(u *dbUser) error {
 	// Set the last login time
 	u.LastLogin = time.Now().Unix()
@@ -336,14 +357,37 @@ func cleanupExpiredData() {
 	// Create the expire timestamp.
 	expires := time.Now().Unix() - int64(settings.Settings.RemoveNotConfirmedUsersTimeout)
 
-	// Remove all expired users.
-	_, err := r.Table(DBUserTable).Filter(
+	// Get all expired users.
+	rows, err := r.Table(DBUserTable).Filter(
 		r.Row.Field("LastLogin").Eq(-1).
 			And(r.Row.Field("Created").Sub(expires).Le(0))).
-		Delete().RunWrite(db.Session)
+		Run(db.Session)
 
 	if err != nil {
-		log.L.Error("failed to remove expired database users: %v", err)
+		log.L.Error("failed to get all expired database users: %v", err)
 		return
 	}
+
+	// Get the users from the query.
+	var users []*dbUser
+	err = rows.All(&users)
+	if err != nil {
+		log.L.Error("failed to get all expired database users: %v", err)
+		return
+	}
+
+	// Create the slice of IDs.
+	ids := make([]string, len(users))
+	for i, u := range users {
+		ids[i] = u.ID
+	}
+
+	// Remove the users.
+	err = dbRemoveUsers(ids...)
+	if err != nil {
+		log.L.Error("failed to remove all expired database users: %v", err)
+		return
+	}
+
+	return
 }
