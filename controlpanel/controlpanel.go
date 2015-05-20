@@ -77,15 +77,6 @@ func routePage(s *sessions.Session, req *mux.Request) {
 
 	// Get the requested control panel page ID.
 	id := req.RouteData.RestPath
-	if len(id) == 0 {
-		if len(pages) == 0 {
-			req.Error(fmt.Errorf("control panel: no pages"))
-			return
-		}
-
-		// If no ID is set, then use the first page as default page.
-		id = pages[0].ID
-	}
 
 	// The current page pointer.
 	var currentPage *Page
@@ -94,17 +85,22 @@ func routePage(s *sessions.Session, req *mux.Request) {
 	var items []item
 	var isActive bool
 	for _, page := range pages {
+		// Skip if the user has no access permission.
+		if !u.IsInGroup(page.AuthGroups...) {
+			continue
+		}
+
+		// If no ID is set, then use the first page as default page.
+		if len(id) == 0 {
+			id = page.ID
+		}
+
 		// Set the active flag if this is the current active item.
 		// Also set the current page pointer.
 		isActive = false
 		if page.ID == id {
 			isActive = true
 			currentPage = page
-		}
-
-		// Skip if the user has no access permission.
-		if !u.IsInGroup(page.AuthGroups...) {
-			continue
 		}
 
 		// Create a new item.
@@ -116,6 +112,12 @@ func routePage(s *sessions.Session, req *mux.Request) {
 		}
 
 		items = append(items, i)
+	}
+
+	// Check if any pages where found for the user.
+	if len(items) == 0 {
+		req.Error(fmt.Errorf("control panel: no pages"))
+		return
 	}
 
 	// Create the page render data.
