@@ -81,6 +81,17 @@ func (e *loginEvents) EventLogin(c *template.Context, loginName string, password
 		return
 	}
 
+	// Check if the user is enabled.
+	if !u.Enabled {
+		// Show a messagebox.
+		messagebox.New().
+			SetTitle(tr.S("bud.auth.login.errorNotEnabled.title")).
+			SetText(tr.S("bud.auth.login.errorNotEnabled.text")).
+			SetType(messagebox.TypeAlert).
+			Show(s)
+		return
+	}
+
 	// Decrypt and generate the temporary SHA256 hash with the session ID and random token.
 	hash, err := decryptPasswordHash(u.PasswordHash)
 	if err != nil {

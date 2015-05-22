@@ -140,10 +140,22 @@ func (u *User) SetName(name string) {
 	u.u.Name = name
 }
 
+// SetLoginName sets the user's login name.
+// You have to call the commit method to make this persistent.
+func (u *User) SetLoginName(loginName string) {
+	u.u.LoginName = loginName
+}
+
 // SetEMail sets the user's e-mail.
 // You have to call the commit method to make this persistent.
 func (u *User) SetEMail(email string) {
 	u.u.EMail = email
+}
+
+// SetEnabled activates or disables the user.
+// You have to call the commit method to make this persistent.
+func (u *User) SetEnabled(enabled bool) {
+	u.u.Enabled = enabled
 }
 
 // Commit all changes to the database.

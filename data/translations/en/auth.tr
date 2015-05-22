@@ -18,6 +18,8 @@
 
 {"ID": "bud.auth.login.error.title", "Text": "Authentication failed"}
 {"ID": "bud.auth.login.error.text", "Text": "The user authentication failed. Please check your username and password."}
+{"ID": "bud.auth.login.errorNotEnabled.title", "Text": "Authentication failed"}
+{"ID": "bud.auth.login.errorNotEnabled.text", "Text": "The user is not activated."}
 {"ID": "bud.auth.login.error.username", "Text": "Please enter an username"}
 {"ID": "bud.auth.login.error.password", "Text": "Please enter a password"}
 

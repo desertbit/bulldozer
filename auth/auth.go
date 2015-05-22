@@ -135,6 +135,7 @@ func IsAuth(i interface{}) bool {
 // If a context value is available, then always pass it instead of the session.
 // This will improve the performance and won't retrieve a user value multiple
 // times from the database during one template execution cycle.
+// This method returns nil, if the user is not enabled.
 func GetUser(i interface{}) *User {
 	var s *sessions.Session
 	var c *template.Context
@@ -183,6 +184,11 @@ func GetUser(i interface{}) *User {
 		log.L.Error(err.Error())
 		return nil
 	} else if u == nil {
+		return nil
+	}
+
+	// If disabled, then abort.
+	if !u.Enabled {
 		return nil
 	}
 
