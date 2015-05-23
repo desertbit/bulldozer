@@ -59,7 +59,7 @@ func ExecNotFound(s *sessions.Session) (int, string, string) {
 	// Custom template options.
 	opts := template.ExecOpts{
 		StyleClasses: []string{
-			"bud-page",
+			"bud-sys-page",
 			"bud-not-found-page",
 		},
 	}
@@ -97,7 +97,7 @@ func ExecError(s *sessions.Session, errorMessage string, vars ...bool) (int, str
 	opts := template.ExecOpts{
 		Data: data,
 		StyleClasses: []string{
-			"bud-page",
+			"bud-sys-page",
 			"bud-error-page",
 		},
 	}

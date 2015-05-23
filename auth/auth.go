@@ -62,7 +62,7 @@ func Init() (err error) {
 	if t == nil {
 		return fmt.Errorf("failed to lookup auth login template!")
 	}
-	t.AddStyleClass("bud-page").
+	t.AddStyleClass("bud-sys-page").
 		RegisterEvents(new(loginEvents)).
 		OnGetData(onLoginTemplateGetData)
 
@@ -71,7 +71,7 @@ func Init() (err error) {
 	if t == nil {
 		return fmt.Errorf("failed to lookup auth register template!")
 	}
-	t.AddStyleClass("bud-page").
+	t.AddStyleClass("bud-sys-page").
 		RegisterEvents(new(registerEvents))
 
 	// Obtain the change password dialog template  and prepare it.
