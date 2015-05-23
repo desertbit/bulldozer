@@ -99,14 +99,14 @@ func RandomString(n int) string {
 
 // ToPath returns a valid path.
 func ToPath(path string) string {
-	// Trim, to lower and replace all empty spaces.
-	path = strings.Replace(strings.ToLower(strings.TrimSpace(path)), " ", "-", -1)
-
 	// Remove everything after #
 	p := strings.Index(path, "#")
 	if p >= 0 {
 		path = path[:p]
 	}
+
+	// Trim, to lower and replace all empty spaces.
+	path = strings.Replace(strings.ToLower(strings.TrimSpace(path)), " ", "-", -1)
 
 	// Remove the following / if necessary.
 	if strings.HasSuffix(path, "/") {
