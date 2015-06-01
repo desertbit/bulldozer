@@ -16,6 +16,11 @@ var (
 	Session *r.Session
 )
 
+func init() {
+	// Set the database driver to verbose mode.
+	r.SetVerbose(true)
+}
+
 //##############//
 //### Public ###//
 //##############//
