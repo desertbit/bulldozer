@@ -32,6 +32,8 @@
 {"ID": "bud.auth.changePassword.passwordVerifyPlaceholder", "Text": "Enter new password again"}
 {"ID": "bud.auth.changePassword.cancelButton", "Text": "Cancel"}
 {"ID": "bud.auth.changePassword.submitButton", "Text": "Submit"}
+{"ID": "bud.auth.changePassword.success.title", "Text": "Success"}
+{"ID": "bud.auth.changePassword.success.text", "Text": "Successfully changed password!"}
 
 {"ID": "bud.auth.changePassword.error.password", "Text": "Passwords must be at least 8 characters with 1 capital letter and 1 number"}
 {"ID": "bud.auth.changePassword.error.passwordsDontMatch", "Text": "The passwords don't match!"}

@@ -6,7 +6,10 @@
 package auth
 
 import (
+	"encoding/gob"
 	"fmt"
+	"strings"
+
 	"github.com/desertbit/bulldozer/callback"
 	"github.com/desertbit/bulldozer/log"
 	"github.com/desertbit/bulldozer/sessions"
@@ -14,12 +17,11 @@ import (
 	"github.com/desertbit/bulldozer/translate"
 	"github.com/desertbit/bulldozer/ui/dialog"
 	"github.com/desertbit/bulldozer/ui/messagebox"
-	"strings"
 )
 
 const (
-	sessionValueKeyChangePasswordUserID   = "budChangePasswordUID"
-	sessionValueKeyChangePasswordCallback = "budChangePasswordCB"
+	sessionValueKeyChangePasswordUserID = "budChangePasswordUID"
+	sessionValueKeyChangePasswordOpts   = "budChangePasswordOpts"
 )
 
 var (
@@ -27,6 +29,9 @@ var (
 )
 
 func init() {
+	// Register the custom type.
+	gob.Register(new(ChangePasswordDialogOpts))
+
 	// Create the dialog and set the options.
 	changePasswordDialog = dialog.New().
 		SetSize(dialog.SizeSmall).
@@ -37,15 +42,24 @@ func init() {
 //### Public ###//
 //##############//
 
-// showChangePasswordDialog shows a change password dialog for the given user.
+type ChangePasswordDialogOpts struct {
+	// If true, a success message box is shown to the user.
+	ShowSuccessMsgBox bool
+
+	// If not empty, the callback specified by the name for
+	// the callback package is executed on success.
+	CallbackName string
+}
+
+// ShowChangePasswordDialog shows a change password dialog for the given user.
 // One optional parameter can be passed, defining a callback name for the callback package.
 // This callback is executed on success.
-func showChangePasswordDialog(s *sessions.Session, u *dbUser, vars ...string) error {
+func ShowChangePasswordDialog(s *sessions.Session, u *User, opts ...ChangePasswordDialogOpts) error {
 	// Create the template render data.
 	data := struct {
 		Username string
 	}{
-		Username: u.LoginName,
+		Username: u.u.LoginName,
 	}
 
 	// Show the dialog
@@ -55,11 +69,11 @@ func showChangePasswordDialog(s *sessions.Session, u *dbUser, vars ...string) er
 	}
 
 	// Save the user ID to the session values.
-	s.InstanceSet(sessionValueKeyChangePasswordUserID, u.ID)
+	s.InstanceSet(sessionValueKeyChangePasswordUserID, u.u.ID)
 
-	// Save the callback name to the session values if present.
-	if len(vars) > 0 {
-		s.InstanceSet(sessionValueKeyChangePasswordCallback, vars[0])
+	// Save the options to the session values if present.
+	if len(opts) > 0 {
+		s.InstanceSet(sessionValueKeyChangePasswordOpts, &opts[0])
 	}
 
 	return nil
@@ -74,6 +88,34 @@ type changePasswordDialogEvents struct{}
 func (e *changePasswordDialogEvents) EventSubmit(c *template.Context, newPassword string) {
 	// Get the session pointer.
 	s := c.Session()
+
+	// Get the options.
+	opts := func() *ChangePasswordDialogOpts {
+		// Get the options.
+		i, ok := s.InstanceGet(sessionValueKeyChangePasswordOpts)
+		if !ok {
+			log.L.Error("change password dialog: failed to get options from session: no session value found!")
+			return nil
+		}
+
+		// Assertion.
+		opts, ok := i.(*ChangePasswordDialogOpts)
+		if !ok {
+			log.L.Error("change password dialog: failed to assert options!")
+			return nil
+		}
+
+		return opts
+	}()
+	if opts == nil {
+		// Show a messagebox
+		messagebox.New().
+			SetTitle(tr.S("bud.auth.changePassword.error.changePasswordTitle")).
+			SetText(tr.S("bud.auth.changePassword.error.changePassword")).
+			SetType(messagebox.TypeAlert).
+			Show(s)
+		return
+	}
 
 	// Get the user value.
 	user := func() *dbUser {
@@ -144,13 +186,18 @@ func (e *changePasswordDialogEvents) EventSubmit(c *template.Context, newPasswor
 	// Close the dialog
 	changePasswordDialog.Close(c)
 
-	// Get and call the callback if defined.
-	i, ok := s.InstancePull(sessionValueKeyChangePasswordCallback)
-	if ok {
-		name, ok := i.(string)
-		if ok {
-			callback.Call(name, s, user)
-		}
+	// Call the callback if defined.
+	if len(opts.CallbackName) > 0 {
+		callback.Call(opts.CallbackName, s, newUser(user))
+	}
+
+	// Show a success message box if defined to.
+	if opts.ShowSuccessMsgBox {
+		messagebox.New().
+			SetTitle(tr.S("bud.auth.changePassword.success.title")).
+			SetText(tr.S("bud.auth.changePassword.success.text")).
+			SetType(messagebox.TypeSuccess).
+			Show(s)
 	}
 }
 

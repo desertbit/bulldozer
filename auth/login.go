@@ -109,14 +109,18 @@ func (e *loginEvents) EventLogin(c *template.Context, loginName string, password
 
 	// If this is the first login, then request a new password.
 	if u.LastLogin <= 0 {
-		if err = showChangePasswordDialog(s, u, finishLoginCallbackName); err != nil {
+		opts := ChangePasswordDialogOpts{
+			CallbackName: finishLoginCallbackName,
+		}
+
+		if err = ShowChangePasswordDialog(s, newUser(u), opts); err != nil {
 			log.L.Error(err.Error())
 		}
 		return
 	}
 
 	// Finish the login
-	finishLogin(s, u)
+	finishLogin(s, newUser(u))
 }
 
 //###############//
@@ -171,7 +175,10 @@ func showLoginErrorMsgBox(s *sessions.Session) {
 		Show(s)
 }
 
-func finishLogin(s *sessions.Session, u *dbUser) {
+func finishLogin(s *sessions.Session, user *User) {
+	// Get the database user.
+	u := user.u
+
 	// Update the last login time
 	err := dbUpdateLastLogin(u)
 	if err != nil {
