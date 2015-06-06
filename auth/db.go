@@ -255,6 +255,10 @@ func dbUpdateUser(u *dbUser) error {
 }
 
 func dbRemoveUsers(ids ...string) error {
+	if len(ids) == 0 {
+		return nil
+	}
+
 	idsI := make([]interface{}, len(ids))
 	for i, id := range ids {
 		idsI[i] = id
@@ -373,6 +377,10 @@ func cleanupExpiredData() {
 	err = rows.All(&users)
 	if err != nil {
 		log.L.Error("failed to get all expired database users: %v", err)
+		return
+	}
+
+	if len(users) == 0 {
 		return
 	}
 
