@@ -87,7 +87,7 @@ func CreateTables(tableNames ...string) (err error) {
 
 func CreateTable(tableName string) (err error) {
 	// Create the table.
-	_, err = r.Db(settings.Settings.DatabaseName).TableCreate(tableName).RunWrite(Session)
+	_, err = r.DB(settings.Settings.DatabaseName).TableCreate(tableName).RunWrite(Session)
 	return
 }
 
@@ -95,7 +95,7 @@ func CreateTable(tableName string) (err error) {
 // and calls the function f if passed.
 func CreateTableIfNotExists(tableName string, f ...func() error) error {
 	// Get a table list.
-	res, err := r.Db(settings.Settings.DatabaseName).TableList().Run(Session)
+	res, err := r.DB(settings.Settings.DatabaseName).TableList().Run(Session)
 	if err != nil {
 		return err
 	}

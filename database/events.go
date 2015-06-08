@@ -62,7 +62,7 @@ func Setup() (err error) {
 	var errStr string
 
 	// Create the database.
-	_, err = r.DbCreate(settings.Settings.DatabaseName).RunWrite(Session)
+	_, err = r.DBCreate(settings.Settings.DatabaseName).RunWrite(Session)
 	if err != nil {
 		errStr = err.Error()
 	}
