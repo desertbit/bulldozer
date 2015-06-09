@@ -246,7 +246,7 @@ func dbUpdateUser(u *dbUser) error {
 		}
 	}
 
-	_, err := r.Table(DBUserTable).Update(u).RunWrite(db.Session)
+	_, err := r.Table(DBUserTable).Get(u.ID).Update(u).RunWrite(db.Session)
 	if err != nil {
 		return err
 	}
